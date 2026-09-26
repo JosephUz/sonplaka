@@ -1,0 +1,30 @@
+# Yerel Docker kurulumu: `docker compose up -d --build`, ardından http://localhost:5187
+# Oyun portu yalnızca bu bilgisayara açıktır (127.0.0.1); dışarıdan erişim tünelden geçer.
+# Cloudflare Tunnel (sonplaka.josephuz.com) için `--profile tunnel` ve .env içinde TUNNEL_TOKEN (bkz. README).
+name: sonplaka
+services:
+  game:
+    build: .
+    image: son-plaka
+    container_name: sonplaka
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${PORT:-5187}:5187"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 5187
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: sonplaka-tunnel
+    profiles: ["tunnel"]
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    # Oyunun ağ alanını paylaşır: paneldeki rota http://localhost:5187 doğrudan oyuna gider.
+    network_mode: "service:game"
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}  # boşsa cloudflared başlamaz; .env dosyasına yaz
+    depends_on:
+      game:
+        condition: service_healthy

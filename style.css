@@ -1,0 +1,276 @@
+html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
+#son-plaka{position:fixed;inset:0;font-family:Segoe UI,Arial,sans-serif;color:#e8eefc;background:#0b0f1a;font-synthesis:none;user-select:none}
+#son-plaka *{box-sizing:border-box}
+#son-plaka [hidden]{display:none!important}
+#son-plaka button,#son-plaka a{-webkit-tap-highlight-color:transparent}
+#son-plaka button{font:600 12px inherit;font-family:inherit;background:#1a2336;border:1px solid #cfe3ff2a;color:#e8eefc;border-radius:8px;padding:12px 17px;cursor:pointer;transition:background .15s,transform .15s}
+#son-plaka a.btn{display:inline-flex;align-items:center;justify-content:center;font-family:inherit;font-size:13.333px;background:#1a2336;border:1px solid #cfe3ff2a;color:#e8eefc;border-radius:8px;padding:12px 17px;text-decoration:none;text-align:center;transition:background .15s,transform .15s}
+#son-plaka button:hover,#son-plaka a.btn:hover{background:#26334d;transform:translateY(-1px)}
+#son-plaka button:focus-visible,#son-plaka a:focus-visible{outline:3px solid #f5c26b;outline-offset:3px}
+#son-plaka kbd{display:inline-block;padding:4px 6px;border:1px solid #e8eefc3b;border-bottom-width:2px;border-radius:4px;font:700 9px inherit;font-family:inherit;margin-left:4px}
+#son-plaka .primary{display:flex;align-items:center;justify-content:space-between;background:#f5c26b;color:#1c1a12;border:0;font-weight:900;letter-spacing:1px;min-height:54px;padding:17px 23px}
+#son-plaka .primary:hover{background:#ffd991}
+#son-plaka .primary span{font-size:22px}
+#son-plaka .eyebrow{font-size:10px;font-weight:800;letter-spacing:2px;color:#9fb3d1}
+#son-plaka .eyebrow i,#son-plaka .pitch-note i{display:inline-block;background:#7fe0e8;width:7px;height:7px;border-radius:50%;margin-right:7px;box-shadow:0 0 8px #7fe0e8}
+#son-plaka .blue-text{color:#68d4d8}
+#son-plaka .orange-text{color:#fda27e}
+
+/* Sahne: tüm pencereyi doldurur; arayüz üstünde yüzer. */
+#son-plaka #sp-view{position:absolute;inset:0;overflow:hidden}
+#son-plaka canvas{display:block;width:100%;height:100%;cursor:crosshair}
+#son-plaka .grain{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,#05070d55,transparent 22%,transparent 78%,#05070d66)}
+
+/* Üst şerit: logo ve düğmeler. */
+#son-plaka header{position:absolute;top:27px;left:34px;right:34px;display:flex;justify-content:space-between;align-items:center;z-index:8}
+#son-plaka .logo{font-weight:950;font-size:26px;letter-spacing:-1px;color:#eef3ff;text-decoration:none;text-shadow:0 2px 12px #05070d}
+#son-plaka .logo>span{color:#7fe0e8}
+#son-plaka .logo small{display:block;font-size:8px;letter-spacing:2px;margin-top:7px;color:#9fb3d1}
+#son-plaka .header-actions{display:flex;gap:8px}
+#son-plaka .header-actions button,#son-plaka .header-actions a.btn{background:#111827e8;font-size:11px}
+
+/* Giriş ekranı. */
+#son-plaka .home{position:absolute;inset:0;background:linear-gradient(90deg,#0b0f1afc 0%,#0b0f1aef 28%,#0b0f1a77 52%,transparent 74%);display:flex;align-items:center}
+#son-plaka .home-content{width:560px;margin-left:7vw;padding-top:60px}
+#son-plaka .home h1{font-size:clamp(40px,4.4vw,72px);letter-spacing:-3px;line-height:1.05;margin:25px 0;color:#eef3ff;font-weight:900}
+#son-plaka .home h1 span{color:#f5c26b}
+#son-plaka .home p{font-size:16px;line-height:1.8;color:#b7c6df;margin:24px 0 32px}
+#son-plaka .home .primary{width:280px}
+#son-plaka .home-meta{display:flex;gap:27px;margin-top:17px;font-size:9px;letter-spacing:1.5px;color:#9fb3d1}
+#son-plaka .rule-cards{display:flex;margin-top:40px;gap:25px}
+#son-plaka .rule-cards div{max-width:140px;border-top:1px solid #7fe0e855;padding-top:14px}
+#son-plaka .rule-cards b{display:block;font-size:9px;letter-spacing:1.2px;color:#f5c26b}
+#son-plaka .rule-cards span{display:block;font-size:11px;line-height:1.6;margin-top:9px;color:#b7c6df}
+#son-plaka .pitch-note{position:absolute;right:40px;bottom:35px;font-size:10px;letter-spacing:2px;background:#111827de;padding:18px;border-radius:8px;border:1px solid #cfe3ff1a}
+#son-plaka .pitch-note span{display:block;font-size:11px;letter-spacing:0;margin:9px 0 0 15px;color:#b7c6df}
+
+/* Skor tabelası: raund puanları (ışıklar), ayakta olan sayısı, raund saati ve evre. */
+#son-plaka #sp-scoreboard{position:absolute;top:22px;left:50%;transform:translateX(-50%);display:flex;gap:23px;align-items:center;padding:12px 23px;background:#111827f0;border:1px solid #ffffff24;border-radius:12px;box-shadow:0 10px 35px #05070d66;z-index:7}
+#son-plaka .team{display:flex;align-items:center;gap:15px;font-size:10px;font-weight:900;letter-spacing:1px}
+#son-plaka .team b{font-size:32px;letter-spacing:0;color:#fff7e6}
+#son-plaka .pips{display:inline-flex;gap:5px}
+#son-plaka .pips i{width:12px;height:12px;border-radius:50%;background:#ffffff22;border:1px solid #ffffff33;transition:background .3s,box-shadow .3s}
+#son-plaka .pips i.won{background:#f5c26b;box-shadow:0 0 10px #f5c26b99}
+#son-plaka .clock{text-align:center;border-left:1px solid #fff2;border-right:1px solid #fff2;padding:0 20px;min-width:150px}
+#son-plaka .clock span{font-size:20px;font-variant-numeric:tabular-nums}
+#son-plaka .clock small{display:block;font-size:7px;letter-spacing:1px;color:#9fb3d1;margin-top:4px;white-space:nowrap}
+#son-plaka .clock small.hot{color:#ff8a5c;font-weight:900}
+
+/* Oyuncuların üstündeki etiketler. */
+#son-plaka #sp-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#son-plaka .actor-label{position:absolute;top:0;left:0;font-size:10px;font-weight:900;text-shadow:0 2px 4px #05070d;background:#111827aa;padding:3px 6px;border-radius:4px}
+#son-plaka .blue{color:#94eff3}
+#son-plaka .orange{color:#ffd098}
+
+/* Nişangah ve dolum halkası (keskin disk şarjı; kırmızıya döner). */
+#son-plaka #sp-crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:28px monospace;color:white;text-shadow:0 1px 4px #05070d;pointer-events:none;z-index:6}
+#son-plaka #sp-charge{--p:0;--c:#7fe0e8;position:absolute;left:50%;top:50%;width:92px;height:92px;transform:translate(-50%,-50%);z-index:6;pointer-events:none}
+#son-plaka .charge-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p) * 1turn),#ffffff2e 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 9px),#000 calc(100% - 8px));mask:radial-gradient(farthest-side,transparent calc(100% - 9px),#000 calc(100% - 8px));filter:drop-shadow(0 0 7px var(--c))}
+#son-plaka #sp-charge span{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:10px;padding:5px 11px;border-radius:6px;background:#0b0f1ae6;border:1px solid var(--c);color:var(--c);font:900 12px/1 Segoe UI,Arial,sans-serif;letter-spacing:1px;white-space:nowrap}
+#son-plaka #sp-charge.full .charge-ring{animation:spFull .35s ease-in-out infinite alternate}
+@keyframes spFull{0%{transform:scale(1)}100%{transform:scale(1.14)}}
+
+/* Ortadaki mesaj, uyarı şeridi (plaka çöküyor), düşme perdesi, donma perdesi. */
+#son-plaka #sp-message{position:absolute;top:130px;left:50%;transform:translateX(-50%);background:#f5c26b;color:#1c1a12;padding:14px 27px;border-radius:8px;font-weight:900;letter-spacing:.5px;z-index:8;white-space:nowrap}
+#son-plaka #sp-warn{position:absolute;top:92px;left:50%;transform:translateX(-50%);padding:9px 22px;border-radius:8px;background:#7a1f12e6;border:1px solid #ff8a5c;color:#ffe2d2;font:900 13px/1 Segoe UI,Arial,sans-serif;letter-spacing:2px;z-index:8;white-space:nowrap;animation:spWarn .5s ease-in-out infinite alternate}
+@keyframes spWarn{0%{box-shadow:0 0 0 #ff5a1f00}100%{box-shadow:0 0 22px #ff5a1f99}}
+#son-plaka #sp-down{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 180px #2a0e0a99;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#0b0f1a44;z-index:5}
+#son-plaka #sp-down strong{font-size:38px;color:#fff1cb;text-shadow:0 3px 18px #742609}
+#son-plaka #sp-down-count{font-size:50px;font-weight:900;color:#ffd199}
+#son-plaka #sp-down small{background:#1a2336dd;padding:8px 12px;border-radius:6px;font-size:12px}
+#son-plaka #sp-freeze{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 160px #8ff3ffaa;background:#8ff3ff14;z-index:5}
+
+/* Sol alt oyuncu kartı: disk sayısı ve güç. */
+#son-plaka #sp-player{position:absolute;bottom:90px;left:30px;width:220px;padding:19px;background:#111827ee;border:1px solid #cfe3ff26;border-radius:10px}
+#son-plaka #sp-player .eyebrow{font-size:8px}
+#son-plaka #sp-status{display:block;font-size:15px;margin:12px 0 16px;color:#f5d899}
+#son-plaka .meter-label{display:flex;justify-content:space-between;font-size:8px;font-weight:800;letter-spacing:1px;color:#b7c6df;margin:12px 0 7px}
+#son-plaka .discs{display:flex;gap:6px}
+#son-plaka .discs i{--f:1;width:34px;height:10px;border-radius:5px;background:linear-gradient(90deg,#7fe0e8 calc(var(--f) * 100%),#ffffff1f 0);box-shadow:0 0 8px #7fe0e855}
+#son-plaka .discs i.empty{background:#ffffff1f;box-shadow:none}
+#son-plaka #sp-power{color:#ffd35c}
+#son-plaka #sp-controls{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:19px;padding:11px 17px;background:#111827ee;border:1px solid #cfe3ff26;border-radius:9px;white-space:nowrap;font-size:10px}
+#son-plaka #sp-controls kbd{margin-right:5px;margin-left:0}
+
+/* Açılır kartlar: yardım, mola, maç sonu. */
+#son-plaka .overlay{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:#05070dc9;backdrop-filter:blur(7px);padding:25px}
+#son-plaka .card{width:min(640px,94vw);max-height:92vh;overflow:auto;background:#131a2a;border:1px solid #cfe3ff2b;border-radius:18px;padding:33px;box-shadow:0 25px 85px #00000077}
+#son-plaka .card h2{font-size:35px;line-height:1.12;margin:17px 0 26px;color:#f4d7a5;letter-spacing:-1px}
+#son-plaka .card p{font-size:12px;line-height:1.8;color:#b7c6df}
+#son-plaka .card dl{display:grid;grid-template-columns:150px 1fr;gap:16px 15px;font-size:12px;line-height:1.6}
+#son-plaka .card dt{color:#f5ce8c;font-weight:800}
+#son-plaka .card dd{margin:0;color:#c6d3e8}
+#son-plaka .card .primary{width:100%;margin-top:23px;justify-content:center}
+#son-plaka .card.small{max-width:370px}
+#son-plaka .card.small button,#son-plaka .card.small a.btn{display:block;width:100%;margin-top:12px}
+#son-plaka .result-card{width:min(780px,95vw)}
+#son-plaka #sp-final-score{font-size:40px;font-weight:900;margin-bottom:20px}
+#son-plaka .table-wrap{overflow:auto}
+#son-plaka table{border-collapse:collapse;width:100%;font-size:12px}
+#son-plaka td,#son-plaka th{padding:10px 8px;text-align:left;border-bottom:1px solid #fff1}
+#son-plaka th{font-size:10px;color:#9fb3d1}
+#son-plaka #sp-results tr.me td{font-weight:800;background:#f5c26b14}
+
+/* Dar ekranlar. */
+@media(max-width:1100px){
+#son-plaka header{left:20px;right:20px;top:20px}
+#son-plaka .logo{font-size:20px}
+#son-plaka .header-actions button,#son-plaka .header-actions a.btn{font-size:9px;padding:9px}
+#son-plaka .header-actions kbd{display:none}
+#son-plaka #sp-scoreboard{top:88px;gap:12px;padding:8px 14px}
+#son-plaka .team b{font-size:24px}
+#son-plaka .clock{padding:0 10px;min-width:120px}
+#son-plaka #sp-message{top:167px}
+#son-plaka #sp-warn{top:150px}
+#son-plaka #sp-controls{gap:10px;font-size:8px}
+#son-plaka #sp-player{width:180px;padding:12px;left:18px}
+#son-plaka .home-content{margin-left:5vw;width:450px}
+#son-plaka .home h1{font-size:54px}
+#son-plaka .home p{font-size:14px}
+}
+@media(max-width:650px){
+#son-plaka .logo small{font-size:6px}
+#son-plaka .header-actions button,#son-plaka .header-actions a.btn{padding:8px}
+#son-plaka .home-content{width:90vw}
+#son-plaka .home{background:#0b0f1ac9}
+#son-plaka .home h1{font-size:48px}
+#son-plaka .home p{font-size:13px}
+#son-plaka .rule-cards{margin-top:25px;gap:20px}
+#son-plaka .pitch-note{display:none}
+#son-plaka #sp-controls{width:94vw;white-space:normal;flex-wrap:wrap;justify-content:center;bottom:12px}
+#son-plaka #sp-player{bottom:110px;width:150px}
+#son-plaka .card{padding:22px}
+#son-plaka .card dl{grid-template-columns:100px 1fr;gap:12px;font-size:11px}
+}
+
+/* Dokunmatik kip: sol yarı joystick, sağ yarı bakış, sağ altta başparmak düğmeleri. */
+#son-plaka .touch-only{display:none}
+#son-plaka.touch .touch-only{display:grid}
+#son-plaka.touch .desktop-only,#son-plaka.touch #sp-controls,#son-plaka.touch #sp-player,#son-plaka.touch kbd{display:none!important}
+#son-plaka.touch canvas{cursor:default}
+#son-plaka #sp-touch{position:absolute;inset:0;touch-action:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#son-plaka.touch #sp-scoreboard,#son-plaka.touch #sp-message,#son-plaka.touch #sp-warn{pointer-events:none}
+#son-plaka .touch-zone{position:absolute;top:0;bottom:0;z-index:7;touch-action:none}
+#son-plaka .touch-zone.left{left:0;width:44%}
+#son-plaka .touch-zone.right{left:44%;right:0}
+#son-plaka #sp-stick{position:fixed;left:0;top:0;width:0;height:0;z-index:10;pointer-events:none}
+#son-plaka #sp-stick::before{content:"";position:absolute;left:-60px;top:-60px;width:120px;height:120px;border-radius:50%;background:#0b0f1ab0;border:2px solid #cfe3ff55;box-shadow:0 6px 24px #05070d66}
+#son-plaka #sp-stick i{position:absolute;left:-27px;top:-27px;width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff6de,#f5c26b);box-shadow:0 4px 14px #05070d88}
+#son-plaka .touch-buttons{position:absolute;right:calc(18px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));width:250px;height:210px;z-index:10;pointer-events:none}
+#son-plaka .tbtn{--cd:0;position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:50%;background:#111827d9;border:2px solid #cfe3ff55;color:#e8eefc;box-shadow:0 6px 20px #05070d66;pointer-events:auto;touch-action:none;overflow:hidden;transition:transform .08s,background .12s}
+#son-plaka .tbtn::after{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(#05070dc0 calc(var(--cd) * 1turn),transparent 0);pointer-events:none}
+#son-plaka .tbtn b{font:950 14px/1 Segoe UI,Arial,sans-serif;letter-spacing:1px}
+#son-plaka .tbtn small{font:800 7px/1 Segoe UI,Arial,sans-serif;letter-spacing:1px;margin-top:5px;opacity:.8}
+#son-plaka .tbtn.on{transform:scale(.9);background:#26334d}
+#son-plaka .tbtn.shoot{right:0;bottom:0;width:96px;height:96px;background:#f5c26be6;color:#1c1a12;border-color:#fff3}
+#son-plaka .tbtn.shoot b{font-size:18px}
+#son-plaka .tbtn.shoot.on{background:#ffd991}
+#son-plaka .tbtn.shoot.idle{opacity:.5}
+#son-plaka .tbtn.bar{right:112px;bottom:4px;width:78px;height:78px;border-color:#ff8a5c99}
+#son-plaka .tbtn.jump{right:14px;bottom:112px;width:70px;height:70px}
+#son-plaka .tbtn.jump b{font-size:12px}
+#son-plaka #sp-rotate{display:none}
+@media(orientation:portrait){
+#son-plaka.touch #sp-rotate{position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#0b0f1a;text-align:center;padding:30px}
+#son-plaka #sp-rotate strong{font-size:26px;color:#f4d7a5}
+#son-plaka #sp-rotate span{font-size:14px;color:#b7c6df}
+}
+
+/* Kısa (yatay telefon) ekranlar. */
+@media(max-height:560px){
+#son-plaka header{top:calc(10px + env(safe-area-inset-top));left:calc(16px + env(safe-area-inset-left));right:calc(16px + env(safe-area-inset-right))}
+#son-plaka .logo{font-size:17px}
+#son-plaka .logo small{display:none}
+#son-plaka .header-actions button,#son-plaka .header-actions a.btn{font-size:9px;padding:8px 10px}
+#son-plaka #sp-scoreboard{top:8px;gap:10px;padding:5px 12px;border-radius:9px}
+#son-plaka .team{gap:8px;font-size:8px}
+#son-plaka .team b{font-size:20px}
+#son-plaka .pips i{width:8px;height:8px}
+#son-plaka .clock{padding:0 8px;min-width:90px}
+#son-plaka .clock span{font-size:15px}
+#son-plaka .clock small{font-size:6px}
+#son-plaka #sp-message{top:62px;padding:9px 18px;font-size:12px}
+#son-plaka #sp-warn{top:52px;padding:6px 12px;font-size:10px}
+#son-plaka .home-content{padding-top:34px;margin-left:calc(5vw + env(safe-area-inset-left));width:min(440px,70vw)}
+#son-plaka .home h1{font-size:30px;letter-spacing:-1px;margin:10px 0}
+#son-plaka .home p{font-size:12px;line-height:1.5;margin:8px 0 14px}
+#son-plaka .home .primary{min-height:44px;padding:12px 18px;width:230px}
+#son-plaka .home-meta{margin-top:10px}
+#son-plaka .rule-cards{margin-top:14px}
+#son-plaka .rule-cards span{margin-top:5px;line-height:1.4}
+#son-plaka .pitch-note{display:none}
+#son-plaka .overlay{padding:10px}
+#son-plaka .card{padding:18px 22px;max-height:94vh}
+#son-plaka .card h2{font-size:22px;margin:8px 0 12px}
+#son-plaka .card dl{gap:8px 12px;font-size:11px;line-height:1.45}
+#son-plaka .card .primary{margin-top:12px;min-height:42px}
+#son-plaka .card.small button,#son-plaka .card.small a.btn{margin-top:8px;padding:10px}
+#son-plaka #sp-final-score{font-size:28px;margin-bottom:8px}
+#son-plaka td,#son-plaka th{padding:5px 6px}
+#son-plaka #sp-charge{width:74px;height:74px}
+#son-plaka #sp-down strong{font-size:26px}
+#son-plaka #sp-down-count{font-size:34px}
+#son-plaka .touch-buttons{transform:scale(.88);transform-origin:100% 100%}
+}
+
+/* Telefonda üst düğmeler simge. */
+#son-plaka.touch .header-actions button{font-size:0;padding:0;width:40px;height:40px}
+#son-plaka.touch .header-actions button::before{font-size:18px}
+#son-plaka.touch #sp-cam::before{content:"🎥"}
+#son-plaka.touch #sp-help-open::before{content:"?";font-weight:900}
+#son-plaka.touch #sp-pause-open::before{content:"☰"}
+#son-plaka.touch #sp-sound::before{content:"🔊"}
+#son-plaka.touch #sp-sound.muted::before{content:"🔇"}
+#son-plaka.touch #sp-charge{top:auto;bottom:calc(64px + env(safe-area-inset-bottom));transform:translateX(-50%);width:54px;height:54px}
+#son-plaka.touch #sp-charge span{top:50%;left:100%;transform:translateY(-50%);margin:0 0 0 10px;font-size:10px;padding:4px 8px}
+
+/* Çok oyunculu: giriş ekranında ad, Oda kur / Odaya katıl, kod satırı, çevrim içi sayısı; sunucu yoksa "Yakında". */
+#son-plaka .home-online{margin-top:22px;width:280px;display:grid;gap:8px}
+#son-plaka .home-online .nick{display:flex;align-items:center;gap:10px;background:#111827d9;border:1px solid #cfe3ff2a;border-radius:8px;padding:0 12px}
+#son-plaka .home-online .nick span{font-size:9px;font-weight:800;letter-spacing:1.5px;color:#9fb3d1}
+#son-plaka .home-online input{flex:1;min-width:0;background:transparent;border:0;color:#e8eefc;font:700 13px inherit;font-family:inherit;padding:11px 0;outline:none;user-select:text}
+#son-plaka .online-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#son-plaka .online-row button{position:relative;font-weight:800;letter-spacing:1px;white-space:nowrap;padding:12px 8px}
+#son-plaka .online-row button.soon,#son-plaka .join-row button.soon{opacity:.55;cursor:default;transform:none}
+#son-plaka .soon-tag{position:absolute;top:-9px;right:-6px;padding:3px 7px;border-radius:10px;background:#f5c26b;color:#1c1a12;font:900 8px/1 system-ui,sans-serif;letter-spacing:1px;font-style:normal}
+#son-plaka .join-row{display:flex;gap:8px}
+#son-plaka .join-row input{background:#111827d9;border:1px solid #cfe3ff2a;border-radius:8px;padding:10px 12px;text-transform:uppercase;letter-spacing:2px;color:#e8eefc}
+#son-plaka .home-status{display:flex;gap:12px;min-height:14px;font-size:10px;letter-spacing:.5px;color:#9fb3d1}
+#son-plaka #sp-online{color:#8fe3a4;font-weight:700}
+#son-plaka .home .rule-cards{margin-top:30px}
+
+/* Lobi. */
+#son-plaka .lobby-card{width:min(680px,94vw)}
+#son-plaka .lobby-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#son-plaka .lobby-head h2{margin:12px 0;letter-spacing:3px;font-size:34px}
+#son-plaka .lobby-teams{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+#son-plaka .lobby-team>b{display:block;font-size:11px;letter-spacing:2px;margin-bottom:8px}
+#son-plaka .lobby-team.blue>b{color:#68d4d8}
+#son-plaka .lobby-team.orange>b{color:#fda27e}
+#son-plaka .lobby-team ol{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+#son-plaka .seat{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;background:#111827;border:1px solid #cfe3ff1c;cursor:pointer;font-size:12px;min-height:40px}
+#son-plaka .seat em{font-style:normal;font-size:9px;letter-spacing:1px;color:#9fb3d1;width:62px;flex:none}
+#son-plaka .seat small{font-size:9px;color:#9fb3d1;margin-left:4px}
+#son-plaka .seat.free span{color:#a7b8d0}
+#son-plaka .seat.free:hover{background:#1e2a40;border-color:#f5c26b66}
+#son-plaka .lobby-team.blue .seat.taken{border-left:3px solid #39c2cf}
+#son-plaka .lobby-team.orange .seat.taken{border-left:3px solid #f5825b}
+#son-plaka .seat.taken span{font-weight:800;color:#e8eefc}
+#son-plaka .seat.me{background:#22314a}
+#son-plaka .seat.me span::after{content:" · sen";color:#f5c26b;font-weight:700}
+#son-plaka .seat.off{opacity:.55}
+#son-plaka .seat.picked,#son-plaka .seat.drop{outline:2px solid #f5c26b;outline-offset:1px}
+#son-plaka .seat.dragging{opacity:.4}
+#son-plaka .lobby-status{min-height:18px;margin:12px 0 0;color:#f5ce8c!important}
+#son-plaka .lobby-leave{display:block;width:100%;margin-top:10px}
+#son-plaka .pause-note{font-size:11px;margin:14px 0 0}
+@media(max-height:560px){
+#son-plaka .home-online{margin-top:10px;width:min(440px,70vw);grid-template-columns:1fr 1fr;gap:6px}
+#son-plaka .home-online .nick input{padding:7px 0;font-size:12px}
+#son-plaka .online-row button{padding:8px 10px;font-size:10px}
+#son-plaka .join-row,#son-plaka .home-status{grid-column:1/-1}
+#son-plaka .home .rule-cards{display:none}
+#son-plaka .lobby-card{padding:16px}
+#son-plaka .lobby-head h2{font-size:24px;margin:4px 0}
+#son-plaka .seat{min-height:30px;padding:5px 9px}
+}

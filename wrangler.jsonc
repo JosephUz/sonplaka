@@ -1,0 +1,12 @@
+{
+  // Son Plaka istemcisi — Cloudflare Worker, yalnız statik dosyalar (kod yok): sonplaka.josephuz.com.
+  // Dosyalar `npm run build:web` ile dist/ klasörüne toplanır; yayın: `npm run deploy:web`.
+  // Çevrim içi sunucu ayrı: evdeki PC'de Docker + Cloudflare Tunnel → sonplaka-sunucu.josephuz.com.
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "sonplaka",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": false,
+  "assets": { "directory": "./dist" },
+  // custom_domain: DNS kaydını wrangler açar; bu adda başka kayıt (tunnel route, CNAME) kalmamalı.
+  "routes": [{ "pattern": "sonplaka.josephuz.com", "custom_domain": true }]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "son-plaka",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "node tests/browser-smoke.mjs",
+    "build:web": "node scripts/build-web.mjs",
+    "deploy:web": "node scripts/build-web.mjs && npx wrangler@4 deploy"
+  },
+  "dependencies": {
+    "three": "0.180.0",
+    "ws": "^8.21.3"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  }
+}

@@ -1,0 +1,11 @@
+node_modules/
+*.log
+.env
+artifacts/
+dist/
+apk/
+.wrangler/
+# İmza anahtarları asla repoya girmez (yedekle).
+android/*.jks
+android/keystore.properties
+scratch/

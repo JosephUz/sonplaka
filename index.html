@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b0f1a">
+<title>Son Plaka · Boşluk Arenası</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/style.css">
+<script type="importmap">{ "imports": { "three": "/vendor/three.module.js" } }</script>
+</head>
+<body>
+<div id="son-plaka">
+  <div id="sp-view">
+    <div id="sp-labels"></div>
+    <div class="grain"></div>
+
+    <header>
+      <a class="logo" href="/">SON<span>PLAKA</span><small>BOŞLUK ARENASI / İLK DENEME</small></a>
+      <div class="header-actions">
+        <a id="sp-site" class="btn" href="https://www.josephuz.com/">← josephuz.com</a>
+        <button id="sp-cam" aria-label="Kamera: birinci şahıs / omuz">🎥 Omuz</button>
+        <button id="sp-help-open">Nasıl oynanır <kbd>F1</kbd></button>
+        <button id="sp-pause-open" hidden>Duraklat <kbd>Esc</kbd></button>
+        <button id="sp-sound" aria-label="Sesi aç veya kapat">Ses açık</button>
+      </div>
+    </header>
+
+    <div id="sp-scoreboard" hidden>
+      <div class="team blue-text"><span class="pips" id="sp-blue-wins"></span>MAVİ <b id="sp-blue-alive">5</b></div>
+      <div class="clock"><span id="sp-timer">0:00</span><small id="sp-phase">RAUND 1</small></div>
+      <div class="team orange-text"><b id="sp-orange-alive">5</b> TURUNCU<span class="pips" id="sp-orange-wins"></span></div>
+    </div>
+
+    <section id="sp-home" class="home">
+      <div class="home-content">
+        <div class="eyebrow"><i></i> 5v5 DİSK ARENASI · DARALAN BOŞLUK</div>
+        <h1>Plakalar düşer.<br><span>Sen kalırsın.</span></h1>
+        <p>Diskle rakibi kenardan aşağı at, plakalar teker teker boşluğa düşerken<br>zıplama plakalarıyla içeri kaç. Son plakada kim kalırsa raund onun.</p>
+        <button id="sp-start" class="primary">ARENAYA GİR <span>↗</span></button>
+        <div class="home-meta"><span>01 OYUNCU + 09 BOT</span><span>3 RAUND ALAN KAZANIR</span></div>
+        <div class="home-online">
+          <label class="nick"><span>ADIN</span><input id="sp-nick" maxlength="16" autocomplete="off" spellcheck="false" aria-label="Oyuncu adı"></label>
+          <div class="online-row">
+            <button id="sp-create">ODA KUR</button>
+            <button id="sp-join">ODAYA KATIL</button>
+          </div>
+          <div id="sp-joinrow" class="join-row" hidden><input id="sp-code" placeholder="ODA KODU" maxlength="8" autocomplete="off" spellcheck="false" aria-label="Oda kodu"><button id="sp-join-go">Katıl</button></div>
+          <div class="home-status"><span id="sp-online"></span><span id="sp-home-status" role="status"></span></div>
+        </div>
+        <div class="rule-cards">
+          <div><b>01 / DİSK</b><span>Vurulan savrulur; can yok, düşen gider.</span></div>
+          <div><b>02 / PLAKA</b><span>Dış halka 40. saniyede düşer, doğuş kapanır.</span></div>
+          <div><b>03 / SON PLAKA</b><span>Merkez daralır. Ayakta kalan takım raundu alır.</span></div>
+        </div>
+      </div>
+      <div class="pitch-note"><i></i> BOŞLUK ARENASI <span>13 plaka, 40 zıplama plakası, sınır diskleri sektirir.</span></div>
+    </section>
+
+    <div id="sp-crosshair" hidden>+</div>
+    <div id="sp-charge" hidden><div class="charge-ring"></div><span id="sp-charge-text"></span></div>
+    <div id="sp-warn" role="status" hidden></div>
+    <div id="sp-message" role="status" hidden></div>
+    <div id="sp-down" hidden><strong id="sp-down-title">DÜŞTÜN!</strong><span id="sp-down-count"></span><small id="sp-down-note"></small></div>
+    <div id="sp-freeze" hidden></div>
+
+    <aside id="sp-player" hidden>
+      <span class="eyebrow" id="sp-side">SEN / MAVİ TAKIM</span>
+      <strong id="sp-status">DİSKLER HAZIR</strong>
+      <div class="meter-label"><span>DİSK</span><span id="sp-disc-text">3 / 3</span></div>
+      <div class="discs" id="sp-discs"></div>
+      <div class="meter-label power-row"><span>GÜÇ</span><span id="sp-power">—</span></div>
+    </aside>
+
+    <div id="sp-touch" hidden>
+      <div class="touch-zone left" data-t="stick"></div>
+      <div class="touch-zone right" data-t="look"></div>
+      <div id="sp-stick" hidden><i></i></div>
+      <div class="touch-buttons">
+        <div id="sp-t-shoot" class="tbtn shoot" data-t="shoot" role="button" aria-label="Disk at"><b>AT</b><small id="sp-t-shoot-sub">TUT: KESKİN</small></div>
+        <div id="sp-t-bar" class="tbtn bar" data-t="bar" role="button" aria-label="Levye"><b>LEVYE</b></div>
+        <div id="sp-t-jump" class="tbtn jump" data-t="jump" role="button" aria-label="Zıpla"><b>ZIPLA</b><small>2 KEZ</small></div>
+      </div>
+    </div>
+    <div id="sp-rotate"><strong>Telefonu yan çevir</strong><span>Son Plaka yatay ekranda oynanır.</span></div>
+
+    <div id="sp-controls" hidden>
+      <span><kbd>W A S D</kbd> Hareket</span>
+      <span><kbd>FARE</kbd> Bak / nişan</span>
+      <span><kbd>SOL TIK</kbd> Disk · 1,5 sn tut: Keskin</span>
+      <span><kbd>SAĞ TIK / F</kbd> Levye</span>
+      <span><kbd>BOŞLUK</kbd> Zıpla · havada tekrar</span>
+      <span><kbd>V</kbd> Kamera</span>
+    </div>
+
+    <section id="sp-help" class="overlay" hidden>
+      <div class="card">
+        <span class="eyebrow">ARENA KURALLARI</span>
+        <h2>Can yok. Mermi yok.<br>Sadece kenar var.</h2>
+        <dl class="touch-only">
+          <dt>Sol yarı</dt><dd>Parmağını koy, joystick belirir: sürükleyerek yürü.</dd>
+          <dt>Sağ yarı</dt><dd>Parmağını kaydırarak bak ve nişan al (ortadaki artı nişangahtır).</dd>
+          <dt>AT</dt><dd>Dokun: disk. 1,5 saniye basılı tut: keskin disk (değdiğini anında eler). Elinde 3 disk var, 1,5 saniyede bir yenilenir.</dd>
+          <dt>LEVYE</dt><dd>Yakındaki rakibi kenara doğru iter. Kenar düellosunun silahı.</dd>
+          <dt>ZIPLA</dt><dd>Havadayken bir kez daha zıplarsın. Havada vurulursan düşersin.</dd>
+          <dt>Kamera 🎥</dt><dd>Telefonda omuz üstü başlar; birinci şahsa geçebilirsin.</dd>
+        </dl>
+        <dl class="desktop-only">
+          <dt>WASD / Oklar</dt><dd>Baktığın yöne göre yürü. Plakanın kenarından düşersin; kenarda dikkat.</dd>
+          <dt>Fare + sol tık</dt><dd>Nişangaha disk at. Disk hasar vermez: vurulan disk yönünde savrulur ve havalanır. Kenara yakın olan boşluğa gider.</dd>
+          <dt>Sol tık basılı</dt><dd>1,5 saniye tut (halka dolar): <b>keskin disk</b>. Yavaş ve parlak, herkes görür; ama değdiğini anında eler.</dd>
+          <dt>Sağ tık / F</dt><dd><b>Levye</b>: yakındaki rakibi kendinden uzağa savurur. Kenardaki rakibi levyeyle uğurla.</dd>
+          <dt>Boşluk</dt><dd>Zıpla; havadayken bir kez daha zıpla. Havada vurulursan yönün değişir, düşebilirsin.</dd>
+          <dt>Zıplama plakaları</dt><dd>Plakalar arasındaki tek geçiş: üstüne bas, karşı plakaya uçarsın (uçuşta yön veremezsin, disk atabilirsin). Bir zıplama plakasına disk vurursan 5 saniye kapanır: rakibin yolunu ya da kaçışını kesersin.</dd>
+          <dt>Daralma</dt><dd>40. saniyede dış halka (8 plaka) düşer ve <b>yeniden doğuş kapanır</b>; 80. saniyede iç halka. Sonra merkez plaka küçülür. Düşmeden 5 saniye önce plaka titrer: içeri kaç.</dd>
+          <dt>Güç diskleri</dt><dd>Merkezde ve iç halkada doğar: <b>üçlü</b> (3 atış yelpaze) ve <b>dondurucu</b> (3 atış, vurulan 2 saniye donar; donmuşu levyeyle it).</dd>
+          <dt>Raund</dt><dd>Doğuş kapandıktan sonra bir takımın kimsesi kalmayınca raund biter. 3 raund alan maçı kazanır. Elenince takım arkadaşını izlersin.</dd>
+          <dt>V</dt><dd>Kamera: birinci şahıs ↔ omuz üstü.</dd>
+          <dt>Esc</dt><dd>Fareyi bırakır ve oyunu durdurur.</dd>
+        </dl>
+        <p>Diskler görünmez sınırdan ve kolonlardan seker (3 kez): köşeden vur. Çok oyunculu: giriş ekranından oda kur, kodu ya da linki paylaş; herkes boş koltuğa oturur, boş kalanları botlar oynar.</p>
+        <button id="sp-help-close" class="primary">ANLADIM</button>
+      </div>
+    </section>
+
+    <section id="sp-lobby" class="overlay" hidden>
+      <div class="card lobby-card">
+        <span class="eyebrow">ODA · 5v5</span>
+        <div class="lobby-head"><h2 id="sp-lobby-code">----</h2><button id="sp-lobby-copy">Linki kopyala</button></div>
+        <p id="sp-lobby-hint"></p>
+        <div class="lobby-teams">
+          <div class="lobby-team blue"><b>MAVİ</b><ol id="sp-seats-0"></ol></div>
+          <div class="lobby-team orange"><b>TURUNCU</b><ol id="sp-seats-1"></ol></div>
+        </div>
+        <p id="sp-lobby-status" class="lobby-status" role="status"></p>
+        <button id="sp-lobby-start" class="primary">MAÇI BAŞLAT <span>↗</span></button>
+        <button id="sp-lobby-leave" class="lobby-leave">Odadan çık</button>
+      </div>
+    </section>
+
+    <section id="sp-pause" class="overlay" hidden>
+      <div class="card small">
+        <span class="eyebrow">MOLA</span>
+        <h2>Bir nefes al.</h2>
+        <button id="sp-resume" class="primary">OYUNA DÖN</button>
+        <button id="sp-restart">Yeniden başlat</button>
+        <button id="sp-menu">Ana menü</button>
+        <p id="sp-pause-note" class="pause-note" hidden>Çevrim içi maç durmaz: sen moladayken oyuncun yerinde durur.</p>
+        <a class="btn" href="https://www.josephuz.com/">josephuz.com'a dön</a>
+      </div>
+    </section>
+
+    <section id="sp-results" class="overlay" hidden>
+      <div class="card result-card">
+        <span class="eyebrow">MAÇ SONU</span>
+        <h2 id="sp-result-title"></h2>
+        <div id="sp-final-score"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Oyuncu</th><th>Düşürme</th><th>Düşme</th><th>İsabet</th><th>Atış</th><th>Güç diski</th><th>Zıplama plakası</th></tr></thead>
+            <tbody id="sp-stats"></tbody>
+          </table>
+        </div>
+        <button id="sp-again" class="primary">BİR MAÇ DAHA</button>
+      </div>
+    </section>
+  </div>
+</div>
+<script type="module" src="/game.js"></script>
+</body>
+</html>
