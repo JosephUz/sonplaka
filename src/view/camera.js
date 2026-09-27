@@ -42,8 +42,9 @@ export function createCamera() {
     },
     /** Ekran yönlü hareket girdisini (x sağ, z geri) bakış yönlü zemin vektörüne çevirir. */
     movement(x, z) {
+      // İleri (sin yaw, cos yaw); sağ = ileri × yukarı = (-fz, fx).
       const fx = Math.sin(yaw), fz = Math.cos(yaw);
-      return { x: fz * x - fx * z, z: -fx * x - fz * z };
+      return { x: -fz * x - fx * z, z: fx * x - fz * z };
     },
     /** Dünya noktasının ekran konumu; behind: kameranın arkasında (etiket gizlenir). */
     project(x, y, z) {

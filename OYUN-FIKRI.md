@@ -6,7 +6,7 @@ Ricochet'nin (Valve, 2000) disk arenası ile battle royale'in daralan alanı bir
 
 ## Arena
 
-Merkez plaka (yarıçap 10, dört kolon) + iç halka (4 plaka, yarıçap 7, ortada kolon) + dış halka (8 plaka, yarıçap 6). Dış halkanın bir yarısı mavi, öbür yarısı turuncu takımın doğuş plakalarıdır. Plakalar arası tek geçiş **zıplama plakaları**: üstüne basan karşı plakanın kenarından içeriye uçar (uçuşta yön verilmez, disk atılabilir). 40 zıplama plakası: dış halka komşuları, dış ↔ iç, iç ↔ merkez. Görünmez silindir sınır ve kolonlar diskleri sektirir.
+Merkez plaka (yarıçap 10, dört kolon) + iç halka (4 plaka, yarıçap 7, ortada kolon) + dış halka (8 plaka, yarıçap 6). Dış halkanın bir yarısı mavi, öbür yarısı turuncu takımın doğuş plakalarıdır. Plakalar arası tek geçiş **zıplama plakaları**: üstünde Boşluk'a basan karşı plakanın kenarından içeriye uçar (uçuşta yön verilmez, disk atılabilir). 40 zıplama plakası: dış halka komşuları, dış ↔ iç, iç ↔ merkez. Görünmez silindir sınır ve kolonlar diskleri sektirir.
 
 ## Eylemler
 

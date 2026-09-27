@@ -11,7 +11,7 @@ import { mat } from './builders.js';
 const PLATE_TOP = ['#5b6f86', '#4d6a66', '#5f5a68'];
 const PLATE_SIDE = ['#242c3a', '#22302e', '#2c2833'];
 const PICK_COLORS = { triple: '#ffd35c', freeze: '#8ff3ff' };
-const PAD_COLORS = { ok: '#7dff9a', off: '#ff5a5a', dead: '#5a6170' };
+const PAD_COLORS = { ok: '#9fd8ff', off: '#3a3f4c', dead: '#2b2f3a' };
 
 export function buildArenaView(scene, arena) {
   const plates = arena.plates.map(pl => {
@@ -87,8 +87,9 @@ export function buildArenaView(scene, arena) {
         const q = w.arena.pads[i], v = pads[i], plate = w.plates[q.plate];
         const state = plate.phase >= 2 ? 'dead' : w.plates[q.to].phase >= 2 ? 'dead' : s.off > 0 ? 'off' : 'ok';
         if (state !== v.state) { v.state = state; v.material.color.set(PAD_COLORS[state]); v.material.emissive.set(PAD_COLORS[state]); }
-        v.material.emissiveIntensity = state === 'ok' ? 0.7 + Math.sin(time * 5 + i) * 0.3 : state === 'off' ? 0.5 + (s.off % 0.4 < 0.2 ? 0.5 : 0) : 0.1;
-        v.pivot.position.y = 0.07 + (state === 'ok' ? (Math.sin(time * 4 + i) + 1) * 0.08 : 0);
+        // Sakin: yanıp sönme yok; açık plaka hafif parlar, kapalı ve ölü plaka sönük.
+        v.material.emissiveIntensity = state === 'ok' ? 0.55 : 0.05;
+        v.pivot.visible = state === 'ok';
       });
       w.pickups.forEach((s, i) => {
         const v = pickups[i], spot = w.arena.pickups[i];

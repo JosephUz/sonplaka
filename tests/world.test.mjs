@@ -114,11 +114,13 @@ test('zıplama: yerde kalkar, havada bir kez daha zıplar, üçüncü olmaz', ()
   assert.ok(p.ground); assert.equal(p.plate, 0);
 });
 
-test('zıplama plakasına basan hedef plakaya uçar ve oraya iner; inince hemen geri dönmez', () => {
+test('zıplama plakasında Boşluk hedef plakaya uçurur, basmak yetmez; inince hemen geri dönmez', () => {
   const w = setup(), q = w.arena.pads.find(x => x.plate === 0);
   const p = center(w, 0, q.x, q.z); p.padLock = 0;
   for (const t of w.players) if (t.id !== 0) t.out = true;
-  step(w, 1 / 60);
+  run(w, 10);
+  assert.equal(p.flight, 0, 'basınca kendiliğinden fırlattı'); assert.ok(p.ground);
+  step(w, 1 / 60, { jump: true });
   assert.ok(p.flight > 0, 'uçmadı'); assert.equal(p.stats.pads, 1);
   run(w, Math.ceil(q.time * 60) + 10);
   assert.equal(p.plate, q.to, 'hedef plakaya inmedi'); assert.ok(p.ground);
@@ -135,7 +137,7 @@ test('diskle vurulan zıplama plakası 5 saniye kapanır', () => {
   run(w, 30);
   assert.ok(w.pads[q.id].off > PAD.off - 1, 'kapanmadı: ' + w.pads[q.id].off);
   const r = center(w, 1, q.x, q.z); r.padLock = 0; r.out = false;
-  step(w, 1 / 60);
+  step(w, 1 / 60, { players: { 1: { jump: true } } });
   assert.equal(r.flight, 0, 'kapalı plaka fırlattı');
 });
 

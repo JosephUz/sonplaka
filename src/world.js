@@ -161,7 +161,7 @@ function respawn(w, p, dt) {
 /** Girdiyi eyleme çevirir: zıplama, levye, disk şarjı ve atış. */
 function act(w, p, cmd, dt) {
   if (p.knock > 0 || p.freeze > 0) { p.charge = 0; return; }
-  if (cmd.jump) jump(w, p.id);
+  if (cmd.jump && !pad(w, p)) jump(w, p.id); // zıplama plakasının üstünde Boşluk: uçuş; değilse zıplama
   if (cmd.secondary) swing(w, p.id);
   const pressing = cmd.hold || cmd.tap;
   if (pressing && p.discs > 0 && p.throwCd <= 0 && !p.chargeSpent) p.charge = Math.min(DISC.sharpCharge, p.charge + dt);
@@ -207,7 +207,6 @@ function physics(w, p, cmd, dt) {
     if (p.flight > 0) { p.flight = 0; p.padLock = Math.max(p.padLock, PAD.lock); } // inince karşı plakaya hemen basmasın
     if (landed) emit(w, 'land', { id: p.id, x: p.x, y: p.y, z: p.z });
   } else { p.ground = false; p.plate = g ? g.plate : -1; }
-  if (p.ground && p.padLock <= 0 && p.knock <= 0 && p.freeze <= 0 && w.state === 'play') pad(w, p);
   if (p.y < ARENA.fallDepth && w.state === 'play') eliminate(w, p, 'fall');
 }
 
@@ -227,20 +226,31 @@ function pillars(w, p) {
   }
 }
 
-/** Zıplama plakasına basan, hedef plaka ayaktaysa ve plaka kapalı değilse oraya fırlar. */
-function pad(w, p) {
+/** Oyuncunun üstünde durduğu zıplama plakası (açık ve hedefi ayakta), yoksa null. */
+export function padUnder(w, p) {
+  if (!p.ground || p.plate < 0) return null;
   for (const id of w.arena.plates[p.plate].pads) {
-    const q = w.arena.pads[id], s = w.pads[id];
-    if (s.off > 0 || Math.hypot(p.x - q.x, p.z - q.z) > ARENA.padR) continue;
-    const target = w.plates[q.to];
-    if (target.phase >= 2) continue;
+    const q = w.arena.pads[id];
+    if (w.pads[id].off > 0 || w.plates[q.to].phase >= 2 || Math.hypot(p.x - q.x, p.z - q.z) > ARENA.padR) continue;
+    return q;
+  }
+  return null;
+}
+
+/** Zıplama plakasının üstünde Boşluk: hedef plakaya uçar. Uçtuysa true. */
+function pad(w, p) {
+  if (p.padLock > 0) return false;
+  const q = padUnder(w, p);
+  if (q) {
+    const id = q.id, target = w.plates[q.to];
     const T = q.time;
     p.vx = (q.land.x - p.x) / T; p.vz = (q.land.z - p.z) / T; p.vy = JUMP.gravity * T / 2 + (target.y - p.y) / T;
     p.ground = false; p.flight = T * 1.5; p.padLock = PAD.lock; p.jumps = 0; // uçuş inişte biter; süre yalnız güvence
     p.stats.pads++;
     emit(w, 'pad', { id: p.id, pad: id, x: p.x, y: p.y, z: p.z });
-    return;
+    return true;
   }
+  return false;
 }
 
 /** Diskler: uçuş, sınır ve kolon sekmesi, zıplama plakası kapatma, isabet, ömür. */
@@ -317,6 +327,7 @@ export const aliveCount = (w, team) => w.players.filter(p => p.team === team && 
 
 /** Doğuş kapandıktan sonra bir takımın kimsesi kalmayınca raund biter. */
 function checkRound(w) {
+  if (w.respawnOpen) return;
   const a = aliveCount(w, 0), b = aliveCount(w, 1);
   if (a > 0 && b > 0) return;
   const team = a > 0 ? 0 : b > 0 ? 1 : null;
