@@ -1,5 +1,5 @@
 import { DISC, ROUND, TEAMS } from './config.js';
-import { aliveCount, padUnder } from './world.js';
+import { aliveCount } from './world.js';
 
 /**
  * Arayüz (DOM): ekranlar (giriş, yardım, mola, maç sonu, lobi), skor tabelası (raund ışıkları, ayakta olan sayısı,
@@ -18,7 +18,7 @@ export function createUI(root) {
     wins: [$('blue-wins'), $('orange-wins')], alive: [$('blue-alive'), $('orange-alive')], timer: $('timer'), phase: $('phase'),
     side: $('side'), status: $('status'), discText: $('disc-text'), discs: $('discs'), power: $('power'),
     down: $('down'), downTitle: $('down-title'), downCount: $('down-count'), downNote: $('down-note'), freeze: $('freeze'),
-    crosshair: $('crosshair'), message: $('message'), warn: $('warn'), padHint: $('pad-hint'),
+    crosshair: $('crosshair'), message: $('message'), warn: $('warn'),
     charge: $('charge'), chargeText: $('charge-text'),
     site: $('site'), resultTitle: $('result-title'), finalScore: $('final-score'), stats: $('stats'), sound: $('sound'),
   };
@@ -58,9 +58,7 @@ export function createUI(root) {
       const [text, hot] = phase(w);
       el.phase.textContent = text; el.phase.classList.toggle('hot', hot);
       el.side.textContent = 'SEN / ' + TEAMS.names[me.team] + ' TAKIM';
-      const onPad = !me.out && padUnder(w, me);
-      el.status.textContent = me.out ? (me.respawn > 0 ? 'DÖNÜYORSUN' : 'ELENDİN') : me.freeze > 0 ? 'DONDUN' : me.knock > 0 ? 'SAVRULDUN' : me.flight > 0 ? 'UÇUŞTA' : onPad ? 'ZIPLAMA PLAKASI · BOŞLUK: UÇ' : me.discs > 0 ? 'DİSKLER HAZIR' : 'DİSK YENİLENİYOR';
-      el.padHint.hidden = !playing || !!screen || !onPad;
+      el.status.textContent = me.out ? (me.respawn > 0 ? 'DÖNÜYORSUN' : 'ELENDİN') : me.freeze > 0 ? 'DONDUN' : me.knock > 0 ? 'SAVRULDUN' : me.flight > 0 ? 'UÇUŞTA' : me.discs > 0 ? 'DİSKLER HAZIR' : 'DİSK YENİLENİYOR';
       el.discText.textContent = me.discs + ' / ' + DISC.max;
       [...el.discs.children].forEach((pip, i) => {
         const full = i < me.discs, filling = i === me.discs && me.discs < DISC.max;

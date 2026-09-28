@@ -34,7 +34,7 @@ Chromium'unu indirir (kullanıcının Chrome'una ve faresine dokunmaz). Ekran g�
   değdiğini anında eler.
 - **Levye** (sağ tık / F): yakın ve önündeki rakibi uzağa iter.
 - **Zıplama** (Boşluk): havada bir kez daha. Uçuşta ve savrulurken yön verilmez.
-- **Zıplama plakaları**: plakalar arası tek geçiş; üstünde **Boşluk**: karşı plakaya uç. Diskle vurulan 5 sn kapanır (söner).
+- **Rampalar**: plakalar arası tek geçiş; plaka kenarındaki rampaya koş, okun gösterdiği plakaya uçarsın. Diskle vurulan 5 sn kapanır (söner).
 - **Daralma**: 40. sn dış halka düşer, **doğuş kapanır**; 80. sn iç halka; 100-130. sn merkez küçülür; 145. sn merkez düşer.
   Düşmeden 5 sn önce plaka titrer ve ekranda uyarı çıkar.
 - **Raund**: doğuş kapandıktan sonra bir takımın kimsesi kalmayınca biter. 3 raund alan maçı kazanır. Elenen takım

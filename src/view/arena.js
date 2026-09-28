@@ -35,12 +35,19 @@ export function buildArenaView(scene, arena) {
     return { group, body, r0: pl.r };
   });
 
+  // Rampa: plaka kenarında hedefe doğru yükselen kama; üstünde hedefi gösteren ok. Kama şekli (uzunluk, yükseklik)
+  // düzleminde çizilip genişlik boyunca çıkarılır; yerel +X hedef yönüne döndürülür.
+  const wedge = new T.Shape();
+  wedge.moveTo(-1.7, 0); wedge.lineTo(1.5, 0); wedge.lineTo(1.5, 0.95); wedge.lineTo(-1.7, 0.04); wedge.closePath();
+  const rampGeo = new T.ExtrudeGeometry(wedge, { depth: 2.6, bevelEnabled: false });
+  rampGeo.translate(0, 0, -1.3);
   const pads = arena.pads.map(q => {
-    const plate = plates[q.plate], material = new T.MeshStandardMaterial({ color: PAD_COLORS.ok, emissive: PAD_COLORS.ok, emissiveIntensity: 0.9, roughness: 0.5 });
-    const mesh = new T.Mesh(new T.CylinderGeometry(ARENA.padR, ARENA.padR, 0.14, 28), material);
-    mesh.position.set(q.x - arena.plates[q.plate].x, 0.07, q.z - arena.plates[q.plate].z); plate.group.add(mesh);
-    const arrow = new T.Mesh(new T.ConeGeometry(0.42, 1.1, 3), new T.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.85 }));
-    arrow.rotation.x = Math.PI / 2; arrow.position.set(0, 0.12, 0.55);
+    const plate = plates[q.plate], material = new T.MeshStandardMaterial({ color: PAD_COLORS.ok, emissive: PAD_COLORS.ok, emissiveIntensity: 0.55, roughness: 0.5 });
+    const mesh = new T.Mesh(rampGeo, material);
+    mesh.position.set(q.x - arena.plates[q.plate].x, 0, q.z - arena.plates[q.plate].z); mesh.rotation.y = q.dir - Math.PI / 2;
+    mesh.castShadow = true; mesh.receiveShadow = true; plate.group.add(mesh);
+    const arrow = new T.Mesh(new T.ConeGeometry(0.5, 1.2, 3), new T.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.9 }));
+    arrow.rotation.x = Math.PI / 2; arrow.position.set(0, 1.35, 0.6);
     const pivot = new T.Group(); pivot.position.copy(mesh.position); pivot.rotation.y = q.dir; pivot.add(arrow); plate.group.add(pivot);
     return { mesh, material, pivot, state: 'ok' };
   });
@@ -90,6 +97,7 @@ export function buildArenaView(scene, arena) {
         // Sakin: yanıp sönme yok; açık plaka hafif parlar, kapalı ve ölü plaka sönük.
         v.material.emissiveIntensity = state === 'ok' ? 0.55 : 0.05;
         v.pivot.visible = state === 'ok';
+        v.pivot.position.y = Math.sin(time * 3 + i) * 0.08; // ok hafifçe süzülür
       });
       w.pickups.forEach((s, i) => {
         const v = pickups[i], spot = w.arena.pickups[i];

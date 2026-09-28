@@ -27,8 +27,6 @@ export function botInput(w, p) {
     if (b.dest) {
       const dx = b.dest.x - p.x, dz = b.dest.z - p.z, d = Math.hypot(dx, dz);
       if (d > 0.35) { cmd.x = dx / d; cmd.z = dz / d; }
-      // Zıplama plakasına vardı: Boşluk ile uçar (plaka kendiliğinden fırlatmaz).
-      if (b.dest.pad && d < 1.0 && p.ground && p.padLock <= 0) cmd.jump = true;
     }
     if (b.duel && target && p.ground) {
       if (w.time >= b.strafeT) { b.strafeT = w.time + BOT.strafe * (0.6 + w.random() * 0.8); b.strafe = -b.strafe; }

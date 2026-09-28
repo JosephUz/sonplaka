@@ -161,7 +161,7 @@ function respawn(w, p, dt) {
 /** Girdiyi eyleme çevirir: zıplama, levye, disk şarjı ve atış. */
 function act(w, p, cmd, dt) {
   if (p.knock > 0 || p.freeze > 0) { p.charge = 0; return; }
-  if (cmd.jump && !pad(w, p)) jump(w, p.id); // zıplama plakasının üstünde Boşluk: uçuş; değilse zıplama
+  if (cmd.jump) jump(w, p.id);
   if (cmd.secondary) swing(w, p.id);
   const pressing = cmd.hold || cmd.tap;
   if (pressing && p.discs > 0 && p.throwCd <= 0 && !p.chargeSpent) p.charge = Math.min(DISC.sharpCharge, p.charge + dt);
@@ -207,6 +207,8 @@ function physics(w, p, cmd, dt) {
     if (p.flight > 0) { p.flight = 0; p.padLock = Math.max(p.padLock, PAD.lock); } // inince karşı plakaya hemen basmasın
     if (landed) emit(w, 'land', { id: p.id, x: p.x, y: p.y, z: p.z });
   } else { p.ground = false; p.plate = g ? g.plate : -1; }
+  // Rampaya basan mutlaka uçar (iniş kilidi bitmişse; savrulmuş ya da donmuş oyuncu hariç).
+  if (p.ground && p.knock <= 0 && p.freeze <= 0 && w.state === 'play') pad(w, p);
   if (p.y < ARENA.fallDepth && w.state === 'play') eliminate(w, p, 'fall');
 }
 
@@ -226,7 +228,7 @@ function pillars(w, p) {
   }
 }
 
-/** Oyuncunun üstünde durduğu zıplama plakası (açık ve hedefi ayakta), yoksa null. */
+/** Oyuncunun üstünde durduğu rampa (açık ve hedefi ayakta), yoksa null. */
 export function padUnder(w, p) {
   if (!p.ground || p.plate < 0) return null;
   for (const id of w.arena.plates[p.plate].pads) {
@@ -237,7 +239,7 @@ export function padUnder(w, p) {
   return null;
 }
 
-/** Zıplama plakasının üstünde Boşluk: hedef plakaya uçar. Uçtuysa true. */
+/** Rampaya basan hedef plakaya uçar (iniş kilidi bitmişse). Uçtuysa true. */
 function pad(w, p) {
   if (p.padLock > 0) return false;
   const q = padUnder(w, p);

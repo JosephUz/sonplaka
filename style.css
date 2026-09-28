@@ -64,10 +64,6 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 
 /* Nişangah ve dolum halkası (keskin disk şarjı; kırmızıya döner). */
 #son-plaka #sp-crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:28px monospace;color:white;text-shadow:0 1px 4px #05070d;pointer-events:none;z-index:6}
-#son-plaka #sp-pad-hint{position:absolute;left:50%;top:calc(50% + 48px);transform:translateX(-50%);padding:7px 14px;border-radius:8px;background:#0b0f1ae6;border:1px solid #9fd8ff;color:#dff3ff;font:900 12px/1 Segoe UI,Arial,sans-serif;letter-spacing:1px;white-space:nowrap;z-index:6;pointer-events:none}
-#son-plaka #sp-pad-hint kbd{margin:0 6px 0 0;font-size:10px}
-#son-plaka.touch #sp-pad-hint{font-size:0;padding:0;border:0}
-#son-plaka.touch #sp-pad-hint::after{content:"ZIPLA: karşı plakaya uç";font-size:11px;padding:7px 14px;display:inline-block;border-radius:8px;background:#0b0f1ae6;border:1px solid #9fd8ff}
 #son-plaka #sp-charge{--p:0;--c:#7fe0e8;position:absolute;left:50%;top:50%;width:92px;height:92px;transform:translate(-50%,-50%);z-index:6;pointer-events:none}
 #son-plaka .charge-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p) * 1turn),#ffffff2e 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 9px),#000 calc(100% - 8px));mask:radial-gradient(farthest-side,transparent calc(100% - 9px),#000 calc(100% - 8px));filter:drop-shadow(0 0 7px var(--c))}
 #son-plaka #sp-charge span{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:10px;padding:5px 11px;border-radius:6px;background:#0b0f1ae6;border:1px solid var(--c);color:var(--c);font:900 12px/1 Segoe UI,Arial,sans-serif;letter-spacing:1px;white-space:nowrap}
