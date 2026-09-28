@@ -11,7 +11,7 @@ import { mat } from './builders.js';
 const PLATE_TOP = ['#5b6f86', '#4d6a66', '#5f5a68'];
 const PLATE_SIDE = ['#242c3a', '#22302e', '#2c2833'];
 const PICK_COLORS = { triple: '#ffd35c', freeze: '#8ff3ff' };
-const PAD_COLORS = { ok: '#9fd8ff', off: '#3a3f4c', dead: '#2b2f3a' };
+const PAD_COLORS = { ok: '#5f9fd0', off: '#3a3f4c', dead: '#2b2f3a' };
 
 export function buildArenaView(scene, arena) {
   const plates = arena.plates.map(pl => {
@@ -38,16 +38,16 @@ export function buildArenaView(scene, arena) {
   // Rampa: plaka kenarında hedefe doğru yükselen kama; üstünde hedefi gösteren ok. Kama şekli (uzunluk, yükseklik)
   // düzleminde çizilip genişlik boyunca çıkarılır; yerel +X hedef yönüne döndürülür.
   const wedge = new T.Shape();
-  wedge.moveTo(-1.7, 0); wedge.lineTo(1.5, 0); wedge.lineTo(1.5, 0.95); wedge.lineTo(-1.7, 0.04); wedge.closePath();
-  const rampGeo = new T.ExtrudeGeometry(wedge, { depth: 2.6, bevelEnabled: false });
-  rampGeo.translate(0, 0, -1.3);
+  wedge.moveTo(-1.5, 0); wedge.lineTo(1.3, 0); wedge.lineTo(1.3, 0.7); wedge.lineTo(-1.5, 0.03); wedge.closePath();
+  const rampGeo = new T.ExtrudeGeometry(wedge, { depth: 2.2, bevelEnabled: false });
+  rampGeo.translate(0, 0, -1.1);
   const pads = arena.pads.map(q => {
-    const plate = plates[q.plate], material = new T.MeshStandardMaterial({ color: PAD_COLORS.ok, emissive: PAD_COLORS.ok, emissiveIntensity: 0.55, roughness: 0.5 });
+    const plate = plates[q.plate], material = new T.MeshStandardMaterial({ color: PAD_COLORS.ok, emissive: PAD_COLORS.ok, emissiveIntensity: 0.25, roughness: 0.6 });
     const mesh = new T.Mesh(rampGeo, material);
     mesh.position.set(q.x - arena.plates[q.plate].x, 0, q.z - arena.plates[q.plate].z); mesh.rotation.y = q.dir - Math.PI / 2;
     mesh.castShadow = true; mesh.receiveShadow = true; plate.group.add(mesh);
-    const arrow = new T.Mesh(new T.ConeGeometry(0.5, 1.2, 3), new T.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.9 }));
-    arrow.rotation.x = Math.PI / 2; arrow.position.set(0, 1.35, 0.6);
+    const arrow = new T.Mesh(new T.ConeGeometry(0.3, 0.8, 3), new T.MeshBasicMaterial({ color: '#dff3ff', transparent: true, opacity: 0.75 }));
+    arrow.rotation.x = Math.PI / 2; arrow.position.set(0, 1.05, 0.5);
     const pivot = new T.Group(); pivot.position.copy(mesh.position); pivot.rotation.y = q.dir; pivot.add(arrow); plate.group.add(pivot);
     return { mesh, material, pivot, state: 'ok' };
   });
@@ -95,7 +95,7 @@ export function buildArenaView(scene, arena) {
         const state = plate.phase >= 2 ? 'dead' : w.plates[q.to].phase >= 2 ? 'dead' : s.off > 0 ? 'off' : 'ok';
         if (state !== v.state) { v.state = state; v.material.color.set(PAD_COLORS[state]); v.material.emissive.set(PAD_COLORS[state]); }
         // Sakin: yanıp sönme yok; açık plaka hafif parlar, kapalı ve ölü plaka sönük.
-        v.material.emissiveIntensity = state === 'ok' ? 0.55 : 0.05;
+        v.material.emissiveIntensity = state === 'ok' ? 0.25 : 0.03;
         v.pivot.visible = state === 'ok';
         v.pivot.position.y = Math.sin(time * 3 + i) * 0.08; // ok hafifçe süzülür
       });
