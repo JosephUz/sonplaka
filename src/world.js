@@ -1,4 +1,4 @@
-import { ARENA, CREDIT, DISC, FREEZE, JUMP, MATCH, MOVE, PAD, PICKUP, ROUND } from './config.js';
+import { ARENA, CREDIT, DISC, FREEZE, JUMP, MATCH, MOVE, PICKUP, ROUND } from './config.js';
 import { alive, emit, facing, jump, knock, pickup, swing, throwDisc } from './actions.js';
 import { botInput } from './ai.js';
 import { buildArena } from './arena.js';
@@ -34,7 +34,7 @@ export function createWorld(seed = MATCH.seed) {
     const team = i < MATCH.teamSize ? 0 : 1, role = i % MATCH.teamSize;
     w.players.push({
       id: i, team, role, human: i === 0, name: i === 0 ? 'Sen' : 'Bot-' + i,
-      x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, yaw: 0, pitch: 0, ground: true, plate: -1, jumps: 0,
+      x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, yaw: 0, pitch: 0, ground: true, plate: -1, jumps: 0, sprint: false,
       knock: 0, flight: 0, freeze: 0, respawn: 0, out: false, padLock: 0,
       discs: DISC.max, regen: 0, charge: 0, chargeSpent: false, throwCd: 0, barCd: 0, power: null, powerLeft: 0,
       lastHit: null, think: 0.2 + i * 0.05, bot: null,
@@ -64,7 +64,7 @@ function spawn(w, p) {
   const plate = w.arena.plates[ids.length ? ids[p.role % ids.length] : w.arena.spawns[p.team][0]];
   const s = w.plates[plate.id], d = Math.hypot(plate.x, plate.z) || 1, px = plate.z / d, pz = -plate.x / d, off = (p.role - 2) * 1.3;
   Object.assign(p, { x: plate.x + px * off, y: s.y, z: plate.z + pz * off, vx: 0, vy: 0, vz: 0, ground: true, plate: plate.id, jumps: 0,
-    knock: 0, flight: 0, freeze: 0, respawn: 0, out: false, padLock: 1, discs: DISC.max, regen: 0, charge: 0, chargeSpent: false, throwCd: 0, barCd: 0, power: null, powerLeft: 0, lastHit: null, bot: null });
+    knock: 0, flight: 0, freeze: 0, respawn: 0, out: false, padLock: 0, discs: DISC.max, regen: 0, charge: 0, chargeSpent: false, throwCd: 0, barCd: 0, power: null, powerLeft: 0, lastHit: null, bot: null });
   p.yaw = Math.atan2(-p.x, -p.z); p.pitch = 0;
   emit(w, 'spawn', { id: p.id });
 }
@@ -189,7 +189,9 @@ export function groundAt(w, x, z) {
 function physics(w, p, cmd, dt) {
   const control = p.knock <= 0 && p.flight <= 0 && p.freeze <= 0 && w.state === 'play';
   const mx = control ? cmd.x || 0 : 0, mz = control ? cmd.z || 0 : 0, md = Math.hypot(mx, mz);
-  const tx = mx / Math.max(1, md) * MOVE.speed, tz = mz / Math.max(1, md) * MOVE.speed;
+  p.sprint = control && !!cmd.sprint && md > 0.1;
+  const speed = MOVE.speed * (p.sprint ? MOVE.sprint : 1);
+  const tx = mx / Math.max(1, md) * speed, tz = mz / Math.max(1, md) * speed;
   if (control || (p.ground && p.knock <= 0)) {
     const blend = 1 - Math.exp(-(p.ground ? MOVE.accel : MOVE.air) * dt);
     if (p.freeze > 0) { p.vx *= 1 - blend; p.vz *= 1 - blend; }
@@ -204,7 +206,7 @@ function physics(w, p, cmd, dt) {
   if (g && p.vy <= 0 && p.y <= g.y + 0.02 && prevY >= g.y - 0.05) {
     const landed = !p.ground;
     p.y = g.y; p.vy = g.state.phase === 2 ? g.state.vy : 0; p.ground = true; p.plate = g.plate; p.jumps = 0;
-    if (p.flight > 0) { p.flight = 0; p.padLock = Math.max(p.padLock, PAD.lock); } // inince karşı plakaya hemen basmasın
+    if (p.flight > 0) p.flight = 0;
     if (landed) emit(w, 'land', { id: p.id, x: p.x, y: p.y, z: p.z });
   } else { p.ground = false; p.plate = g ? g.plate : -1; }
   // Rampaya basan mutlaka uçar (iniş kilidi bitmişse; savrulmuş ya da donmuş oyuncu hariç).
@@ -241,13 +243,13 @@ export function padUnder(w, p) {
 
 /** Rampaya basan hedef plakaya uçar (iniş kilidi bitmişse). Uçtuysa true. */
 function pad(w, p) {
-  if (p.padLock > 0) return false;
+
   const q = padUnder(w, p);
   if (q) {
     const id = q.id, target = w.plates[q.to];
     const T = q.time;
     p.vx = (q.land.x - p.x) / T; p.vz = (q.land.z - p.z) / T; p.vy = JUMP.gravity * T / 2 + (target.y - p.y) / T;
-    p.ground = false; p.flight = T * 1.5; p.padLock = PAD.lock; p.jumps = 0; // uçuş inişte biter; süre yalnız güvence
+    p.ground = false; p.flight = T * 1.5; p.jumps = 0; // uçuş inişte biter; süre yalnız güvence
     p.stats.pads++;
     emit(w, 'pad', { id: p.id, pad: id, x: p.x, y: p.y, z: p.z });
     return true;
@@ -290,16 +292,8 @@ function bounce(w, d) {
   }
 }
 
-/** Disk bir rakibe ya da zıplama plakasına değdi mi. Rakibe değince disk biter (true). */
+/** Disk bir rakibe değdi mi (rampalar diske aldırmaz). Rakibe değince disk biter (true). */
 function collide(w, d) {
-  for (let i = 0; i < w.pads.length; i++) {
-    const s = w.pads[i];
-    if (s.off > 0) continue;
-    const q = w.arena.pads[i], plate = w.plates[q.plate];
-    if (plate.phase >= 2 || Math.abs(d.y - plate.y) > 2.2 || Math.hypot(d.x - q.x, d.z - q.z) > ARENA.padR + DISC.radius) continue;
-    s.off = PAD.off;
-    emit(w, 'padOff', { pad: i, by: d.owner, x: q.x, y: plate.y, z: q.z });
-  }
   for (const p of w.players) {
     if (p.out || p.team === d.team) continue;
     if (Math.hypot(p.x - d.x, p.z - d.z) > DISC.radius + 0.55 || d.y < p.y - 0.3 || d.y > p.y + 2.2) continue;

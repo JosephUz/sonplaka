@@ -146,7 +146,7 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
   function readInput(conn, msg) {
     const [x, z] = Array.isArray(msg.mv) ? msg.mv.map(finite) : [0, 0];
     const d = Math.hypot(x, z), k = d > 1 ? 1 / d : 1;
-    conn.input.cmd = { x: x * k, z: z * k, yaw: finite(msg.yaw), pitch: Math.max(-1.3, Math.min(1.3, finite(msg.pitch))), hold: Boolean(msg.hold) };
+    conn.input.cmd = { x: x * k, z: z * k, yaw: finite(msg.yaw), pitch: Math.max(-1.3, Math.min(1.3, finite(msg.pitch))), hold: Boolean(msg.hold), sprint: Boolean(msg.sp) };
     for (const ch of String(msg.e || '').slice(0, 12)) {
       const name = EDGES[ch];
       if (name) conn.input.edges[name] = true;

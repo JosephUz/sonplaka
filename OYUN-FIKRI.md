@@ -14,7 +14,7 @@ Merkez plaka (yarıçap 10) + iç halka (4 plaka, yarıçap 7) + dış halka (8 
 - **Keskin disk** (sol tık 1,5 sn basılı): yavaş ve parlak, herkes görür; değdiğini anında eler.
 - **Levye** (sağ tık / F): bakış konisindeki yakın rakibi kendinden uzağa savurur. Kenar düellosunun silahı.
 - **Zıplama** (Boşluk): çift zıplama. Havada vurulursan düşersin.
-- **Zıplama plakası kapatma**: bir zıplama plakasına disk vurursan 5 saniye kapanır; rakibin yolunu ya da kaçışını kesersin.
+- **Hızlı koşu** (Shift): 1,45 kat hız; rampaya yetişmek ve diskten kaçmak için. Rampalar hiç kapanmaz.
 
 ## Daralma
 

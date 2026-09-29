@@ -8,7 +8,6 @@ const TONES = {
   swing: [200, 640],
   jump: [300, 520],
   pad: [380, 980],
-  padOff: [220, 70],
   fall: [520, 50],
   tremble: [90, 70],
   collapse: [70, 28],

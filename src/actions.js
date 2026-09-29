@@ -21,7 +21,7 @@ export function facing(p) {
 export function jump(w, id) {
   const p = w.players[id];
   if (idle(w, p) || p.flight > 0) return false;
-  if (p.ground) { p.vy = JUMP.vy; p.ground = false; p.jumps = JUMP.double; p.padLock = Math.max(p.padLock, 0.25); }
+  if (p.ground) { p.vy = JUMP.vy; p.ground = false; p.jumps = JUMP.double; }
   else if (p.jumps > 0) { p.vy = JUMP.vy * JUMP.secondMult; p.jumps--; }
   else return false;
   emit(w, 'jump', { id, x: p.x, y: p.y, z: p.z });
@@ -74,7 +74,7 @@ export function swing(w, id) {
 /** Savurma: verilen yatay yönde hızla iter, havalandırır; kısa süre kontrol yok. Vuran kaydedilir (düşürme sayılır). */
 export function knock(w, t, ux, uz, speed, lift, by, kind) {
   t.vx = ux * speed; t.vz = uz * speed; t.vy = Math.max(t.vy, lift);
-  t.ground = false; t.knock = DISC.knockTime; t.flight = 0; t.charge = 0; t.padLock = Math.max(t.padLock, 0.3);
+  t.ground = false; t.knock = DISC.knockTime; t.flight = 0; t.charge = 0;
   t.lastHit = { by, t: w.time };
   const attacker = w.players[by];
   if (attacker) attacker.stats.hits++;

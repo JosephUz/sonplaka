@@ -104,8 +104,8 @@ export function createNetClient(hooks) {
     const free = !me.out && me.ground && me.knock <= 0 && me.freeze <= 0 && me.flight <= 0 && world.state === 'play';
     let wx = 0, wz = 0;
     if (free && move && Math.hypot(move.x, move.z) > 0.1) {
-      const d = Math.max(1, Math.hypot(move.x, move.z)), ahead = NET.interp + rtt / 2;
-      wx = move.x / d * MOVE.speed * ahead; wz = move.z / d * MOVE.speed * ahead;
+      const d = Math.max(1, Math.hypot(move.x, move.z)), ahead = NET.interp + rtt / 2, speed = MOVE.speed * (me.sprint ? MOVE.sprint : 1);
+      wx = move.x / d * speed * ahead; wz = move.z / d * speed * ahead;
       const n = Math.hypot(wx, wz); if (n > NET.leadMax) { wx *= NET.leadMax / n; wz *= NET.leadMax / n; }
     }
     const s = 1 - Math.exp(-dt / NET.leadSmooth);
@@ -116,7 +116,7 @@ export function createNetClient(hooks) {
   /** Bu karenin girdisi (input.read çıktısı): sürekli durum saniyede 30 kez, basış olunca hemen. */
   function input(cmd, dt) {
     for (const [name, key] of Object.entries(EDGE_KEY)) if (cmd[name]) edges += key;
-    last = { mv: [+(cmd.x || 0).toFixed(3), +(cmd.z || 0).toFixed(3)], yaw: +(cmd.yaw || 0).toFixed(3), pitch: +(cmd.pitch || 0).toFixed(3), hold: !!cmd.hold };
+    last = { mv: [+(cmd.x || 0).toFixed(3), +(cmd.z || 0).toFixed(3)], yaw: +(cmd.yaw || 0).toFixed(3), pitch: +(cmd.pitch || 0).toFixed(3), hold: !!cmd.hold, sp: !!cmd.sprint };
     sendTimer += dt;
     if (edges || sendTimer >= NET.inputEvery) flushInput();
   }

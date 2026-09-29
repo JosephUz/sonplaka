@@ -73,7 +73,9 @@ export function createInput(canvas, { playing, onHelp, onPause, onLook, onUnlock
     /** Bu adımın girdisi: bakış yönlü hareket, bakış açıları, sol tık durumu ve birikmiş basışlar. */
     read(view) {
       const move = view.movement(...axes());
-      const cmd = { ...move, yaw: view.yaw, pitch: view.pitch, hold: held, ...edges };
+      // Shift (ya da joystick sonuna kadar itili) hızlı koşu.
+      const sprint = keys.has('ShiftLeft') || keys.has('ShiftRight') || (pad ? Math.hypot(pad.axis().x, pad.axis().z) > 0.97 : false);
+      const cmd = { ...move, yaw: view.yaw, pitch: view.pitch, hold: held, sprint, ...edges };
       edges = {};
       return cmd;
     },

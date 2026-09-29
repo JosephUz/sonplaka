@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ARENA, CROWBAR, DISC, FREEZE, PAD, PICKUP, ROUND } from '../src/config.js';
+import { ARENA, CROWBAR, DISC, FREEZE, MOVE, PAD, PICKUP, ROUND } from '../src/config.js';
 import { aliveCount, createWorld, groundAt, jump, step, swing, throwDisc } from '../src/world.js';
 
 /** Raund oynanır durumda, herkes yerinde; botlar düşünmesin diye uzun think. */
@@ -126,17 +126,29 @@ test('rampaya basan hedef plakaya uçar ve oraya iner; inince hemen geri dönmez
   assert.equal(p.plate, q.to, 'geri uçtu');
 });
 
-test('diskle vurulan zıplama plakası 5 saniye kapanır', () => {
+test('rampa hiç kapanmaz: disk vursa da, biri az önce uçmuş olsa da basan uçar', () => {
   const w = setup(), q = w.arena.pads.find(x => x.plate === 0);
   const p = center(w, 0, q.x - Math.sin(q.dir) * 4, q.z - Math.cos(q.dir) * 4);
   p.yaw = q.dir; p.pitch = -0.28;
   for (const t of w.players) if (t.id !== 0) t.out = true;
   assert.ok(throwDisc(w, 0));
   run(w, 30);
-  assert.ok(w.pads[q.id].off > PAD.off - 1, 'kapanmadı: ' + w.pads[q.id].off);
-  const r = center(w, 1, q.x, q.z); r.padLock = 0; r.out = false;
+  assert.equal(w.pads[q.id].off, 0, 'disk rampayı kapattı');
+  const r = center(w, 1, q.x, q.z); r.out = false;
   step(w, 1 / 60);
-  assert.equal(r.flight, 0, 'kapalı rampa fırlattı');
+  assert.ok(r.flight > 0, 'rampa fırlatmadı');
+  const s = center(w, 2, q.x, q.z); s.out = false;
+  step(w, 1 / 60);
+  assert.ok(s.flight > 0, 'arka arkaya ikinci basan uçmadı');
+});
+
+test('Shift hızlı koşturur', () => {
+  const w = setup(), p = center(w, 0);
+  for (const t of w.players) if (t.id !== 0) t.out = true;
+  run(w, 40, { x: 1, z: 0, sprint: true });
+  assert.ok(p.vx > MOVE.speed * 1.3, 'hızlanmadı: ' + p.vx.toFixed(2));
+  run(w, 40, { x: -1, z: 0 });
+  assert.ok(Math.abs(p.vx) < MOVE.speed + 0.1 && !p.sprint);
 });
 
 test('disk görünmez sınırdan seker, ömrü biter; plakalarda kolon yok', () => {

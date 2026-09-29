@@ -13,7 +13,6 @@ const BURSTS = {
   swing: { count: 6, color: () => '#ffffff', spread: 4 },
   fall: { count: 34, size: 0.2, spread: 12, up: [4, 12], life: 1.4, color: (e, i) => ['#ff7a2e', '#ffffff', '#ffd35c'][i % 3] },
   pad: { count: 10, color: () => '#7dff9a', spread: 4, up: [4, 9] },
-  padOff: { count: 14, color: () => '#ff5a5a', spread: 5 },
   bounce: { count: 4, color: () => '#bff6ff', spread: 3, size: 0.09 },
   pickup: { count: 22, color: () => '#ffd35c', spread: 5, up: [4, 9], life: 1 },
   jump: { count: 3, color: () => '#c9d8ff', spread: 2, size: 0.08, life: 0.4 },

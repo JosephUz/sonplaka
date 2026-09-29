@@ -35,7 +35,8 @@ Chromium'unu indirir (kullanıcının Chrome'una ve faresine dokunmaz). Ekran g�
   değdiğini anında eler.
 - **Levye** (sağ tık / F): yakın ve önündeki rakibi uzağa iter.
 - **Zıplama** (Boşluk): havada bir kez daha. Uçuşta ve savrulurken yön verilmez.
-- **Rampalar**: plakalar arası tek geçiş; plaka kenarındaki rampaya koş, okun gösterdiği plakaya uçarsın. Diskle vurulan 5 sn kapanır (söner).
+- **Rampalar**: plakalar arası tek geçiş; plaka kenarındaki rampaya koş, okun gösterdiği plakaya uçarsın. Rampa hiç kapanmaz.
+- **Hızlı koşu** (Shift; telefonda joystick sonuna kadar): 1,45 kat hız.
 - **Daralma**: 40. sn dış halka düşer, **doğuş kapanır**; 80. sn iç halka; 100-130. sn merkez küçülür; 145. sn merkez düşer.
   Düşmeden 5 sn önce plaka titrer ve ekranda uyarı çıkar.
 - **Raund**: doğuş kapandıktan sonra bir takımın kimsesi kalmayınca biter. 3 raund alan maçı kazanır. Elenen takım
@@ -52,6 +53,7 @@ Maç sonunda karne: düşürme, düşme, isabet, atış, güç diski, zıplama p
 | Fare | Bak / nişan (birinci şahıs) |
 | Sol tık | Disk; 1,5 sn tut: keskin disk |
 | Sağ tık / F | Levye |
+| Shift | Hızlı koş |
 | Boşluk | Zıpla, havada tekrar |
 | V | Kamera: birinci şahıs ↔ omuz |
 | F1 / Esc | Nasıl oynanır / mola |

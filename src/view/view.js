@@ -75,6 +75,9 @@ export function createView(container, { mobile = false } = {}) {
       discs.sync(w.discs, time);
       effects.update(dt);
       const me = w.players[w.me];
+      // Hızlı koşuda görüş açısı hafif genişler.
+      const fov = CAMERA.fov + (me.sprint && !me.out ? 7 : 0);
+      if (Math.abs(cam.camera.fov - fov) > 0.05) { cam.camera.fov += (fov - cam.camera.fov) * Math.min(1, dt * 6); cam.camera.updateProjectionMatrix(); }
       hand.visible = fps && playing && !me.out && me.discs > 0;
       if (hand.visible) {
         const k = 1 + (me.charge / DISC.sharpCharge) * 0.6;

@@ -31,17 +31,17 @@ export const ROUND = { start: 3, tremble: 5, ring2At: 40, ring1At: 80, shrinkAt:
 /** Maç: takım başı oyuncu; `seed` bot kararlarının tohumu (testler buna dayanır). */
 export const MATCH = { teamSize: 5, seed: 61 };
 
-/** Koşu hızı, yerde ve havada hedef hıza yaklaşma katsayısı (1/sn), yerde savrulma sürtünmesi. */
-export const MOVE = { speed: 7.5, accel: 18, air: 5, friction: 6 };
+/** Yürüme hızı, Shift ile hızlı koşu çarpanı, yerde ve havada hedef hıza yaklaşma katsayısı (1/sn), yerde savrulma sürtünmesi. */
+export const MOVE = { speed: 7.5, sprint: 1.45, accel: 18, air: 5, friction: 6 };
 
 /** Zıplama: kalkış hızı, yerçekimi, havadaki ikinci zıplama (çift zıplama) ve ikinci zıplamanın gücü. */
 export const JUMP = { vy: 9.5, gravity: 24, double: 1, secondMult: 0.9 };
 
 /**
- * Zıplama plakası: iki plaka arası uçuş `speed` hızıyla hesaplanır, süre `min`-`max` arasına sıkışır. Uçuşta yön
- * verilmez (disk atılabilir). İnen oyuncu `lock` saniye yeni plakaya basamaz. Diskle vurulan plaka `off` saniye kapanır.
+ * Rampa (zıplama plakası): iki plaka arası uçuş `speed` hızıyla hesaplanır, süre `min`-`max` arasına sıkışır. Uçuşta
+ * yön verilmez (disk atılabilir). Rampa hiçbir koşulda kapanmaz: basan her zaman uçar.
  */
-export const PAD = { speed: 20, min: 0.9, max: 1.5, lock: 0.8, off: 5 };
+export const PAD = { speed: 20, min: 0.9, max: 1.5 };
 
 /**
  * Disk: elde en çok `max`, `regen` saniyede bir yenilenir. Düz uçar (`speed`), sınırdan ve kolonlardan `bounces` kez

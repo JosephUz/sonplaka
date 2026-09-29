@@ -27,6 +27,7 @@ export function botInput(w, p) {
     if (b.dest) {
       const dx = b.dest.x - p.x, dz = b.dest.z - p.z, d = Math.hypot(dx, dz);
       if (d > 0.35) { cmd.x = dx / d; cmd.z = dz / d; }
+      cmd.sprint = !!b.dest.pad; // rampaya koşarken ve kaçarken hızlı
     }
     if (b.duel && target && p.ground) {
       if (w.time >= b.strafeT) { b.strafeT = w.time + BOT.strafe * (0.6 + w.random() * 0.8); b.strafe = -b.strafe; }
@@ -92,7 +93,7 @@ function plan(w, p, b) {
   // Başka plakada: menzildeyse çoğunlukla yerinde kalıp uzaktan atar (rakibe bakan kenara yakın, yanlara kayarak);
   // yeni indiği plakada bir süre kalır; aksi halde zıplama plakalarıyla ona (plakası ayaktaysa) ya da merkeze gider.
   const d = distance(p, best);
-  if (p.padLock > 0) b.stay = w.time + BOT.stay;
+  if (p.flight > 0) b.stay = w.time + BOT.stay;
   b.cross = d <= BOT.fireRange;
   if (b.cross && (w.time < b.stay || w.random() > BOT.crossChance)) {
     const ux = (best.x - plate.x) / (Math.hypot(best.x - plate.x, best.z - plate.z) || 1), uz = (best.z - plate.z) / (Math.hypot(best.x - plate.x, best.z - plate.z) || 1);

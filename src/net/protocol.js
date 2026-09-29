@@ -10,7 +10,7 @@ export const C2S = {
   MOVE: 'move',     // { id, slot } — yalnızca yönetici: oyuncuyu koltuğa taşır, koltuk doluysa ikisi yer değiştirir
   START: 'start',   // yalnızca yönetici
   LEAVE: 'leave',
-  INPUT: 'in',      // { mv: [x, z], yaw, pitch, hold, e: 'basışlar' } — bkz. EDGES
+  INPUT: 'in',      // { mv: [x, z], yaw, pitch, hold, sp (Shift), e: 'basışlar' } — bkz. EDGES
   PING: 'ping',
 };
 export const S2C = {
