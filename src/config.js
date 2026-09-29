@@ -20,21 +20,20 @@ export const ARENA = {
 };
 
 /**
- * Dalga akışı (saniye, dalganın oyun saatine göre): dış halka `ring2At`'te, iç halka `ring1At`'te düşer; her düşüşten
- * `tremble` saniye önce plaka titrer. Merkez plaka `shrinkAt`'ten başlayarak `shrinkTime` saniyede `minR` yarıçapına
- * küçülür, `endAt`'te o da düşer: dalga biter, `between` saniye sonra bütün plakalar geri gelir ve yeni dalga `start`
- * saniye geri sayımla (kimse kıpırdamaz) başlar. Düşme hakkı sınırsız: düşen `respawn` saniye sonra ayakta bir plakada
- * (kendi takımının dış plakası, düştüyse iç halka, o da düştüyse merkez) yeniden doğar.
+ * Maç akışı (saniye, oyun saatine göre): `start` saniye geri sayım (kimse kıpırdamaz); dış halka `ring2At`'te, iç halka
+ * `ring1At`'te düşer; her düşüşten `tremble` saniye önce plaka titrer. Dış halka düşene kadar düşen `respawn` saniye
+ * sonra kendi dış plakasında, sonra iç halkada doğar. İç halka düşünce **son plaka** evresi: yalnız merkez kalır ve
+ * **doğuş kapanır**. Merkez `shrinkAt`'ten başlayarak `shrinkTime` saniyede `minR` yarıçapına küçülür, `endAt`'te
+ * düşer. Son plakada ayakta kalan takım kazanır: rakip takımların kimsesi kalmayınca hemen; `endAt` gelince ayakta
+ * oyuncusu en çok olan, eşitse en çok düşüren, o da eşitse berabere.
  */
-export const ROUND = { start: 3, tremble: 5, ring2At: 40, ring1At: 80, shrinkAt: 100, shrinkTime: 30, minR: 2.2, endAt: 145, between: 4, respawn: 4 };
+export const ROUND = { start: 3, tremble: 5, ring2At: 40, ring1At: 80, shrinkAt: 100, shrinkTime: 30, minR: 2.2, endAt: 145, respawn: 4 };
 
 /**
- * Maç: `time` saniye sürer (yalnız oyun anında sayar; geri sayımda ve dalga arasında durur). Süre bitince en çok
- * düşüren takım kazanır, eşitlikte berabere. Kip: takım başı oyuncu `teamSize` — 1 ise **herkes tek** (`ffaTeams`
- * oyuncu, herkes ayrı takım), 2–5 ise iki takım (2v2 … 5v5); boş yerleri botlar doldurur. `seed` bot kararlarının
- * tohumu (testler buna dayanır).
+ * Maç kipi: takım başı oyuncu `teamSize` — 1 ise **herkes tek** (`ffaTeams` oyuncu, herkes ayrı takım), 2–5 ise iki
+ * takım (2v2 … 5v5); boş yerleri botlar doldurur. `seed` bot kararlarının tohumu (testler buna dayanır).
  */
-export const MATCH = { teamSize: 5, ffaTeams: 5, time: 300, seed: 61 };
+export const MATCH = { teamSize: 5, ffaTeams: 5, seed: 61 };
 export const MODES = [1, 2, 3, 4, 5];
 export const modeLabel = n => (n === 1 ? 'HERKES TEK' : `${n}v${n}`);
 export const teamsFor = n => (n === 1 ? MATCH.ffaTeams : 2);

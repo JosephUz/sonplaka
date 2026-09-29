@@ -14,7 +14,8 @@ import { alive, createWorld, step } from './world.js';
  * (herkes tek, 2v2 … 5v5) giriş ekranında seçilir ve hatırlanır; tek başına maç ve oda kurma bu seçimle başlar.
  * Her kare: sabit 1/60 sn adımlarla simülasyon (girdi her adımda okunur; bakış açıları kameradan gelir) → olaylar
  * (efekt, ses, mesaj, sarsıntı) → çizim. Kamera seni izler; düşünce düşüşünü, sonra doğana kadar takım arkadaşını
- * omuz üstünden izlersin. Doğunca bakış merkeze çevrilir. Fare kilidi düşerse (Esc) oyun molaya girer.
+ * omuz üstünden izlersin (son plakada elenince maç bitene kadar). Doğunca bakış merkeze çevrilir. Fare kilidi
+ * düşerse (Esc) oyun molaya girer.
  *
  * **Çevrim içi** (webde, config.js → ONLINE; bkz. lobby.js, net/): maçı sunucu koşturur, bu sayfa girdiyi yollar ve
  * gelen durumu çizer (net/client.js). Çevrim içinde mola maçı durdurmaz.
@@ -206,7 +207,7 @@ export async function start(root) {
         case 'go': ui.message('BAŞLA!', 1); break;
         case 'spawn': if (e.id === me) faceCenter(); break;
         case 'tremble': ui.warn(e.ring === 2 ? 'DIŞ HALKA ÇÖKÜYOR · İÇERİ KAÇ' : 'İÇ HALKA ÇÖKÜYOR · MERKEZE KAÇ', 5); break;
-        case 'collapse': ui.message(e.ring === 2 ? 'DIŞ HALKA DÜŞTÜ' : e.ring === 1 ? 'İÇ HALKA DÜŞTÜ' : 'SON PLAKA DA GİTTİ', 2.5); view.shake(0.35); break;
+        case 'collapse': ui.message(e.ring === 2 ? 'DIŞ HALKA DÜŞTÜ' : e.ring === 1 ? 'SON PLAKA · DOĞUŞ KAPANDI' : 'SON PLAKA DA GİTTİ', 2.5); view.shake(0.35); break;
         case 'shrinkWarn': ui.warn('MERKEZ DARALIYOR · KENARDAN UZAK DUR', 5); break;
         case 'hit':
           if (e.id === me) { view.shake(CAMERA.knockShake); if (e.kind === 'freeze') ui.message('DONDUN · 2 SN', 1.5); }
@@ -224,9 +225,7 @@ export async function start(root) {
           else if (e.by === me) ui.message(who(w.players[e.id]) + ' DÜŞTÜ · SENİN SAYENDE', 2);
           break;
         case 'pickup': if (e.id === me) ui.message(POWER_NAMES[e.kind] + ' ×' + PICKUP.shots, 1.8); break;
-        case 'roundEnd': ui.message('DALGA BİTTİ · PLAKALAR GERİ GELİYOR', 3); break;
-        case 'round': if (e.n > 1) ui.message('DALGA ' + e.n, 1.5); break;
-        case 'end': ui.message(e.team == null ? 'SÜRE DOLDU · BERABERE' : 'SÜRE DOLDU · ' + TEAMS.names[e.team] + ' KAZANDI', 3); break;
+        case 'end': ui.message(e.team == null ? 'BERABERE' : (e.why === 'last' ? 'SON PLAKADA KALAN: ' : 'SON PLAKA DÜŞTÜ · ') + TEAMS.names[e.team] + ' KAZANDI', 3); break;
         default: break;
       }
     }

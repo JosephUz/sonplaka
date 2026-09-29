@@ -92,11 +92,11 @@ try {
   await page.waitForTimeout(400);
   if (await page.locator('#sp-pause').isVisible()) { await page.locator('#sp-resume').click(); await page.waitForTimeout(200); }
 
-  // Maç sonu: süre dolsun, mavi önde.
-  await game(() => { const w = window.__sonPlaka.world(); w.state = 'play'; w.t = 50; w.score = [3, 1]; w.matchT = 0.05; });
+  // Maç sonu: son plakada turuncunun kimsesi kalmasın.
+  await game(() => { const w = window.__sonPlaka.world(); w.state = 'play'; w.t = 90; w.respawnOpen = false; for (const p of w.players) { p.out = p.team === 1; p.respawn = 0; } });
   await page.waitForTimeout(400);
   assert.ok(await page.locator('#sp-results').isVisible(), 'karne açılmadı');
-  assert.match(await page.locator('#sp-result-title').textContent(), /Arena sizin/, 'kazanan yazısı yanlış');
+  assert.match(await page.locator('#sp-result-title').textContent(), /Son plaka sizin/, 'kazanan yazısı yanlış');
   await page.screenshot({ path: 'artifacts/06-results.png' });
 
   // Dokunmatik kip (kamera seçimi hatırlanır; temiz başlasın); herkes tek kipi seçilir: 5 oyuncu, 5 takım.

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ARENA, CROWBAR, DISC, FREEZE, MATCH, MOVE, PAD, PICKUP, ROUND } from '../src/config.js';
-import { createWorld, groundAt, jump, step, swing, throwDisc } from '../src/world.js';
+import { ARENA, CROWBAR, DISC, FREEZE, MOVE, PAD, PICKUP, ROUND } from '../src/config.js';
+import { aliveCount, createWorld, groundAt, jump, step, swing, throwDisc } from '../src/world.js';
 
 /** Raund oynanır durumda, herkes yerinde; botlar düşünmesin diye uzun think. */
 const setup = () => {
@@ -26,13 +26,12 @@ test('arena: merkez + 4 iç + 8 dış plaka, her takıma 4 doğuş plakası, kar
   assert.equal(a.plates[0].pillars.length, ARENA.center.pillars);
 });
 
-test('5v5 başlar: geri sayım, sonra oyun; herkes kendi takımının dış plakasında ve yerde; maç süresi dolu', () => {
+test('5v5 başlar: geri sayım, sonra oyun; herkes kendi takımının dış plakasında ve yerde; doğuş açık', () => {
   const w = createWorld();
-  assert.equal(w.players.length, 10); assert.equal(w.state, 'countdown'); assert.equal(w.teams, 2);
+  assert.equal(w.players.length, 10); assert.equal(w.state, 'countdown'); assert.equal(w.teams, 2); assert.equal(w.respawnOpen, true);
   for (const p of w.players) { assert.ok(w.spawns[p.team].includes(p.plate), 'yanlış plaka'); assert.ok(p.ground); }
-  assert.equal(w.matchT, MATCH.time);
   run(w, Math.ceil(ROUND.start * 60) + 2);
-  assert.equal(w.state, 'play'); assert.ok(w.matchT < MATCH.time && w.matchT > MATCH.time - 1, 'süre geri sayımda saymamalı, oyunda saymalı');
+  assert.equal(w.state, 'play');
 });
 
 test('kipler: herkes tek 5 ayrı takım, 2v2 dört oyuncu; doğuş plakaları takımlara paylaştırılır', () => {
@@ -207,32 +206,50 @@ test('güç diski alınır, sonra sıradaki tür yeniden doğar', () => {
   assert.equal(w.pickups[1].active, true); assert.notEqual(w.pickups[1].kind, kind);
 });
 
-test('süre bitince en çok düşüren takım kazanır; eşitlikte berabere', () => {
+test('iç halka düşünce son plaka: doğuş kapanır, düşen elenir; rakip takımın kimsesi kalmayınca ayakta kalan kazanır', () => {
   const w = setup(); spread(w);
-  w.score = [3, 1]; w.matchT = 0.01;
+  w.t = ROUND.ring1At - 0.05;
+  run(w, 6);
+  assert.equal(w.respawnOpen, false, 'iç halka düşünce doğuş kapanmalı');
+  assert.ok(w.events.some(e => e.type === 'collapse' && e.ring === 1));
+  // Doğuş kapalıyken düşen doğuş süresi almaz.
+  const t = w.players[5]; Object.assign(t, { x: 0, y: -31, z: 0, plate: -1, ground: false });
   step(w, 1 / 60);
-  assert.equal(w.winner, 0); assert.equal(w.state, 'over');
-  assert.ok(w.events.some(e => e.type === 'end' && e.team === 0));
-  const tie = setup(); spread(tie);
-  tie.score = [2, 2]; tie.matchT = 0.01;
-  step(tie, 1 / 60);
-  assert.equal(tie.winner, -1, 'eşitlik berabere olmalı');
-  const ffa = createWorld(1, { teamSize: 1 }); ffa.state = 'play'; ffa.score = [0, 4, 1, 0, 2]; ffa.matchT = 0.01;
-  step(ffa, 1 / 60);
-  assert.equal(ffa.winner, 1);
+  assert.ok(t.out && t.respawn === 0, 'son plakada elenen geri gelmemeli');
+  assert.equal(w.state, 'play', 'turuncunun başka oyuncusu varken maç bitmemeli');
+  for (const p of w.players) if (p.team === 1) Object.assign(p, { out: true, respawn: 0 });
+  step(w, 1 / 60);
+  assert.equal(w.state, 'over'); assert.equal(w.winner, 0);
+  assert.ok(w.events.some(e => e.type === 'end' && e.team === 0 && e.why === 'last'));
 });
 
-test('merkez düşünce dalga biter, plakalar geri gelir, herkes yeniden doğar, skor kalır', () => {
+test('doğmayı bekleyen oyuncu sayılır: doğuş açıkken herkes düşse de maç bitmez', () => {
   const w = setup(); spread(w);
-  w.score = [2, 0];
+  for (const p of w.players) if (p.team === 1) Object.assign(p, { out: true, respawn: 2 });
+  step(w, 1 / 60);
+  assert.equal(w.state, 'play');
+  w.respawnOpen = false;
+  step(w, 1 / 60);
+  assert.equal(w.state, 'play', 'doğmayı bekleyen sayılmalı');
+});
+
+test('merkez düşünce maç biter: ayakta oyuncusu çok olan, eşitse en çok düşüren kazanır, o da eşitse berabere', () => {
+  const w = setup(); spread(w); w.respawnOpen = false;
+  Object.assign(w.players[5], { out: true, respawn: 0 });
   w.t = ROUND.endAt - 0.02;
   run(w, 3);
-  assert.equal(w.state, 'over'); assert.equal(w.plates[0].phase, 2);
-  assert.ok(w.events.some(e => e.type === 'roundEnd'));
-  run(w, Math.ceil(ROUND.between * 60) + 2);
-  assert.equal(w.round, 2); assert.equal(w.state, 'countdown');
-  assert.ok(w.plates.every(s => s.phase === 0 && s.y === 0), 'plakalar geri gelmedi');
-  assert.ok(w.players.every(p => !p.out)); assert.deepEqual(w.score, [2, 0]);
+  assert.equal(w.state, 'over'); assert.equal(w.plates[0].phase, 2); assert.equal(w.winner, 0, 'ayakta 5-4: mavi kazanmalı');
+  assert.ok(w.events.some(e => e.type === 'end' && e.why === 'time'));
+  const tie = setup(); spread(tie); tie.respawnOpen = false; tie.score = [1, 3];
+  tie.t = ROUND.endAt - 0.02; run(tie, 3);
+  assert.equal(tie.winner, 1, 'ayakta eşit: en çok düşüren kazanmalı');
+  const even = setup(); spread(even); even.respawnOpen = false;
+  even.t = ROUND.endAt - 0.02; run(even, 3);
+  assert.equal(even.winner, -1, 'her şey eşit: berabere');
+  const ffa = createWorld(1, { teamSize: 1 }); ffa.state = 'play'; ffa.respawnOpen = false;
+  for (const p of ffa.players) if (p.id !== 3) Object.assign(p, { out: true, respawn: 0 });
+  step(ffa, 1 / 60);
+  assert.equal(ffa.winner, 3, 'herkes tek: kalan son oyuncu kazanır');
 });
 
 test('merkez plaka 100. saniyeden sonra küçülür, 145. saniyede düşer', () => {
@@ -246,19 +263,19 @@ test('merkez plaka 100. saniyeden sonra küçülür, 145. saniyede düşer', () 
   assert.equal(w.plates[0].phase, 2);
 });
 
-test('botlarla tam maç biter: süre dolar, en çok düşüren kazanır, birden çok dalga oynanır, koordinatlar geçerli', () => {
+test('botlarla tam maç biter: son plakada kalan kazanır (en geç merkez düşünce), koordinatlar geçerli, botlar atar ve düşürür', () => {
   for (const teamSize of [5, 1]) {
     const w = createWorld(7, { teamSize });
     let throws = 0;
-    for (let i = 0; i < 60 * (MATCH.time + 120) && w.winner === null; i++) {
+    for (let i = 0; i < 60 * (ROUND.endAt + 30) && w.winner === null; i++) {
       step(w, 1 / 60);
       for (const e of w.events) if (e.type === 'throw') throws++;
       w.events.length = 0;
       for (const p of w.players) assert.ok(Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.z));
     }
-    assert.notEqual(w.winner, null, 'maç bitmedi'); assert.equal(w.matchT, 0);
-    assert.ok(w.round >= 2, 'ikinci dalga başlamadı: ' + w.round);
-    if (w.winner >= 0) assert.equal(w.score[w.winner], Math.max(...w.score));
+    assert.notEqual(w.winner, null, 'maç bitmedi'); assert.ok(w.t <= ROUND.endAt + 0.1, 'maç merkez düşünce bitmeli');
+    assert.equal(w.respawnOpen, false, 'son plaka evresine gelinmeli');
+    if (w.winner >= 0) assert.equal(aliveCount(w, w.winner), Math.max(...w.players.map(p => aliveCount(w, p.team))), 'kazanan ayakta oyuncusu en çok olan olmalı');
     assert.ok(throws > 50, 'botlar disk atmadı: ' + throws);
     assert.ok(w.players.slice(1).some(p => p.stats.kills > 0), 'hiçbir bot düşürmedi');
     assert.equal(w.score.reduce((a, b) => a + b, 0), w.players.reduce((a, p) => a + p.stats.kills, 0), 'takım skoru düşürmelerin toplamı olmalı');

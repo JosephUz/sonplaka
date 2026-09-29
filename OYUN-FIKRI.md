@@ -1,6 +1,6 @@
 # Son Plaka
 
-Ricochet'nin (Valve, 2000) disk arenası ile battle royale'in daralan alanı birleşir; ama alan iki boyutlu bir çember değil, **ayağının altındaki plakaların kendisidir**: boşlukta asılı 13 yuvarlak plaka her dalgada dıştan içe teker teker düşer. Can barı yok, mermi yok. Rakibi vurmazsın, **kenardan aşağı atarsın**. Düşme hakkı sınırsız; 5 dakikanın sonunda en çok düşüren kazanır.
+Ricochet'nin (Valve, 2000) disk arenası ile battle royale'in daralan alanı birleşir; ama alan iki boyutlu bir çember değil, **ayağının altındaki plakaların kendisidir**: boşlukta asılı 13 yuvarlak plaka maç boyunca dıştan içe teker teker düşer. Can barı yok, mermi yok. Rakibi vurmazsın, **kenardan aşağı atarsın**. Dış halkalar ayaktayken düşme hakkı sınırsız; son plakada doğuş kapanır ve orada ayakta kalan kazanır.
 
 Kipler: **herkes tek** (5 oyuncu, herkes ayrı takım), **2v2**, **3v3**, **4v4**, **5v5**. Tek başına oyunda sen ve botlar; çevrim içinde aynı kipler (koltuk sayısı kipe göre, boş koltuklar bot; insanlar aynı takımdaysa co-op, karşı takıma geçince PvP). Masaüstünde birinci şahıs, telefonda omuz üstü kamera.
 
@@ -18,11 +18,11 @@ Merkez plaka (yarıçap 10) + iç halka (4 plaka, yarıçap 7) + dış halka (8 
 
 ## Daralma
 
-Dalga saatine göre: 35. saniyede dış halka titrer, 40. saniyede düşer; 75-80. saniyede iç halka; 100. saniyeden sonra merkez plaka 30 saniyede yarıçap 2,2'ye küçülür; 145. saniyede o da düşer: dalga biter, 4 saniye sonra bütün plakalar geri gelir ve yeni dalga 3 saniye geri sayımla başlar. Düşen plakanın üstündeki onunla gider.
+Oyun saatine göre: 35. saniyede dış halka titrer, 40. saniyede düşer; 75-80. saniyede iç halka ve **doğuş kapanır**; 100. saniyeden sonra merkez plaka 30 saniyede yarıçap 2,2'ye küçülür; 145. saniyede o da düşer ve maç biter. Düşen plakanın üstündeki onunla gider.
 
-## Süre, skor ve doğuş
+## Doğuş, son plaka ve kazanan
 
-Maç 5 dakika (yalnız oyun anında sayar; geri sayımda ve dalga arasında durur). **Düşme hakkı sınırsız**: düşen 4 saniye sonra ayakta bir plakada doğar (kendi takımının dış plakası; düştüyse iç halka; o da düştüyse merkez). Düşen oyuncuya son 4 saniyede vuran rakip "düşürme" alır ve takımına 1 puan yazılır. Süre bitince en çok düşüren takım kazanır; eşitlikte berabere. Düşen, doğana kadar düşüşünü, sonra takım arkadaşını izler.
+Dış ve iç halka ayaktayken düşme hakkı sınırsız: düşen 4 saniye sonra ayakta bir plakada doğar (kendi takımının dış plakası; düştüyse iç halka). Düşen oyuncuya son 4 saniyede vuran rakip "düşürme" alır ve takımına 1 puan yazılır. İç halka düşünce **son plaka** evresi: yalnız merkez kalır, doğuş kapanır, elenen elenir. Rakip takımların kimsesi kalmayınca (ayakta ya da doğmayı bekleyen) ayakta kalan takım hemen kazanır. Merkez 145. saniyede düşerse ayakta oyuncusu en çok olan takım, eşitse en çok düşüren, o da eşitse berabere. Herkes tek kipinde kalan son oyuncu kazanır. Elenen, maç bitene kadar takım arkadaşını izler.
 
 ## Güç diskleri
 

@@ -82,7 +82,8 @@ test('maç bitince END gider ve oda lobiye döner', async () => {
   const a = join('Ali');
   a.say({ t: 'create' }); a.say({ t: 'start' });
   const room = [...rooms.rooms.values()][0], w = room.world;
-  w.score = [2, 0]; w.state = 'play'; w.t = 0; w.matchT = 0.01;
+  w.score = [2, 0]; w.state = 'play'; w.t = 90; w.respawnOpen = false;
+  for (const p of w.players) if (p.team === 1) Object.assign(p, { out: true, respawn: 0 });
   await wait(60);
   const end = a.last(S2C.END);
   assert.ok(end, 'END gelmedi'); assert.equal(end.winner, 0); assert.deepEqual(end.score, [2, 0]);

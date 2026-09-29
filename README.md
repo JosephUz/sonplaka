@@ -1,9 +1,10 @@
 # Son Plaka
 
-Three.js ile tarayıcıda çalışan, birinci şahıs **disk arenası + daralan boşluk**. Boşlukta asılı 13 plaka her dalgada
-dıştan içe düşer; diskle rakibi kenardan aşağı atarsın, rampalarla içeri kaçarsın. Can yok, mermi yok. Düşme hakkı
-sınırsız: 5 dakikalık maçın sonunda en çok düşüren takım kazanır. Kipler **herkes tek** (5 kişi), **2v2 … 5v5**; boş
-yerleri botlar doldurur; webde **çok oyunculu** (oda, aynı kipler, co-op ya da PvP).
+Three.js ile tarayıcıda çalışan, birinci şahıs **disk arenası + daralan boşluk**. Boşlukta asılı 13 plaka maç boyunca
+dıştan içe düşer; diskle rakibi kenardan aşağı atarsın, rampalarla içeri kaçarsın. Can yok, mermi yok. Dış halkalar
+ayaktayken düşme hakkı sınırsız; iç halka düşünce **son plaka**: doğuş kapanır, orada ayakta kalan takım kazanır.
+Kipler **herkes tek** (5 kişi), **2v2 … 5v5**; boş yerleri botlar doldurur; webde **çok oyunculu** (oda, aynı kipler,
+co-op ya da PvP).
 Oyun fikri ve kurallar: [OYUN-FIKRI.md](OYUN-FIKRI.md).
 
 ## Başlatma
@@ -38,11 +39,12 @@ Chromium'unu indirir (kullanıcının Chrome'una ve faresine dokunmaz). Ekran g�
 - **Zıplama** (Boşluk): havada bir kez daha. Uçuşta ve savrulurken yön verilmez.
 - **Rampalar**: plakalar arası tek geçiş; plaka kenarındaki rampaya koş, okun gösterdiği plakaya uçarsın. Rampa hiç kapanmaz.
 - **Hızlı koşu** (Shift; telefonda joystick sonuna kadar): 1,45 kat hız.
-- **Daralma (dalga)**: 40. sn dış halka düşer; 80. sn iç halka; 100-130. sn merkez küçülür; 145. sn merkez düşer, dalga
-  biter, 4 sn sonra bütün plakalar geri gelir ve yeni dalga başlar. Düşmeden 5 sn önce plaka titrer ve ekranda uyarı çıkar.
-- **Süre ve skor**: maç 5 dakika (`MATCH.time`). **Düşme hakkı sınırsız**: düşen 4 sn sonra ayakta bir plakada doğar
-  (kendi dış plakası; düştüyse iç halka; o da düştüyse merkez). Düşürdüğün her rakip takımına 1 puan; süre bitince en
-  çok düşüren takım kazanır, eşitlikte berabere. Düşen, doğana kadar düşüşünü ve takım arkadaşını izler.
+- **Daralma**: 40. sn dış halka düşer; 80. sn iç halka (**doğuş kapanır**); 100-130. sn merkez küçülür; 145. sn merkez
+  düşer. Düşmeden 5 sn önce plaka titrer ve ekranda uyarı çıkar.
+- **Doğuş ve kazanan**: dış ve iç halka ayaktayken düşen 4 sn sonra ayakta bir plakada doğar (kendi dış plakası;
+  düştüyse iç halka). İç halka düşünce yalnız merkez kalır ve doğuş kapanır: rakip takımların kimsesi kalmayınca
+  ayakta kalan takım kazanır; merkez 145. sn düşerse ayakta oyuncusu en çok olan, eşitse en çok düşüren (`score`), o
+  da eşitse berabere. Düşen, doğana (ya da maç bitene) kadar düşüşünü ve takım arkadaşını izler.
 - **Kipler** (giriş ekranında seçilir, hatırlanır): **herkes tek** (5 oyuncu, herkes ayrı takım), **2v2**, **3v3**,
   **4v4**, **5v5**. Boş yerler bot.
 - **Güç diskleri**: merkezde ve iç halkada; üçlü (3 atış yelpaze) ve dondurucu (3 atış, 2 sn donma).
@@ -85,9 +87,9 @@ odaları `server/`, oyun kodu `src/` altındadır. three.js npm paketinden `/ven
 
 | Dosya | İçerik |
 |---|---|
-| `src/config.js` | Bütün ayar sayıları (arena, dalga takvimi, maç süresi ve kipler, disk, levye, bot, kamera) |
+| `src/config.js` | Bütün ayar sayıları (arena, maç takvimi ve kipler, disk, levye, bot, kamera) |
 | `src/arena.js` | Plakalar, kolonlar, zıplama plakaları, güç diski noktaları (paylaşımlı geometri) |
-| `src/world.js` | Simülasyon: kipler, dalga akışı, plaka çöküşü, fizik, diskler, düşme ve doğuş, süre ve skor |
+| `src/world.js` | Simülasyon: kipler, maç akışı, plaka çöküşü, fizik, diskler, düşme ve doğuş, son plaka ve kazanan |
 | `src/actions.js` | Zıplama, disk, levye, savurma, güç diski |
 | `src/ai.js` | Bot kararları ve plakalar arası yol |
 | `src/net/` | Protokol, durum paketi, istemci |

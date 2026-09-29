@@ -56,7 +56,9 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 #son-plaka .team{display:flex;align-items:center;gap:10px;font-size:10px;font-weight:900;letter-spacing:1px;color:var(--tc,#e8eefc);opacity:.75}
 #son-plaka .team.me{opacity:1;text-shadow:0 0 12px var(--tc)}
 #son-plaka .team b{font-size:32px;letter-spacing:0;color:#fff7e6}
+#son-plaka .team small{font-size:9px;letter-spacing:.5px;color:#9fb3d1;font-variant-numeric:tabular-nums}
 #son-plaka .clock span.hot{color:#ff8a5c}
+#son-plaka #sp-final-score em{font-style:normal;font-size:11px;letter-spacing:.5px;color:#9fb3d1;margin-left:2px}
 #son-plaka .pips{display:inline-flex;gap:5px}
 #son-plaka .pips i{width:12px;height:12px;border-radius:50%;background:#ffffff22;border:1px solid #ffffff33;transition:background .3s,box-shadow .3s}
 #son-plaka .pips i.won{background:#f5c26b;box-shadow:0 0 10px #f5c26b99}

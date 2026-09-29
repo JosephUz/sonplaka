@@ -1,9 +1,9 @@
 import { DISC, ROUND, TEAMS } from './config.js';
-import { leaders } from './world.js';
+import { aliveCount, leaders } from './world.js';
 
 /**
- * Arayüz (DOM): ekranlar (giriş, yardım, mola, maç sonu, lobi), skor tabelası (takım skorları, kalan maç süresi ve
- * sıradaki dalga evresi), sol alttaki oyuncu kartı (disk çubukları, güç), nişangah çevresinde ağır disk dolum
+ * Arayüz (DOM): ekranlar (giriş, yardım, mola, maç sonu, lobi), skor tabelası (takımların ayakta oyuncusu ve düşürmesi,
+ * son plakanın düşmesine kalan süre, sıradaki evre), sol alttaki oyuncu kartı (disk çubukları, güç), nişangah çevresinde ağır disk dolum
  * halkası, ortadaki mesaj, çökme uyarı şeridi, düşme ve donma perdeleri. Simülasyonu yalnızca okur.
  */
 const SCREENS = ['home', 'help', 'pause', 'results', 'lobby'];
@@ -31,8 +31,8 @@ export function createUI(root) {
     scoreCells = [];
     el.boards.forEach((node, side) => {
       const teams = Array.from({ length: w.teams }, (_, t) => t).filter(t => (side === 0 ? t < half : t >= half));
-      node.innerHTML = teams.map(t => `<div class="team${t === me ? ' me' : ''}" style="--tc:${TEAMS.colors[t]}"><span>${TEAMS.names[t]}</span><b>0</b></div>`).join('');
-      [...node.querySelectorAll('b')].forEach((b, i) => { scoreCells[teams[i]] = b; });
+      node.innerHTML = teams.map(t => `<div class="team${t === me ? ' me' : ''}" style="--tc:${TEAMS.colors[t]}"><span>${TEAMS.names[t]}</span><b>0</b><small title="Düşürme">0 ↓</small></div>`).join('');
+      [...node.querySelectorAll('.team')].forEach((cell, i) => { scoreCells[teams[i]] = { alive: cell.querySelector('b'), kills: cell.querySelector('small') }; });
     });
   }
 
@@ -48,12 +48,12 @@ export function createUI(root) {
     /** Kırmızı uyarı şeridi (plaka çöküyor); süre boyunca kalır. */
     warn(text, time = 5) { el.warn.textContent = text; el.warn.hidden = false; warnTime = time; },
 
-    /** Mesaj ve uyarı süreleri; dalga geri sayımında "HAZIR OL". */
+    /** Mesaj ve uyarı süreleri; maç başı geri sayımında "HAZIR OL". */
     tick(dt, w, active) {
       if (messageTime > 0 && active) { messageTime -= dt; if (messageTime <= 0) el.message.hidden = true; }
       if (warnTime > 0 && active) { warnTime -= dt; if (warnTime <= 0) el.warn.hidden = true; }
       if (messageTime > 0) return;
-      if (active && w.state === 'countdown') { el.message.hidden = false; el.message.textContent = `${w.round > 1 ? `DALGA ${w.round}` : 'BAŞLIYOR'} · HAZIR OL · ${Math.ceil(w.t)}`; }
+      if (active && w.state === 'countdown') { el.message.hidden = false; el.message.textContent = `HAZIR OL · ${Math.ceil(w.t)}`; }
       else el.message.hidden = true;
     },
 
@@ -65,14 +65,15 @@ export function createUI(root) {
       el.crosshair.hidden = !playing || !!screen || me.out;
       const key = `${w.teams}:${me.team}`;
       if (key !== boardKey) { boardKey = key; buildBoard(w); }
-      w.score.forEach((s, t) => { if (scoreCells[t]) scoreCells[t].textContent = s; });
-      const t = Math.max(0, w.matchT);
+      w.score.forEach((s, t) => { if (scoreCells[t]) { scoreCells[t].alive.textContent = aliveCount(w, t); scoreCells[t].kills.textContent = s + ' ↓'; } });
+      // Saat: son plakanın düşmesine kalan süre.
+      const t = Math.max(0, w.state === 'countdown' ? ROUND.endAt : ROUND.endAt - w.t);
       el.timer.textContent = Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
-      el.timer.classList.toggle('hot', w.state === 'play' && t <= 30);
+      el.timer.classList.toggle('hot', w.state === 'play' && !w.respawnOpen);
       const [text, hot] = phase(w);
       el.phase.textContent = text; el.phase.classList.toggle('hot', hot);
       el.side.textContent = 'SEN / ' + TEAMS.names[me.team] + (w.teamSize > 1 ? ' TAKIM' : '');
-      el.status.textContent = me.out ? 'DÖNÜYORSUN' : me.freeze > 0 ? 'DONDUN' : me.knock > 0 ? 'SAVRULDUN' : me.flight > 0 ? 'UÇUŞTA' : me.discs > 0 ? 'DİSKLER HAZIR' : 'DİSK YENİLENİYOR';
+      el.status.textContent = me.out ? (me.respawn > 0 ? 'DÖNÜYORSUN' : 'ELENDİN') : me.freeze > 0 ? 'DONDUN' : me.knock > 0 ? 'SAVRULDUN' : me.flight > 0 ? 'UÇUŞTA' : me.discs > 0 ? 'DİSKLER HAZIR' : 'DİSK YENİLENİYOR';
       el.discText.textContent = me.discs + ' / ' + DISC.max;
       [...el.discs.children].forEach((pip, i) => {
         const full = i < me.discs, filling = i === me.discs && me.discs < DISC.max;
@@ -86,9 +87,10 @@ export function createUI(root) {
       el.down.hidden = !down && !falling;
       if (falling) { el.downTitle.textContent = 'DÜŞÜYORSUN!'; el.downCount.textContent = ''; el.downNote.textContent = ''; }
       else if (down) {
-        el.downTitle.textContent = 'DÜŞTÜN!';
-        el.downCount.textContent = me.respawn > 0.05 ? me.respawn.toFixed(1) + ' sn' : '';
-        el.downNote.textContent = w.state === 'over' ? 'Dalga bitti: plakalar geri geliyor.' : me.respawn > 0.05 ? 'Ayakta bir plakada yeniden doğacaksın.' : 'Ayakta plaka bekleniyor.';
+        const waiting = me.respawn > 0.05;
+        el.downTitle.textContent = waiting ? 'DÜŞTÜN!' : 'ELENDİN';
+        el.downCount.textContent = waiting ? me.respawn.toFixed(1) + ' sn' : '';
+        el.downNote.textContent = w.state === 'over' ? 'Maç bitti.' : waiting ? 'Ayakta bir plakada yeniden doğacaksın.' : 'Son plaka: doğuş kapalı. Takım arkadaşını izliyorsun.';
       }
       el.downNote.hidden = !el.downNote.textContent;
       el.freeze.hidden = !playing || !!screen || me.freeze <= 0;
@@ -104,11 +106,11 @@ export function createUI(root) {
       el.chargeText.textContent = state.text;
     },
 
-    /** Maç karnesi: kazanan, takım skorları, oyuncu istatistikleri (takım rengiyle, en çok düşüren üstte). */
+    /** Maç karnesi: kazanan, takımların son plakada ayakta kalanı ve düşürmesi, oyuncu istatistikleri (en çok düşüren üstte). */
     results(w) {
       const me = w.players[w.me];
-      el.resultTitle.textContent = w.winner === me.team ? 'Arena sizin!' : w.winner === -1 || w.winner === null ? 'Berabere. Boşluk kimseyi seçmedi.' : 'Boşluk bu kez sizi yuttu.';
-      el.finalScore.innerHTML = w.score.map((s, t) => `<span style="color:${TEAMS.colors[t]}">${TEAMS.names[t]} <b>${s}</b></span>`).join('<i>·</i>');
+      el.resultTitle.textContent = w.winner === me.team ? 'Son plaka sizin!' : w.winner === -1 || w.winner === null ? 'Berabere. Boşluk kimseyi seçmedi.' : 'Boşluk bu kez sizi yuttu.';
+      el.finalScore.innerHTML = w.score.map((s, t) => `<span style="color:${TEAMS.colors[t]}">${TEAMS.names[t]} <b>${aliveCount(w, t)}</b> <em>ayakta · ${s} düşürme</em></span>`).join('<i>·</i>');
       const rows = [...w.players].sort((a, b) => b.stats.kills - a.stats.kills || a.stats.falls - b.stats.falls || a.id - b.id);
       el.stats.innerHTML = rows.map(p =>
         `<tr class="${p.id === w.me ? 'me' : ''}" style="color:${TEAMS.colors[p.team]}"><td>${esc(p.name)}</td>` +
@@ -119,16 +121,15 @@ export function createUI(root) {
   };
 }
 
-/** Sıradaki dalga evresi ve kalan süre: [metin, kritik mi]. */
+/** Sıradaki evre ve kalan süre: [metin, kritik mi]. */
 function phase(w) {
-  if (w.winner !== null) return ['MAÇ BİTTİ', false];
-  if (w.state === 'countdown') return [w.round > 1 ? `DALGA ${w.round}` : 'BAŞLIYOR', false];
-  if (w.state === 'over') return ['PLAKALAR GERİ GELİYOR', false];
+  if (w.winner !== null || w.state === 'over') return ['MAÇ BİTTİ', false];
+  if (w.state === 'countdown') return ['BAŞLIYOR', false];
   const t = w.t, left = at => Math.ceil(at - t);
   if (t < ROUND.ring2At) return [`DIŞ HALKA DÜŞER · ${left(ROUND.ring2At)}`, t >= ROUND.ring2At - ROUND.tremble];
-  if (t < ROUND.ring1At) return [`İÇ HALKA DÜŞER · ${left(ROUND.ring1At)}`, t >= ROUND.ring1At - ROUND.tremble];
-  if (t < ROUND.shrinkAt) return [`MERKEZ DARALIR · ${left(ROUND.shrinkAt)}`, t >= ROUND.shrinkAt - ROUND.tremble];
-  if (t < ROUND.endAt) return [`SON PLAKA · ${left(ROUND.endAt)}`, true];
+  if (t < ROUND.ring1At) return [`İÇ HALKA DÜŞER · DOĞUŞ KAPANIR · ${left(ROUND.ring1At)}`, t >= ROUND.ring1At - ROUND.tremble];
+  if (t < ROUND.shrinkAt) return [`SON PLAKA · DARALMA · ${left(ROUND.shrinkAt)}`, t >= ROUND.shrinkAt - ROUND.tremble];
+  if (t < ROUND.endAt) return [`SON PLAKA DÜŞER · ${left(ROUND.endAt)}`, true];
   return ['BOŞLUK', true];
 }
 
