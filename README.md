@@ -7,13 +7,14 @@ Oyun fikri ve kurallar: [OYUN-FIKRI.md](OYUN-FIKRI.md).
 
 ## Başlatma
 
-`Baslat.cmd` dosyasına çift tıklayın: gerekirse `npm install` yapar, sunucuyu açar ve oyunu tarayıcıda başlatır.
-Alternatif: bu klasörde `npm install` ve `npm start`, ardından http://127.0.0.1:5187. Node.js gerekir.
-Port değiştirmek için PowerShell'de `$env:PORT=5188; npm start`.
+Docker Desktop açıkken `Baslat.cmd` dosyasına çift tıklayın: `docker compose up -d --build` ile konteyneri
+(`sonplaka`, otomatik yeniden başlar, `/health` sağlık kontrolü) kaldırır ve http://localhost:5187 adresini açar. Docker yoksa
+aynı dosya Node ile açar (`npm install` + `node server.mjs`). Kaynak değişince yalnızca `Baslat.cmd` (ya da
+`docker compose up -d --build`) yeter; `docker compose down` kapatır, `docker compose logs -f` oda kayıtlarını izler.
 
-**Docker ile (compose)**: `docker compose up -d --build`; oyun http://localhost:5187 adresinde (yalnızca bu bilgisayardan).
-`docker compose down` kapatır. Sunucu oyun dosyalarını `no-store` ile verir; `/health` yanıtındaki `surum` alanı ayakta
-olan yapının damgasıdır.
+Geliştirme için Docker'sız: `npm install` ve `npm start`, ardından http://127.0.0.1:5187 (önce aynı porttaki konteyneri durdur).
+Port değiştirmek için `PORT=5188 docker compose up -d` ya da PowerShell'de `$env:PORT=5188; npm start`.
+Sunucu oyun dosyalarını `no-store` ile verir; `/health` yanıtındaki `surum` alanı ayakta olan yapının damgasıdır.
 
 **Yayın**: oyun dosyaları Cloudflare Worker'da statik site olarak durur (`npm run deploy:web`, `wrangler.jsonc` →
 sonplaka.josephuz.com). Evdeki PC yalnızca çevrim içi sunucudur (WebSocket odaları, çevrim içi sayısı).
