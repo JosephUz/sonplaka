@@ -17,10 +17,16 @@ export function buildArenaView(scene, arena) {
   const plates = arena.plates.map(pl => {
     const group = new T.Group(); group.position.set(pl.x, 0, pl.z); scene.add(group);
     const body = new T.Group(); group.add(body);
-    const top = new T.Mesh(new T.CylinderGeometry(pl.r, pl.r * 0.92, 1.6, 56), [mat(PLATE_SIDE[pl.ring]), mat(PLATE_TOP[pl.ring]), mat(PLATE_SIDE[pl.ring])]);
+    // Alt yüz açık renkli ve altta da parlayan çerçeve: düşerken yukarıda uzaklaşan plakalar görünsün.
+    const top = new T.Mesh(new T.CylinderGeometry(pl.r, pl.r * 0.92, 1.6, 56), [mat(PLATE_SIDE[pl.ring]), mat(PLATE_TOP[pl.ring]), mat(PLATE_TOP[pl.ring])]);
     top.position.y = -0.8; top.receiveShadow = true; top.castShadow = true; body.add(top);
-    const rim = new T.Mesh(new T.TorusGeometry(pl.r - 0.05, 0.11, 8, 72), new T.MeshStandardMaterial({ color: '#7fe0e8', emissive: '#4fc7d3', emissiveIntensity: 1.2, roughness: 0.4 }));
-    rim.rotation.x = Math.PI / 2; rim.position.y = 0.04; body.add(rim);
+    const rimMat = new T.MeshStandardMaterial({ color: '#7fe0e8', emissive: '#4fc7d3', emissiveIntensity: 1.2, roughness: 0.4 });
+    for (const y of [0.04, -1.62]) {
+      const rim = new T.Mesh(new T.TorusGeometry((y > 0 ? pl.r : pl.r * 0.92) - 0.05, 0.11, 8, 72), rimMat);
+      rim.rotation.x = Math.PI / 2; rim.position.y = y; body.add(rim);
+    }
+    const under = new T.Mesh(new T.CircleGeometry(pl.r * 0.9, 48), new T.MeshBasicMaterial({ color: '#3fbfd8', transparent: true, opacity: 0.18, side: T.DoubleSide, depthWrite: false }));
+    under.rotation.x = Math.PI / 2; under.position.y = -1.63; body.add(under);
     // Zemin deseni: iç halka çizgileri.
     for (const k of [0.66, 0.33]) {
       const ring = new T.Mesh(new T.RingGeometry(pl.r * k - 0.05, pl.r * k, 64), new T.MeshBasicMaterial({ color: '#8fa4bd', transparent: true, opacity: 0.18, depthWrite: false }));
