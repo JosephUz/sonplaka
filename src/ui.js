@@ -73,7 +73,7 @@ export function createUI(root) {
       const [text, hot] = phase(w);
       el.phase.textContent = text; el.phase.classList.toggle('hot', hot);
       el.side.textContent = 'SEN / ' + TEAMS.names[me.team] + (w.teamSize > 1 ? ' TAKIM' : '');
-      el.status.textContent = me.out ? (me.respawn > 0 ? 'DÖNÜYORSUN' : 'ELENDİN') : me.freeze > 0 ? 'DONDUN' : me.knock > 0 ? 'SAVRULDUN' : me.flight > 0 ? 'UÇUŞTA' : me.discs > 0 ? 'DİSKLER HAZIR' : 'DİSK YENİLENİYOR';
+      el.status.textContent = me.out ? (w.respawnOpen || me.respawn > 0 ? 'DÖNÜYORSUN' : 'ELENDİN') : me.freeze > 0 ? 'DONDUN' : me.knock > 0 ? 'SAVRULDUN' : me.flight > 0 ? 'UÇUŞTA' : me.discs > 0 ? 'DİSKLER HAZIR' : 'DİSK YENİLENİYOR';
       el.discText.textContent = me.discs + ' / ' + DISC.max;
       [...el.discs.children].forEach((pip, i) => {
         const full = i < me.discs, filling = i === me.discs && me.discs < DISC.max;
@@ -87,9 +87,9 @@ export function createUI(root) {
       el.down.hidden = !down && !falling;
       if (falling) { el.downTitle.textContent = 'DÜŞÜYORSUN!'; el.downCount.textContent = ''; el.downNote.textContent = ''; }
       else if (down) {
-        const waiting = me.respawn > 0.05;
+        const waiting = w.respawnOpen || me.respawn > 0;
         el.downTitle.textContent = waiting ? 'DÜŞTÜN!' : 'ELENDİN';
-        el.downCount.textContent = waiting ? me.respawn.toFixed(1) + ' sn' : '';
+        el.downCount.textContent = waiting && me.respawn > 0 ? me.respawn.toFixed(1) + ' sn' : '';
         el.downNote.textContent = w.state === 'over' ? 'Maç bitti.' : waiting ? 'Ayakta bir plakada yeniden doğacaksın.' : 'Son plaka: doğuş kapalı. Takım arkadaşını izliyorsun.';
       }
       el.downNote.hidden = !el.downNote.textContent;
