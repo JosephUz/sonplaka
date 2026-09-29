@@ -1,7 +1,7 @@
 import { CROWBAR, DISC, JUMP, PICKUP } from './config.js';
 
 /**
- * Oyuncu eylemleri: zıplama (çift), disk atma (normal / keskin / dondurucu / üçlü), levye. İnsan girdisi de bot
+ * Oyuncu eylemleri: zıplama (çift), disk atma (normal / ağır / dondurucu / üçlü), levye. İnsan girdisi de bot
  * kararları da buradan geçer; eylem yapılamıyorsa (raund oynanmıyor, elenmiş, savrulmuş, donmuş) false döner.
  */
 export function emit(w, type, data = {}) { w.events.push({ type, ...data }); }
@@ -29,16 +29,16 @@ export function jump(w, id) {
 }
 
 /**
- * Disk atar: `kind` 'normal' | 'sharp' (keskin) | 'freeze'. Güç diski varsa (`power`) tür ya da sayı değişir: üçlü
- * yelpaze, dondurucu. Keskin disk gücü ezer (dondurucu gücü yine harcanır).
+ * Disk atar: `kind` 'normal' | 'heavy' (ağır: sert savurur) | 'freeze'. Güç diski varsa (`power`) tür ya da sayı değişir:
+ * üçlü yelpaze, dondurucu. Ağır disk gücü ezer (dondurucu gücü yine harcanır).
  */
 export function throwDisc(w, id, kind = 'normal') {
   const p = w.players[id];
   if (idle(w, p) || p.discs <= 0 || p.throwCd > 0) return false;
   let count = 1;
   if (p.power === 'triple') count = 3;
-  if (p.power === 'freeze' && kind !== 'sharp') kind = 'freeze';
-  const f = facing(p), speed = kind === 'sharp' ? DISC.sharpSpeed : DISC.speed;
+  if (p.power === 'freeze' && kind !== 'heavy') kind = 'freeze';
+  const f = facing(p), speed = kind === 'heavy' ? DISC.heavySpeed : DISC.speed;
   for (let i = 0; i < count; i++) {
     const spread = count > 1 ? (i - 1) * DISC.spread : 0, yaw = p.yaw + spread, c = Math.cos(p.pitch);
     const dx = Math.sin(yaw) * c, dz = Math.cos(yaw) * c;

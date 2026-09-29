@@ -5,7 +5,7 @@ import { DISC, TOUCH } from './config.js';
  * ayrı iş görür:
  * - Sol yarı: parmağın değdiği yerde beliren **joystick** (hareket, analog).
  * - Sağ yarı: parmak kaydırmak **bakış / nişan** (farenin karşılığı).
- * - Sağ alttaki düğmeler: AT (sol tık: dokun disk, basılı tut keskin), LEVYE (sağ tık), ZIPLA (Boşluk). Düğmeye
+ * - Sağ alttaki düğmeler: AT (sol tık: dokun disk, basılı tut ağır), LEVYE (sağ tık), ZIPLA (Boşluk). Düğmeye
  *   basılıyken parmağı kaydırmak da nişan alır.
  * Girdi input.js'e `sink` üzerinden akar (down / up / look); joystick `axis` ile okunur.
  */

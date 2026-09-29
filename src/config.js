@@ -46,10 +46,10 @@ export const PAD = { speed: 20, min: 0.9, max: 1.5 };
 /**
  * Disk: elde en çok `max`, `regen` saniyede bir yenilenir. Düz uçar (`speed`), sınırdan ve kolonlardan `bounces` kez
  * seker, `life` saniye yaşar. İsabet hasar vermez: vurulan disk yönünde `knock` hızıyla savrulur, `lift` kadar havalanır,
- * `knockTime` saniye kontrolsüzdür. Sol tık `sharpCharge` saniye basılıyken bırakılırsa **keskin disk**: yavaş
- * (`sharpSpeed`), parlak, değdiğini anında eler. `cooldown` iki atış arası. Üçlü disk `spread` radyan yelpazeyle çıkar.
+ * `knockTime` saniye kontrolsüzdür. Sol tık `heavyCharge` saniye basılıyken bırakılırsa **ağır disk**: yavaş
+ * (`heavySpeed`), parlak, `heavyKnock` / `heavyLift` kat sert savurur; o da elemez, eleme yalnız düşmeyle. `cooldown` iki atış arası. Üçlü disk `spread` radyan yelpazeyle çıkar.
  */
-export const DISC = { max: 3, regen: 1.5, speed: 26, sharpSpeed: 17, radius: 0.55, life: 4, bounces: 3, knock: 15, lift: 5, knockTime: 0.45, sharpCharge: 1.5, cooldown: 0.25, spread: 0.22 };
+export const DISC = { max: 3, regen: 1.5, speed: 26, heavySpeed: 17, radius: 0.55, life: 4, bounces: 3, knock: 15, lift: 5, knockTime: 0.45, heavyCharge: 1.5, heavyKnock: 1.8, heavyLift: 1.5, cooldown: 0.25, spread: 0.22 };
 
 /** Levye (sağ tık): `range` içinde ve bakış konisinde (`cone`: kosinüs) rakibi kendinden uzağa `knock` ile iter. */
 export const CROWBAR = { range: 2.6, cone: 0.5, knock: 22, lift: 6, cooldown: 0.8 };
@@ -70,11 +70,11 @@ export const CREDIT = 4;
 /**
  * Bot kararları: `think` + rastgele `thinkJitter` aralıkla plan yapar. Düelloda hedefe `range` uzaklıkta durur, `close`
  * altına inince geri açılır, `strafe` saniyede bir yan yön değiştirir; plaka kenarına `edge`'den yakın durmaz. Disk
- * `fireRange` içindeki hedefe `fireEvery` + rastgele aralıkla atılır, nişan `aimError` radyan sapar; `sharpChance` ile
- * keskin disk hazırlar. Yaklaşan diski `dodgeChance` ile zıplayarak savuşturur. Başka plakadaki rakibe `crossChance` ile
+ * `fireRange` içindeki hedefe `fireEvery` + rastgele aralıkla atılır, nişan `aimError` radyan sapar; `heavyChance` ile
+ * ağır disk hazırlar. Yaklaşan diski `dodgeChance` ile zıplayarak savuşturur. Başka plakadaki rakibe `crossChance` ile
  * uzaktan atar; aksi halde zıplama plakasıyla ona (ya da merkeze) gider. Yeni indiği plakada `stay` saniye kalır.
  */
-export const BOT = { think: 0.3, thinkJitter: 0.25, range: 11, close: 5, strafe: 1.1, edge: 2.2, fireRange: 30, fireEvery: 0.7, fireJitter: 0.9, aimError: 0.08, sharpChance: 0.12, dodgeChance: 0.5, crossChance: 0.25, stay: 4 };
+export const BOT = { think: 0.3, thinkJitter: 0.25, range: 11, close: 5, strafe: 1.1, edge: 2.2, fireRange: 30, fireEvery: 0.7, fireJitter: 0.9, aimError: 0.08, heavyChance: 0.12, dodgeChance: 0.5, crossChance: 0.25, stay: 4 };
 
 /**
  * Kamera: masaüstünde **birinci şahıs** (göz `eye` yükseklikte), telefonda omuz üstü (`back` geride, `side` sağda,

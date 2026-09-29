@@ -73,10 +73,10 @@ export function syncActors(actors, w, time, playing, project, hide = -1) {
     v.body.rotation.z = p.freeze > 0 ? Math.sin(time * 30) * 0.03 : 0;
     v.ice.visible = p.freeze > 0;
     v.disc.visible = p.discs > 0;
-    const k = 1 + (p.charge / DISC.sharpCharge) * 0.9;
+    const k = 1 + (p.charge / DISC.heavyCharge) * 0.9;
     v.disc.scale.set(k, 1, k);
-    v.disc.material.emissiveIntensity = 0.6 + (p.charge / DISC.sharpCharge) * 2.4;
-    v.disc.material.emissive.set(p.charge >= DISC.sharpCharge - 0.01 ? '#ff3b3b' : p.power === 'freeze' ? '#8ff3ff' : p.power === 'triple' ? '#ffd35c' : TEAMS.colors[p.team]);
+    v.disc.material.emissiveIntensity = 0.6 + (p.charge / DISC.heavyCharge) * 2.4;
+    v.disc.material.emissive.set(p.charge >= DISC.heavyCharge - 0.01 ? '#ff9a50' : p.power === 'freeze' ? '#8ff3ff' : p.power === 'triple' ? '#ffd35c' : TEAMS.colors[p.team]);
     const text = p.freeze > 0 ? 'DONDU' : !mine && (w.online ? p.human : false) ? p.name : mine ? '' : '';
     v.label.textContent = text;
     const s = project(p.x, p.y + 2.6, p.z);

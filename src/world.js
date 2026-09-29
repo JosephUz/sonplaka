@@ -18,7 +18,7 @@ export { alive, jump, swing, throwDisc };
  * raund biter (ikisi de aynı anda bitince berabere). ROUND.wins raund alan maçı kazanır (`winner`).
  *
  * İnsan girdisi (her adım): x, z hareket yönü (dünya uzayı); yaw, pitch bakış; hold sol tık basılı, tap bu adımda
- * basıldı, release bırakıldı (kısa: normal disk, DISC.sharpCharge'dan uzun: keskin disk); secondary levye; jump zıplama.
+ * basıldı, release bırakıldı (kısa: normal disk, DISC.heavyCharge'dan uzun: ağır disk); secondary levye; jump zıplama.
  * Birden çok insan varsa (sunucu) girdi `{ players: { [id]: girdi } }` biçimindedir.
  */
 export function createWorld(seed = MATCH.seed) {
@@ -164,9 +164,9 @@ function act(w, p, cmd, dt) {
   if (cmd.jump) jump(w, p.id);
   if (cmd.secondary) swing(w, p.id);
   const pressing = cmd.hold || cmd.tap;
-  if (pressing && p.discs > 0 && p.throwCd <= 0 && !p.chargeSpent) p.charge = Math.min(DISC.sharpCharge, p.charge + dt);
+  if (pressing && p.discs > 0 && p.throwCd <= 0 && !p.chargeSpent) p.charge = Math.min(DISC.heavyCharge, p.charge + dt);
   if (cmd.release || !pressing) {
-    if (cmd.release && p.charge > 0 && !p.chargeSpent) throwDisc(w, p.id, p.charge >= DISC.sharpCharge ? 'sharp' : 'normal');
+    if (cmd.release && p.charge > 0 && !p.chargeSpent) throwDisc(w, p.id, p.charge >= DISC.heavyCharge ? 'heavy' : 'normal');
     p.charge = 0; p.chargeSpent = false;
   }
 }
@@ -298,14 +298,16 @@ function collide(w, d) {
     if (p.out || p.team === d.team) continue;
     if (Math.hypot(p.x - d.x, p.z - d.z) > DISC.radius + 0.55 || d.y < p.y - 0.3 || d.y > p.y + 2.2) continue;
     const vh = Math.hypot(d.vx, d.vz) || 1, ux = d.vx / vh, uz = d.vz / vh;
-    if (d.kind === 'sharp') { p.lastHit = { by: d.owner, t: w.time }; w.players[d.owner].stats.hits++; emit(w, 'hit', { id: p.id, by: d.owner, kind: 'sharp', x: p.x, y: p.y + 1, z: p.z }); eliminate(w, p, 'sharp'); }
-    else { knock(w, p, ux, uz, DISC.knock, DISC.lift, d.owner, d.kind); if (d.kind === 'freeze') p.freeze = FREEZE.time; }
+    // Disk elemez, yalnız savurur; ağır disk daha sert. Eleme yalnız boşluğa düşmekle olur.
+    const heavy = d.kind === 'heavy';
+    knock(w, p, ux, uz, DISC.knock * (heavy ? DISC.heavyKnock : 1), DISC.lift * (heavy ? DISC.heavyLift : 1), d.owner, d.kind);
+    if (d.kind === 'freeze') p.freeze = FREEZE.time;
     return true;
   }
   return false;
 }
 
-/** Eleme: boşluğa düştü ya da keskin disk yedi. Son CREDIT saniyede vuran rakip düşürmüş sayılır. Doğuş açıksa geri gelir. */
+/** Eleme: yalnız boşluğa düşünce. Son CREDIT saniyede vuran rakip düşürmüş sayılır. Doğuş açıksa geri gelir. */
 function eliminate(w, p, cause) {
   if (p.out) return;
   const by = p.lastHit && w.time - p.lastHit.t < CREDIT && w.players[p.lastHit.by]?.team !== p.team ? p.lastHit.by : null;

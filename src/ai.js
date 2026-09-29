@@ -45,7 +45,7 @@ export function botInput(w, p) {
   if (target && w.time >= b.fireT && p.discs > 0 && p.throwCd <= 0) {
     const d = distance(p, target);
     if (d <= BOT.fireRange && (b.duel || b.cross)) {
-      if (b.charge) { cmd.hold = true; if (p.charge >= DISC.sharpCharge - 0.01) { cmd.release = true; b.charge = false; b.fireT = w.time + BOT.fireEvery + w.random() * BOT.fireJitter; } }
+      if (b.charge) { cmd.hold = true; if (p.charge >= DISC.heavyCharge - 0.01) { cmd.release = true; b.charge = false; b.fireT = w.time + BOT.fireEvery + w.random() * BOT.fireJitter; } }
       else { cmd.tap = true; cmd.release = true; b.fireT = w.time + BOT.fireEvery + w.random() * BOT.fireJitter; b.aimErr = (w.random() - 0.5) * 2 * BOT.aimError; }
     }
     if (d < CROWBAR.range * 0.9 && p.barCd <= 0 && Math.abs(target.y - p.y) < 2) cmd.secondary = true;
@@ -65,7 +65,7 @@ function plan(w, p, b) {
     if (s < score) { score = s; best = t; }
   }
   b.target = best ? best.id : null;
-  if (!b.charge && best) b.charge = w.random() < BOT.sharpChance;
+  if (!b.charge && best) b.charge = w.random() < BOT.heavyChance;
   if (!plate) return;
   // Kaçış: plaka titriyor ya da düşüyor, ya da merkez küçülürken kenardayım.
   const shrinking = plate.ring === 0 && ps.r < plate.r - 0.5;

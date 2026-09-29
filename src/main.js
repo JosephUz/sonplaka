@@ -171,13 +171,13 @@ export async function start(root) {
   }
 
   const who = p => (p.id === w.me ? 'SEN' : p.name.toUpperCase());
-  /** Dolum halkası: sol tık basılıyken keskin disk şarjı. */
+  /** Dolum halkası: sol tık basılıyken ağır disk şarjı. */
   function chargeState() {
     if (!active()) return null;
     const p = w.players[w.me];
     if (p.out || p.charge <= 0) return null;
-    const full = p.charge >= DISC.sharpCharge - 0.01;
-    return { p: p.charge / DISC.sharpCharge, full, text: full ? 'BIRAK: KESKİN DİSK' : 'BIRAK: DİSK · TUT: KESKİN' };
+    const full = p.charge >= DISC.heavyCharge - 0.01;
+    return { p: p.charge / DISC.heavyCharge, full, text: full ? 'BIRAK: AĞIR DİSK' : 'BIRAK: DİSK · TUT: AĞIR' };
   }
 
   function consume() {
@@ -197,10 +197,10 @@ export async function start(root) {
           break;
         case 'fall':
           if (e.id === me) {
-            ui.message(e.cause === 'sharp' ? 'KESKİN DİSK · ELENDİN' : e.by !== null ? who(w.players[e.by]) + ' SENİ DÜŞÜRDÜ' : 'DÜŞTÜN', 2.5);
+            ui.message(e.by !== null ? who(w.players[e.by]) + ' SENİ DÜŞÜRDÜ' : 'DÜŞTÜN', 2.5);
             // Düşüş sineması: kamera düştüğün yerde alçalırken yukarıdaki arenaya bakar.
-            if (e.cause !== 'sharp') {
-              // Bakış arenanın merkezine, yukarı: plakalar tepede uzaklaşırken görünsün.
+            // Bakış arenanın merkezine, yukarı: plakalar tepede uzaklaşırken görünsün.
+            {
               const yaw = Math.atan2(-e.x, -e.z), pitch = Math.min(1.1, Math.atan2(-e.y + 2, Math.hypot(e.x, e.z) || 1));
               fallCam = { x: e.x, y: e.y, z: e.z, t: 0, yaw, pitch, id: -1 }; view.face(yaw, pitch);
             }

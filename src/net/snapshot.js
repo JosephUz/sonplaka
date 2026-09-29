@@ -7,7 +7,7 @@ import { PICKUP } from '../config.js';
  * için istemci kimlikle eşler); plakalar, zıplama plakaları ve güç diskleri kısa diziler.
  */
 export const PLAYER = ['x', 'y', 'z', 'vx', 'vy', 'vz', 'yaw', 'pitch', 'knock', 'flight', 'freeze', 'respawn', 'discs', 'regen', 'charge', 'throwCd', 'barCd', 'sprint', 'plate', 'jumps', 'out', 'ground', 'power', 'powerLeft'];
-const KINDS = ['normal', 'sharp', 'freeze'];
+const KINDS = ['normal', 'heavy', 'freeze'];
 const STATES = ['countdown', 'play', 'over'];
 const r2 = v => Math.round(v * 100) / 100, r3 = v => Math.round(v * 1000) / 1000;
 

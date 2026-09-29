@@ -3,13 +3,13 @@ import { TEAMS } from '../config.js';
 import { box } from './builders.js';
 
 /**
- * Parçacıklar: isabette takım rengi kıvılcım, keskin diskte kırmızı patlama, düşüşte kenarda büyük saçılma, levyede
+ * Parçacıklar: isabette kıvılcım (ağır diskte turuncu), düşüşte kenarda büyük saçılma, levyede
  * beyaz çakım, zıplama plakasında yeşil (kapanınca kırmızı) püskürtü, sekmede küçük kıvılcım, güç diskinde altın
  * yağmuru. Plaka çökünce çökme noktasında geniş bir şok halkası yayılır, raund biterken kazanan renginde konfeti.
  * Küçük kutular fırlayıp yerçekimiyle boşluğa düşer ve ömürleri bitince sahneden kalkar.
  */
 const BURSTS = {
-  hit: { count: 12, color: e => (e.kind === 'sharp' ? '#ff3b3b' : '#fff1b8') },
+  hit: { count: 12, color: e => (e.kind === 'heavy' ? '#ff9a50' : '#fff1b8') },
   swing: { count: 6, color: () => '#ffffff', spread: 4 },
   fall: { count: 34, size: 0.2, spread: 12, up: [4, 12], life: 1.4, color: (e, i) => ['#ff7a2e', '#ffffff', '#ffd35c'][i % 3] },
   pad: { count: 10, color: () => '#7dff9a', spread: 4, up: [4, 9] },
@@ -39,8 +39,8 @@ export function createEffects(scene) {
           live.push({ mesh, vx: Math.sin(a) * s, vz: Math.cos(a) * s, vy: upMin + Math.random() * (upMax - upMin), spin: (Math.random() - 0.5) * 12, life: (kind.life || 0.7) * (0.6 + Math.random() * 0.4) });
         }
       }
-      if (e.type === 'collapse' || e.type === 'roundEnd' || e.type === 'hit' && e.kind === 'sharp') {
-        const color = new T.Color(e.type === 'roundEnd' ? TEAMS.colors[e.team ?? 0] : e.type === 'collapse' ? '#ff9a50' : '#ff3b3b');
+      if (e.type === 'collapse' || e.type === 'roundEnd') {
+        const color = new T.Color(e.type === 'roundEnd' ? TEAMS.colors[e.team ?? 0] : '#ff9a50');
         const mesh = new T.Mesh(ringGeo, new T.MeshBasicMaterial({ color, transparent: true, opacity: 0.9, side: T.DoubleSide, depthWrite: false }));
         mesh.rotation.x = -Math.PI / 2; mesh.position.set(e.x || 0, (e.y ?? 0) + 0.15, e.z || 0); mesh.scale.setScalar(0.01);
         scene.add(mesh);

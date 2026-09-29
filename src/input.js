@@ -2,7 +2,7 @@ import { createTouch } from './touch.js';
 
 /**
  * Klavye ve fare (yalnızca tarayıcı). WASD / oklar hareket, fare kilitliyken bakış; sol tık disk (basılı tutunca
- * keskin disk şarjı, bırakınca atış), sağ tık ya da F levye, Boşluk zıplama; V kamera, F1 yardım, Esc mola. Basışlar
+ * ağır disk şarjı, bırakınca atış), sağ tık ya da F levye, Boşluk zıplama; V kamera, F1 yardım, Esc mola. Basışlar
  * (tap, release, secondary, jump) bir sonraki okumada bir kez tüketilir. Kilit yokken sahaya tıklamak önce fareyi
  * kilitler; test kipinde (başsız tarayıcı kilit vermez) tıklama doğrudan işler.
  * Dokunmatik kipte (`touch` kök öğesi verilince, bkz. touch.js) fare kilidi yoktur: joystick hareket, sağ yarı bakış,

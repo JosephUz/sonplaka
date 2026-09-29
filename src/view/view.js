@@ -80,13 +80,13 @@ export function createView(container, { mobile = false } = {}) {
       if (Math.abs(cam.camera.fov - fov) > 0.05) { cam.camera.fov += (fov - cam.camera.fov) * Math.min(1, dt * 6); cam.camera.updateProjectionMatrix(); }
       hand.visible = fps && playing && !me.out && me.discs > 0;
       if (hand.visible) {
-        const k = 1 + (me.charge / DISC.sharpCharge) * 0.6;
+        const k = 1 + (me.charge / DISC.heavyCharge) * 0.6;
         hand.scale.set(k, 1, k);
         hand.rotation.y = time * (me.charge > 0 ? 9 : 1.5);
         hand.position.y = -0.26 + Math.sin(time * 2.2) * 0.008 + (me.throwCd > 0 ? -0.08 * me.throwCd / DISC.cooldown : 0);
-        const color = me.charge >= DISC.sharpCharge - 0.01 ? '#ff3b3b' : me.power === 'freeze' ? '#8ff3ff' : me.power === 'triple' ? '#ffd35c' : me.team === 0 ? '#39c2cf' : '#f5825b';
+        const color = me.charge >= DISC.heavyCharge - 0.01 ? '#ff9a50' : me.power === 'freeze' ? '#8ff3ff' : me.power === 'triple' ? '#ffd35c' : me.team === 0 ? '#39c2cf' : '#f5825b';
         hand.material.color.set(color); hand.material.emissive.set(color);
-        hand.material.emissiveIntensity = 0.7 + (me.charge / DISC.sharpCharge) * 2;
+        hand.material.emissiveIntensity = 0.7 + (me.charge / DISC.heavyCharge) * 2;
       }
       renderer.render(scene, cam.camera);
     },

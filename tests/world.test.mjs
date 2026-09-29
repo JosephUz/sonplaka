@@ -72,16 +72,21 @@ test('disk isabeti hasar vermez, savurur ve havalandırır; savrulan kenara yak�
   assert.ok(t.out, 'kenardan düşmedi'); assert.equal(p.stats.kills, 1, 'düşürme sayılmadı');
 });
 
-test('keskin disk: 1,5 sn basılı tutup bırakınca çıkar, değdiğini anında eler', () => {
+test('ağır disk: 1,5 sn basılı tutup bırakınca çıkar; elemez, normal diskten çok daha sert savurur', () => {
   const w = setup();
   const p = center(w, 0, -2.8, -2.8), t = center(w, 5, 0, 0), yaw = Math.PI / 4;
   p.yaw = yaw;
-  run(w, Math.ceil(DISC.sharpCharge * 60) + 2, { hold: true, yaw, pitch: 0 });
+  run(w, Math.ceil(DISC.heavyCharge * 60) + 2, { hold: true, yaw, pitch: 0 });
   assert.equal(w.discs.length, 0, 'bırakmadan attı');
   step(w, 1 / 60, { release: true, yaw, pitch: 0 });
-  assert.equal(w.discs[0]?.kind, 'sharp');
-  run(w, 30);
-  assert.ok(t.out, 'elenmedi'); assert.equal(p.stats.kills, 1);
+  assert.equal(w.discs[0]?.kind, 'heavy');
+  let hit = false;
+  for (let i = 0; i < 30 && !hit; i++) { step(w, 1 / 60); if (t.knock > 0) hit = true; }
+  assert.ok(hit, 'ağır disk değmedi');
+  assert.equal(t.out, false, 'disk eledi: eleme yalnız düşmeyle olmalı');
+  const heavySpeed = Math.hypot(t.vx, t.vz);
+  assert.ok(heavySpeed > DISC.knock * 1.5, `ağır disk sert savurmadı: ${heavySpeed.toFixed(1)}`);
+  assert.ok(t.vy > DISC.lift, 'ağır disk daha çok havalandırmalı');
 });
 
 test('kısa sol tık normal disk atar; diskler 1,5 saniyede bir yenilenir; elde en çok 3', () => {

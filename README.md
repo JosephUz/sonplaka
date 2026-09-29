@@ -31,8 +31,8 @@ Chromium'unu indirir (kullanıcının Chrome'una ve faresine dokunmaz). Ekran g�
 
 - **Disk** (sol tık): elde 3, 1,5 sn'de bir yenilenir. Görünmez sınırdan 3 kez seker. İsabet hasar vermez:
   vurulan disk yönünde savrulur ve havalanır; kenara yakın olan boşluğa düşer.
-- **Keskin disk**: sol tık 1,5 sn basılı (nişangahta halka dolar, kırmızıya döner), bırakınca çıkar. Yavaş, parlak;
-  değdiğini anında eler.
+- **Ağır disk**: sol tık 1,5 sn basılı (nişangahta halka dolar, turuncuya döner), bırakınca çıkar. Yavaş, parlak;
+  değdiğini çok daha sert savurur. Hiçbir disk elemez: eleme yalnız boşluğa düşmekle olur.
 - **Levye** (sağ tık / F): yakın ve önündeki rakibi uzağa iter.
 - **Zıplama** (Boşluk): havada bir kez daha. Uçuşta ve savrulurken yön verilmez.
 - **Rampalar**: plakalar arası tek geçiş; plaka kenarındaki rampaya koş, okun gösterdiği plakaya uçarsın. Rampa hiç kapanmaz.
@@ -51,7 +51,7 @@ Maç sonunda karne: düşürme, düşme, isabet, atış, güç diski, zıplama p
 |---|---|
 | WASD / oklar | Bakışa göre hareket |
 | Fare | Bak / nişan (birinci şahıs) |
-| Sol tık | Disk; 1,5 sn tut: keskin disk |
+| Sol tık | Disk; 1,5 sn tut: ağır disk |
 | Sağ tık / F | Levye |
 | Shift | Hızlı koş |
 | Boşluk | Zıpla, havada tekrar |
@@ -61,7 +61,7 @@ Maç sonunda karne: düşürme, düşme, isabet, atış, güç diski, zıplama p
 ## Telefon
 
 Dokunmatik ekran algılanınca (masaüstünde `?touch`) omuz kamerasıyla başlar; sol yarıda joystick, sağ yarıda parmak
-kaydırarak bakış, sağ altta **AT** (basılı tut: keskin), **LEVYE**, **ZIPLA**. Ekran yataydır.
+kaydırarak bakış, sağ altta **AT** (basılı tut: ağır), **LEVYE**, **ZIPLA**. Ekran yataydır.
 
 ## Çok oyunculu
 

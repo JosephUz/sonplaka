@@ -3,7 +3,7 @@ import { aliveCount } from './world.js';
 
 /**
  * Arayüz (DOM): ekranlar (giriş, yardım, mola, maç sonu, lobi), skor tabelası (raund ışıkları, ayakta olan sayısı,
- * raund saati ve sıradaki evre), sol alttaki oyuncu kartı (disk çubukları, güç), nişangah çevresinde keskin disk dolum
+ * raund saati ve sıradaki evre), sol alttaki oyuncu kartı (disk çubukları, güç), nişangah çevresinde ağır disk dolum
  * halkası, ortadaki mesaj, çökme uyarı şeridi, düşme ve donma perdeleri. Simülasyonu yalnızca okur.
  */
 const SCREENS = ['home', 'help', 'pause', 'results', 'lobby'];
@@ -89,7 +89,7 @@ export function createUI(root) {
       el.charge.hidden = !state;
       if (!state) return;
       el.charge.style.setProperty('--p', Math.max(0, Math.min(1, state.p)).toFixed(3));
-      el.charge.style.setProperty('--c', state.full ? '#ff3b3b' : '#7fe0e8');
+      el.charge.style.setProperty('--c', state.full ? '#ff9a50' : '#7fe0e8');
       el.charge.classList.toggle('full', !!state.full);
       el.chargeText.textContent = state.text;
     },

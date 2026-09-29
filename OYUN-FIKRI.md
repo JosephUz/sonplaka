@@ -11,7 +11,7 @@ Merkez plaka (yarıçap 10) + iç halka (4 plaka, yarıçap 7) + dış halka (8 
 ## Eylemler
 
 - **Disk** (sol tık): elde en çok 3, 1,5 saniyede bir yenilenir. Düz uçar, 3 kez seker, 4 saniye yaşar. İsabet hasar vermez: vurulan disk yönünde savrulur, havalanır, yarım saniye kontrolsüzdür. Kenara yakın olan boşluğa gider.
-- **Keskin disk** (sol tık 1,5 sn basılı): yavaş ve parlak, herkes görür; değdiğini anında eler.
+- **Ağır disk** (sol tık 1,5 sn basılı): yavaş ve parlak, herkes görür; değdiğini çok daha sert savurur. Hiçbir disk elemez, eleme yalnız düşmeyle.
 - **Levye** (sağ tık / F): bakış konisindeki yakın rakibi kendinden uzağa savurur. Kenar düellosunun silahı.
 - **Zıplama** (Boşluk): çift zıplama. Havada vurulursan düşersin.
 - **Hızlı koşu** (Shift): 1,45 kat hız; rampaya yetişmek ve diskten kaçmak için. Rampalar hiç kapanmaz.
@@ -30,7 +30,7 @@ Merkez plakada ve iç halka plakalarında doğar, alınınca 20 saniye sonra sı
 
 ## Botlar
 
-Her 0,3 saniyede plan: plakası titriyorsa içeri götüren zıplama plakasına kaçar; plakasında güç diski varsa alır; rakiple aynı plakadaysa mesafeyi koruyup yanlara kayarak atar ve yakınsa levye sallar; rakip başka plakadaysa menzildeyse çoğunlukla yerinde kalıp uzaktan atar, değilse zıplama plakalarıyla ona ya da merkeze gider (genişlik öncelikli yol; kapalı ve düşmüş plakalar yok). Yaklaşan diski görünce zıplayarak kaçınır. Ara sıra keskin disk hazırlar.
+Her 0,3 saniyede plan: plakası titriyorsa içeri götüren zıplama plakasına kaçar; plakasında güç diski varsa alır; rakiple aynı plakadaysa mesafeyi koruyup yanlara kayarak atar ve yakınsa levye sallar; rakip başka plakadaysa menzildeyse çoğunlukla yerinde kalıp uzaktan atar, değilse zıplama plakalarıyla ona ya da merkeze gider (genişlik öncelikli yol; kapalı ve düşmüş plakalar yok). Yaklaşan diski görünce zıplayarak kaçınır. Ara sıra ağır disk hazırlar.
 
 ## Sonraki adımlar
 
