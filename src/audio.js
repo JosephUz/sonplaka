@@ -1,6 +1,7 @@
 /**
  * Kısa sentez sesler (dosya yok): disk, isabet, levye, zıplama, zıplama plakası, düşüş, titreme, çökme, güç diski.
  * Tarayıcı ilk kullanıcı hareketinden önce ses açtırmaz; bağlam ilk seste kurulur, hata olursa sessiz kalır.
+ * Aç / kapa ayarı tarayıcıda kalır (localStorage "sp.sound").
  */
 const TONES = {
   throw: [520, 240],
@@ -21,9 +22,14 @@ const TONES = {
 
 export function createAudio() {
   let context = null, enabled = true;
+  try { enabled = localStorage.getItem('sp.sound') !== 'off'; } catch { /* yok */ }
   return {
     get enabled() { return enabled; },
-    toggle() { enabled = !enabled; return enabled; },
+    toggle() {
+      enabled = !enabled;
+      try { localStorage.setItem('sp.sound', enabled ? 'on' : 'off'); } catch { /* yok */ }
+      return enabled;
+    },
     play(type) {
       const tone = TONES[type];
       if (!enabled || !tone) return;

@@ -74,6 +74,12 @@ try {
   // Esc: mola; devam.
   await page.keyboard.press('Escape'); await page.waitForTimeout(150);
   assert.ok(await page.locator('#sp-pause').isVisible());
+  await page.locator('#sp-pause-sound').click();
+  assert.equal(await page.locator('#sp-pause-sound').textContent(), 'Ses: kapalı', 'mola menüsünden ses kapanmadı');
+  assert.equal(await page.evaluate(() => localStorage.getItem('sp.sound')), 'off', 'ses ayarı kaydedilmedi');
+  assert.ok(await page.locator('#sp-sound').evaluate(b => b.classList.contains('muted')), 'üst çubuk ses düğmesi aynı durumu göstermiyor');
+  await page.locator('#sp-pause-sound').click();
+  assert.equal(await page.locator('#sp-pause-sound').textContent(), 'Ses: açık');
   await page.locator('#sp-resume').click(); await page.waitForTimeout(150);
   assert.ok(await page.locator('#sp-pause').isHidden());
 

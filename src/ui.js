@@ -20,7 +20,7 @@ export function createUI(root) {
     down: $('down'), downTitle: $('down-title'), downCount: $('down-count'), downNote: $('down-note'), freeze: $('freeze'),
     crosshair: $('crosshair'), message: $('message'), warn: $('warn'),
     charge: $('charge'), chargeText: $('charge-text'),
-    site: $('site'), resultTitle: $('result-title'), finalScore: $('final-score'), stats: $('stats'), sound: $('sound'),
+    site: $('site'), resultTitle: $('result-title'), finalScore: $('final-score'), stats: $('stats'), sound: $('sound'), pauseSound: $('pause-sound'),
   };
   for (const node of el.wins) node.innerHTML = '<i></i>'.repeat(ROUND.wins);
   el.discs.innerHTML = '<i></i>'.repeat(DISC.max);
@@ -29,7 +29,11 @@ export function createUI(root) {
   return {
     button: (id, fn) => { $(id).onclick = fn; },
     show(screen) { for (const s of SCREENS) el.screens[s].hidden = screen !== s; },
-    setSound(on) { el.sound.textContent = on ? 'Ses açık' : 'Ses kapalı'; el.sound.classList.toggle('muted', !on); },
+    /** Ses düğmeleri (üst çubuk ve mola menüsü) aynı durumu gösterir. */
+    setSound(on) {
+      el.sound.textContent = on ? 'Ses açık' : 'Ses kapalı'; el.sound.classList.toggle('muted', !on);
+      el.pauseSound.textContent = on ? 'Ses: açık' : 'Ses: kapalı'; el.pauseSound.classList.toggle('muted', !on);
+    },
     message(text, time = 2) { el.message.textContent = text; el.message.hidden = false; messageTime = time; },
     /** Kırmızı uyarı şeridi (plaka çöküyor); süre boyunca kalır. */
     warn(text, time = 5) { el.warn.textContent = text; el.warn.hidden = false; warnTime = time; },

@@ -99,7 +99,9 @@ export async function start(root) {
   ui.button('start', () => { if (online) leaveRoom(); begin(); }); ui.button('restart', begin); ui.button('again', begin);
   ui.button('pause-open', pause); ui.button('resume', resume); ui.button('menu', menu);
   ui.button('help-open', help); ui.button('help-close', closeHelp);
-  ui.button('sound', () => ui.setSound(audio.toggle()));
+  const toggleSound = () => ui.setSound(audio.toggle());
+  ui.button('sound', toggleSound); ui.button('pause-sound', toggleSound);
+  ui.setSound(audio.enabled);
 
   // ---------- Çevrim içi ----------
   const net = onlineEnabled() ? createNetClient({
