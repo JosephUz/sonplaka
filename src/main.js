@@ -221,11 +221,11 @@ export async function start(root) {
    * İzlenen oyuncu: sen; düştüysen CAMERA.fallView saniye düştüğün yerde alçalan bakış (arena yukarıda uzaklaşır);
    * elenmişsen ayakta kalan takım arkadaşın (yoksa herhangi biri); kimse yoksa arena üstü.
    */
-  const ghost = { x: 0, y: 8, z: 0, yaw: 0, pitch: -0.4, id: -1 };
-  let fallCam = null;
+  const ghost = { x: 0, y: 16, z: 34, yaw: Math.PI, pitch: -0.45, id: -1 };
+  let fallCam = null, ghostOn = false;
   function followTarget(dt) {
     const me = w.players[w.me];
-    if (!me.out) { fallCam = null; return { p: me, spectate: false }; }
+    if (!me.out) { fallCam = null; ghostOn = false; return { p: me, spectate: false }; }
     if (fallCam) {
       fallCam.t += dt; fallCam.y -= CAMERA.fallSink * dt;
       if (fallCam.t < CAMERA.fallView) return { p: fallCam, spectate: false };
@@ -233,6 +233,8 @@ export async function start(root) {
     }
     const mate = w.players.find(p => p.team === me.team && alive(p)) || w.players.find(p => alive(p));
     if (mate && me.respawn <= 0) return { p: mate, spectate: true };
+    // Hayalet bakış: ilk girişte arenayı yukarıdan karşıdan görür, sonra serbestçe bakılır.
+    if (!ghostOn) { ghostOn = true; view.face(Math.PI, -0.45); }
     ghost.yaw = view.yaw; ghost.pitch = view.pitch;
     return { p: ghost, spectate: false };
   }
