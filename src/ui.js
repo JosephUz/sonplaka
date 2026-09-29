@@ -66,13 +66,17 @@ export function createUI(root) {
         pip.style.setProperty('--f', full ? 1 : filling ? (1 - me.regen / DISC.regen).toFixed(3) : 0);
       });
       el.power.textContent = me.power ? `${POWER[me.power]} ×${me.powerLeft}` : '—';
+      // Düşüyorsun: plakanın altına indin ve zemin yok. Düştün / elendin: doğuş sayacı ya da izleme notu.
+      const falling = playing && !screen && !me.out && !me.ground && me.flight <= 0 && me.y < -1.5;
       const down = playing && !screen && me.out;
-      el.down.hidden = !down;
-      if (down) {
+      el.down.hidden = !down && !falling;
+      if (falling) { el.downTitle.textContent = 'DÜŞÜYORSUN!'; el.downCount.textContent = ''; el.downNote.textContent = ''; }
+      else if (down) {
         el.downTitle.textContent = me.respawn > 0 ? 'DÜŞTÜN!' : 'ELENDİN';
         el.downCount.textContent = me.respawn > 0 ? me.respawn.toFixed(1) + ' sn' : '';
         el.downNote.textContent = me.respawn > 0 ? 'Kendi plakanda yeniden doğacaksın.' : w.state === 'over' ? 'Raund bitti.' : 'Doğuş kapandı: raund bitene kadar takım arkadaşını izliyorsun.';
       }
+      el.downNote.hidden = !el.downNote.textContent;
       el.freeze.hidden = !playing || !!screen || me.freeze <= 0;
     },
 

@@ -194,7 +194,11 @@ export async function start(root) {
           if (e.id === me) { view.shake(CAMERA.knockShake); if (e.kind === 'freeze') ui.message('DONDUN · 2 SN', 1.5); }
           break;
         case 'fall':
-          if (e.id === me) ui.message(e.cause === 'sharp' ? 'KESKİN DİSK · ELENDİN' : e.by !== null ? who(w.players[e.by]) + ' SENİ DÜŞÜRDÜ' : 'DÜŞTÜN', 2.5);
+          if (e.id === me) {
+            ui.message(e.cause === 'sharp' ? 'KESKİN DİSK · ELENDİN' : e.by !== null ? who(w.players[e.by]) + ' SENİ DÜŞÜRDÜ' : 'DÜŞTÜN', 2.5);
+            // Düşüş sineması: kamera düştüğün yerde alçalırken yukarıdaki arenaya bakar.
+            if (e.cause !== 'sharp') { fallCam = { x: e.x, y: e.y, z: e.z, t: 0, yaw: view.yaw, pitch: 0.95, id: -1 }; view.face(view.yaw, 0.95); }
+          }
           else if (e.by === me) ui.message(who(w.players[e.id]) + ' DÜŞTÜ · SENİN SAYENDE', 2);
           break;
         case 'pickup': if (e.id === me) ui.message(POWER_NAMES[e.kind] + ' ×' + PICKUP.shots, 1.8); break;
@@ -209,11 +213,20 @@ export async function start(root) {
 
   const refresh = () => ui.hud(w, started && screen !== 'home' && screen !== 'lobby', screen);
 
-  /** İzlenen oyuncu: sen; elenmişsen ayakta kalan takım arkadaşın (yoksa herhangi biri); kimse yoksa arena üstü. */
+  /**
+   * İzlenen oyuncu: sen; düştüysen CAMERA.fallView saniye düştüğün yerde alçalan bakış (arena yukarıda uzaklaşır);
+   * elenmişsen ayakta kalan takım arkadaşın (yoksa herhangi biri); kimse yoksa arena üstü.
+   */
   const ghost = { x: 0, y: 8, z: 0, yaw: 0, pitch: -0.4, id: -1 };
-  function followTarget() {
+  let fallCam = null;
+  function followTarget(dt) {
     const me = w.players[w.me];
-    if (!me.out) return { p: me, spectate: false };
+    if (!me.out) { fallCam = null; return { p: me, spectate: false }; }
+    if (fallCam) {
+      fallCam.t += dt; fallCam.y -= CAMERA.fallSink * dt;
+      if (fallCam.t < CAMERA.fallView) return { p: fallCam, spectate: false };
+      fallCam = null;
+    }
     const mate = w.players.find(p => p.team === me.team && alive(p)) || w.players.find(p => alive(p));
     if (mate && me.respawn <= 0) return { p: mate, spectate: true };
     ghost.yaw = view.yaw; ghost.pitch = view.pitch;
@@ -242,7 +255,7 @@ export async function start(root) {
     ui.tick(dt, w, active());
     ui.charge(chargeState());
     input.sync(w, active());
-    const target = followTarget(), playing = started && screen !== 'home' && screen !== 'lobby';
+    const target = followTarget(screen ? 0 : dt), playing = started && screen !== 'home' && screen !== 'lobby';
     const drawDt = online && started ? dt : screen ? 0 : dt;
     view.render(w, drawDt, playing, target.p, target.spectate);
     uiClock -= dt;

@@ -29,7 +29,7 @@ Chromium'unu indirir (kullanıcının Chrome'una ve faresine dokunmaz). Ekran g�
 
 ## Kurallar
 
-- **Disk** (sol tık): elde 3, 1,5 sn'de bir yenilenir. Sınırdan ve kolonlardan 3 kez seker. İsabet hasar vermez:
+- **Disk** (sol tık): elde 3, 1,5 sn'de bir yenilenir. Görünmez sınırdan 3 kez seker. İsabet hasar vermez:
   vurulan disk yönünde savrulur ve havalanır; kenara yakın olan boşluğa düşer.
 - **Keskin disk**: sol tık 1,5 sn basılı (nişangahta halka dolar, kırmızıya döner), bırakınca çıkar. Yavaş, parlak;
   değdiğini anında eler.

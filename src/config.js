@@ -4,16 +4,17 @@
  * Arena: boşlukta asılı yuvarlak plakalar. Merkez plaka + iç halka (4 plaka) + dış halka (8 plaka). Açı: x = uzaklık·sin(a),
  * z = uzaklık·cos(a). Dış halkanın +z yarısı mavi, -z yarısı turuncu takımın doğuş plakalarıdır.
  * `bound` disklerin sektiği görünmez silindir sınır; `fallDepth` altına düşen elenir. Düşen plaka `fallAccel` ile hızlanır,
- * `gone` altına inince yok olur. Kolonlar (`pillarR`, `pillarH`) diskleri sektirir, oyuncuyu durdurur.
+ * `gone` altına inince yok olur. Kolonlar (`pillarR`, `pillarH`) diskleri sektirir, oyuncuyu durdurur; siper olmasın ve
+ * oyun sürekli hareket istesin diye kapalı (`center.pillars` 0, `ring1.pillar` false): diskler yalnız sınırdan seker.
  * Plakalar arası tek geçiş **zıplama plakaları**: plaka kenarından `padInset` içeride, `padR` yarıçaplı; hedef plakada
  * kenardan `landInset` içeriye indirir.
  */
 export const ARENA = {
   bound: 54,
-  center: { r: 10, pillars: 4, pillarDist: 5.5 },
-  ring1: { n: 4, dist: 24, r: 7, angle0: Math.PI / 4 },
+  center: { r: 10, pillars: 0, pillarDist: 5.5 },
+  ring1: { n: 4, dist: 24, r: 7, angle0: Math.PI / 4, pillar: false },
   ring2: { n: 8, dist: 42, r: 6, angle0: Math.PI / 8 },
-  fallDepth: -14, gone: -70, fallAccel: 14,
+  fallDepth: -30, gone: -70, fallAccel: 14,
   pillarR: 1.1, pillarH: 3.4,
   padR: 1.5, padInset: 1.3, landInset: 4.2,
 };
@@ -78,9 +79,10 @@ export const BOT = { think: 0.3, thinkJitter: 0.25, range: 11, close: 5, strafe:
 /**
  * Kamera: masaüstünde **birinci şahıs** (göz `eye` yükseklikte), telefonda omuz üstü (`back` geride, `side` sağda,
  * `height` yukarıda); V ya da 🎥 ile geçilir. Fare hassasiyeti `yawSpeed` / `pitchSpeed`, eğim sınırları radyan.
- * Savrulunca kamera `knockShake` kadar sarsılır.
+ * Savrulunca kamera `knockShake` kadar sarsılır. Elenince kamera `fallView` saniye boyunca düştüğün yerde alçalarak
+ * (`fallSink` birim/sn) yukarıdaki arenaya bakar, sonra takım arkadaşına geçer.
  */
-export const CAMERA = { fov: 78, far: 260, eye: 1.55, back: 4.2, side: 0.7, height: 2.4, pitchMin: -1.15, pitchMax: 1.15, yawSpeed: 0.0028, pitchSpeed: 0.0022, knockShake: 0.45 };
+export const CAMERA = { fov: 78, far: 260, eye: 1.55, back: 4.2, side: 0.7, height: 2.4, pitchMin: -1.15, pitchMax: 1.15, yawSpeed: 0.0028, pitchSpeed: 0.0022, knockShake: 0.45, fallView: 1.6, fallSink: 7 };
 
 /**
  * Dokunmatik kontroller (telefon / tablet): sol yarıda parmağın değdiği yerde beliren joystick (yarıçap `stick` px,

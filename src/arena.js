@@ -20,7 +20,7 @@ export function buildArena() {
   for (let i = 0; i < ARENA.ring1.n; i++) {
     const a = ARENA.ring1.angle0 + i * Math.PI * 2 / ARENA.ring1.n;
     const p = add(Math.sin(a) * ARENA.ring1.dist, Math.cos(a) * ARENA.ring1.dist, ARENA.ring1.r, 1);
-    p.pillars.push({ x: p.x, z: p.z });
+    if (ARENA.ring1.pillar) p.pillars.push({ x: p.x, z: p.z });
     pickups.push({ plate: p.id, x: p.x - Math.sin(a) * 3.2, z: p.z - Math.cos(a) * 3.2 });
     r1.push(p);
   }

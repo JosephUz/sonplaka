@@ -139,13 +139,14 @@ test('diskle vurulan zıplama plakası 5 saniye kapanır', () => {
   assert.equal(r.flight, 0, 'kapalı rampa fırlattı');
 });
 
-test('disk sınırdan ve kolondan seker, ömrü biter', () => {
-  const w = setup(), p = center(w, 0, 0, -8);
+test('disk görünmez sınırdan seker, ömrü biter; plakalarda kolon yok', () => {
+  const w = setup(), p = center(w, 0, 0, 8);
   for (const t of w.players) if (t.id !== 0) t.out = true;
+  assert.ok(w.arena.plates.every(pl => pl.pillars.length === 0), 'kolon var');
   p.yaw = 0; p.pitch = 0;
   throwDisc(w, 0);
-  run(w, 30);
-  assert.ok(w.events.some(e => e.type === 'bounce'), 'kolondan sekmedi');
+  run(w, Math.ceil((ARENA.bound - 8) / DISC.speed * 60) + 10);
+  assert.ok(w.events.some(e => e.type === 'bounce'), 'sınırdan sekmedi');
   const d = w.discs[0];
   assert.ok(d && d.vz < 0, 'geri dönmedi');
   run(w, Math.ceil(DISC.life * 60) + 5);
