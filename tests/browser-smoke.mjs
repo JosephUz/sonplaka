@@ -81,6 +81,9 @@ try {
   await page.keyboard.press('F1'); await page.waitForTimeout(150);
   assert.ok(await page.locator('#sp-help').isVisible());
   await page.locator('#sp-help-close').click();
+  // Fare kilidi olayları gecikmeli gelebilir (başsız Chrome): oyun molaya düştüyse devam et.
+  await page.waitForTimeout(400);
+  if (await page.locator('#sp-pause').isVisible()) { await page.locator('#sp-resume').click(); await page.waitForTimeout(200); }
 
   // Maç sonu: mavi 3 raund alsın.
   await game(() => { const w = window.__sonPlaka.world(); w.state = 'play'; w.t = 50; w.respawnOpen = false; w.wins = [2, 0]; for (const p of w.players) { p.out = p.team === 1; p.respawn = 0; } });

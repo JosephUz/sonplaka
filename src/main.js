@@ -197,7 +197,11 @@ export async function start(root) {
           if (e.id === me) {
             ui.message(e.cause === 'sharp' ? 'KESKİN DİSK · ELENDİN' : e.by !== null ? who(w.players[e.by]) + ' SENİ DÜŞÜRDÜ' : 'DÜŞTÜN', 2.5);
             // Düşüş sineması: kamera düştüğün yerde alçalırken yukarıdaki arenaya bakar.
-            if (e.cause !== 'sharp') { fallCam = { x: e.x, y: e.y, z: e.z, t: 0, yaw: view.yaw, pitch: 0.7, id: -1 }; view.face(view.yaw, 0.7); }
+            if (e.cause !== 'sharp') {
+              // Bakış arenanın merkezine, yukarı: plakalar tepede uzaklaşırken görünsün.
+              const yaw = Math.atan2(-e.x, -e.z), pitch = Math.min(1.1, Math.atan2(-e.y + 2, Math.hypot(e.x, e.z) || 1));
+              fallCam = { x: e.x, y: e.y, z: e.z, t: 0, yaw, pitch, id: -1 }; view.face(yaw, pitch);
+            }
           }
           else if (e.by === me) ui.message(who(w.players[e.id]) + ' DÜŞTÜ · SENİN SAYENDE', 2);
           break;
