@@ -1,17 +1,21 @@
-import { NET } from './net/protocol.js';
+import { MODES, TEAMS, modeLabel, teamsFor } from './config.js';
 
 /**
  * Çok oyunculu ekranlar: giriş ekranındaki oda düğmeleri (ad, Oda kur, Odaya katıl + kod, çevrim içi sayısı) ve lobi
- * (oda kodu, link, iki takımın beşer koltuğu). Herkes boş (bot) koltuğa tıklayıp oturur. Yönetici oyuncuları taşır:
- * sürükleyip bir koltuğa bırakır ya da oyuncuya, sonra koltuğa tıklar; dolu koltukta ikisi yer değiştirir.
- * Sunucuya bağlanılamadıkça (kapalı ya da config.js → ONLINE ile kapatılmış) oda düğmeleri "Yakında" yazar ve basılmaz.
+ * (oda kodu, link, kip seçimi, takım sütunları ve koltuklar). Kip (herkes tek, 2v2 … 5v5) oda kurulurken giriş
+ * ekranındaki seçimle gelir, lobide yalnız yönetici değiştirir; koltuklar kipe göre dizilir. Herkes boş (bot) koltuğa
+ * tıklayıp oturur: karşı takımdaki boş koltuğa geçince PvP, bütün insanlar aynı takımdaysa co-op (rakipler bot).
+ * Yönetici oyuncuları taşır: sürükleyip bir koltuğa bırakır ya da oyuncuya, sonra koltuğa tıklar; dolu koltukta ikisi
+ * yer değiştirir. Sunucuya bağlanılamadıkça (kapalı ya da config.js → ONLINE ile kapatılmış) oda düğmeleri "Yakında"
+ * yazar ve basılmaz.
  */
 export function createLobby(root, app) {
   const $ = id => root.querySelector('#sp-' + id);
   const el = {
     nick: $('nick'), create: $('create'), join: $('join'), joinRow: $('joinrow'), code: $('code'), joinGo: $('join-go'),
     online: $('online'), status: $('home-status'),
-    lobbyCode: $('lobby-code'), seats: [$('seats-0'), $('seats-1')], hint: $('lobby-hint'), lobbyStatus: $('lobby-status'), start: $('lobby-start'),
+    lobbyCode: $('lobby-code'), title: $('lobby-title'), mode: $('lobby-mode'), teams: $('lobby-teams'), hint: $('lobby-hint'),
+    lobbyStatus: $('lobby-status'), start: $('lobby-start'),
   };
   const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } return v; };
   const defaultNick = () => `Oyuncu-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -30,7 +34,7 @@ export function createLobby(root, app) {
   }
   setServer(false);
 
-  el.create.onclick = () => { el.status.textContent = 'Oda kuruluyor…'; app.create(nick()); };
+  el.create.onclick = () => { el.status.textContent = 'Oda kuruluyor…'; app.create(nick(), app.mode()); };
   el.join.onclick = () => { el.joinRow.hidden = !el.joinRow.hidden; if (!el.joinRow.hidden) el.code.focus(); };
   const joinGo = () => {
     const code = el.code.value.trim().toUpperCase();
@@ -49,27 +53,35 @@ export function createLobby(root, app) {
   };
   el.start.onclick = () => app.start();
   $('lobby-leave').onclick = () => app.leave();
+  el.mode.innerHTML = MODES.map(n => `<option value="${n}">${modeLabel(n)}</option>`).join('');
+  el.mode.onchange = () => app.settings(Number(el.mode.value));
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const roleName = slot => 'Oyuncu ' + (slot % 5 + 1);
 
   function render(next) {
     lobby = next; if (!lobby) return;
     const me = app.id(), host = lobby.hostId === me, mine = lobby.seats.findIndex(s => s && s.id === me);
+    const n = lobby.settings?.teamSize || 5, teams = teamsFor(n);
     el.lobbyCode.textContent = lobby.code;
+    el.title.textContent = 'ODA · ' + modeLabel(n);
+    el.mode.value = String(n); el.mode.disabled = !host || lobby.state === 'playing';
     if (picked != null && !lobby.seats.some(s => s && s.id === picked)) picked = null;
-    for (const team of [0, 1]) {
-      el.seats[team].innerHTML = Array.from({ length: NET.seats / 2 }, (_, k) => {
-        const slot = team * 5 + k, s = lobby.seats[slot];
+    el.teams.style.setProperty('--cols', teams);
+    el.teams.innerHTML = Array.from({ length: teams }, (_, team) => {
+      const seats = Array.from({ length: n }, (_, k) => {
+        const slot = team * n + k, s = lobby.seats[slot];
         const cls = ['seat', s ? 'taken' : 'free', s && s.id === me ? 'me' : '', s && !s.online ? 'off' : '', s && s.id === picked ? 'picked' : ''].filter(Boolean).join(' ');
         const who = s ? `${esc(s.nick)}${s.id === lobby.hostId ? ' <small>yönetici</small>' : ''}${s.online ? '' : ' <small>koptu</small>'}` : `Bot <small>${mine === slot ? '' : 'otur'}</small>`;
-        return `<li class="${cls}" data-slot="${slot}"${s ? ` data-id="${s.id}"` : ''}${host && s ? ' draggable="true"' : ''}><em>${roleName(slot)}</em><span>${who}</span></li>`;
+        return `<li class="${cls}" data-slot="${slot}"${s ? ` data-id="${s.id}"` : ''}${host && s ? ' draggable="true"' : ''}>${n > 1 ? `<em>Koltuk ${k + 1}</em>` : ''}<span>${who}</span></li>`;
       }).join('');
-    }
+      return `<div class="lobby-team" style="--tc:${TEAMS.colors[team]}"><b>${TEAMS.names[team]}</b><ol>${seats}</ol></div>`;
+    }).join('');
     for (const li of root.querySelectorAll('#sp-lobby .seat')) wire(li, host);
     const playing = lobby.state === 'playing';
-    el.hint.textContent = (playing ? 'Maç sürüyor: boş bir koltuğa oturunca oyuna girersin. ' : 'Boş koltuğa tıklayıp otur; boş kalanları botlar oynar. ')
-      + (host ? 'Yönetici olarak oyuncuları sürükleyip bırak (ya da oyuncuya, sonra koltuğa tıkla); dolu koltukta yer değiştirirler.' : '');
+    const humanTeams = new Set(lobby.seats.map((s, i) => (s ? Math.floor(i / n) : -1)).filter(t => t >= 0));
+    const kind = n === 1 ? 'Herkes tek: herkes herkese karşı, boş koltuklar bot.' : humanTeams.size > 1 ? 'PvP: birden çok takımda insan var; boş koltuklar bot.' : 'Co-op: bütün insanlar aynı takımda, rakipler bot. Karşı takımdaki boş koltuğa tıklayıp PvP yapabilirsin.';
+    el.hint.textContent = kind + ' ' + (playing ? 'Maç sürüyor: boş bir koltuğa oturunca oyuna girersin.' : '')
+      + (host ? ' Yönetici olarak kipi değiştirir, oyuncuları sürükleyip bırakırsın (ya da oyuncuya, sonra koltuğa tıkla); dolu koltukta yer değiştirirler.' : '');
     el.start.hidden = !host || playing;
     el.lobbyStatus.textContent = host ? (picked != null ? 'Taşınacak koltuğa tıkla' : '') : playing ? '' : 'Yöneticinin başlatması bekleniyor';
   }

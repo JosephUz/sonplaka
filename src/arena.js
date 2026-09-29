@@ -45,9 +45,16 @@ export function buildArena() {
     link(r1[j], r2[2 * j]); link(r1[j], r2[2 * j + 1]);
   }
   for (let k = 0; k < r2.length; k++) link(r2[k], r2[(k + 1) % r2.length]);
-  /** Takımların doğuş plakaları: dış halkanın +z yarısı mavi, -z yarısı turuncu (merkezden uzaklığa göre sıralı). */
-  const spawns = [r2.filter(p => p.z > 0).map(p => p.id), r2.filter(p => p.z < 0).map(p => p.id)];
-  return { plates, pads, pickups, spawns };
+  return { plates, pads, pickups };
+}
+
+/**
+ * Takımların doğuş plakaları: dış halka takımlara ardışık dilimler hâlinde paylaştırılır (2 takım: 4'er plaka; herkes
+ * tek 5 takım: 2-2-1-2-1). Dönen dizi takım sırasına göre plaka kimlikleri.
+ */
+export function spawnsFor(arena, teams) {
+  const ring2 = arena.plates.filter(p => p.ring === 2).map(p => p.id);
+  return Array.from({ length: teams }, (_, t) => ring2.filter((_, k) => Math.floor(k * teams / ring2.length) === t));
 }
 
 /** Bütün plakaların en dış yarıçapı (görünüm ve sınır için). */

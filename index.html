@@ -27,18 +27,25 @@
     </header>
 
     <div id="sp-scoreboard" hidden>
-      <div class="team blue-text"><span class="pips" id="sp-blue-wins"></span>MAVİ <b id="sp-blue-alive">5</b></div>
-      <div class="clock"><span id="sp-timer">0:00</span><small id="sp-phase">RAUND 1</small></div>
-      <div class="team orange-text"><b id="sp-orange-alive">5</b> TURUNCU<span class="pips" id="sp-orange-wins"></span></div>
+      <div class="teams" id="sp-board-l"></div>
+      <div class="clock"><span id="sp-timer">5:00</span><small id="sp-phase">BAŞLIYOR</small></div>
+      <div class="teams" id="sp-board-r"></div>
     </div>
 
     <section id="sp-home" class="home">
       <div class="home-content">
-        <div class="eyebrow"><i></i> 5v5 DİSK ARENASI · DARALAN BOŞLUK</div>
+        <div class="eyebrow"><i></i> HERKES TEK – 5v5 DİSK ARENASI · DARALAN BOŞLUK</div>
         <h1>Plakalar düşer.<br><span>Sen kalırsın.</span></h1>
-        <p>Diskle rakibi kenardan aşağı at, plakalar teker teker boşluğa düşerken<br>zıplama plakalarıyla içeri kaç. Son plakada kim kalırsa raund onun.</p>
+        <p>Diskle rakibi kenardan aşağı at, plakalar teker teker boşluğa düşerken<br>rampalarla içeri kaç. Düşen 4 saniyede döner; süre bitince en çok düşüren kazanır.</p>
+        <div class="mode-row" role="radiogroup" aria-label="Kaça kaç">
+          <label><input type="radio" name="sp-mode" value="1">HERKES TEK</label>
+          <label><input type="radio" name="sp-mode" value="2">2v2</label>
+          <label><input type="radio" name="sp-mode" value="3">3v3</label>
+          <label><input type="radio" name="sp-mode" value="4">4v4</label>
+          <label><input type="radio" name="sp-mode" value="5" checked>5v5</label>
+        </div>
         <button id="sp-start" class="primary">ARENAYA GİR <span>↗</span></button>
-        <div class="home-meta"><span>01 OYUNCU + 09 BOT</span><span>3 RAUND ALAN KAZANIR</span></div>
+        <div class="home-meta"><span id="sp-home-meta-1">5v5 · SEN + 09 BOT</span><span>5 DAKİKA · EN ÇOK DÜŞÜREN KAZANIR</span></div>
         <div class="home-online">
           <label class="nick"><span>ADIN</span><input id="sp-nick" maxlength="16" autocomplete="off" spellcheck="false" aria-label="Oyuncu adı"></label>
           <div class="online-row">
@@ -49,9 +56,9 @@
           <div class="home-status"><span id="sp-online"></span><span id="sp-home-status" role="status"></span></div>
         </div>
         <div class="rule-cards">
-          <div><b>01 / DİSK</b><span>Vurulan savrulur; can yok, düşen gider.</span></div>
-          <div><b>02 / PLAKA</b><span>Dış halka 40. saniyede düşer, doğuş kapanır.</span></div>
-          <div><b>03 / SON PLAKA</b><span>Merkez daralır. Ayakta kalan takım raundu alır.</span></div>
+          <div><b>01 / DİSK</b><span>Vurulan savrulur; can yok, düşen 4 saniyede geri gelir.</span></div>
+          <div><b>02 / PLAKA</b><span>Dış halka 40. saniyede düşer, sonra iç halka; merkez daralır.</span></div>
+          <div><b>03 / SÜRE</b><span>5 dakika. Merkez de düşünce plakalar geri gelir; en çok düşüren takım kazanır.</span></div>
         </div>
       </div>
       <div class="pitch-note"><i></i> BOŞLUK ARENASI <span>13 plaka, 40 zıplama plakası, sınır diskleri sektirir.</span></div>
@@ -77,7 +84,7 @@
       <div class="touch-zone right" data-t="look"></div>
       <div id="sp-stick" hidden><i></i></div>
       <div class="touch-buttons">
-        <div id="sp-t-shoot" class="tbtn shoot" data-t="shoot" role="button" aria-label="Disk at"><b>AT</b><small id="sp-t-shoot-sub">TUT: KESKİN</small></div>
+        <div id="sp-t-shoot" class="tbtn shoot" data-t="shoot" role="button" aria-label="Disk at"><b>AT</b><small id="sp-t-shoot-sub">TUT: AĞIR</small></div>
         <div id="sp-t-bar" class="tbtn bar" data-t="bar" role="button" aria-label="Levye"><b>LEVYE</b></div>
         <div id="sp-t-jump" class="tbtn jump" data-t="jump" role="button" aria-label="Zıpla"><b>ZIPLA</b><small>2 KEZ</small></div>
       </div>
@@ -114,26 +121,25 @@
           <dt>Shift</dt><dd>Hızlı koş: rampaya yetişmek ve diskten kaçmak için.</dd>
           <dt>Boşluk</dt><dd>Zıpla; havadayken bir kez daha zıpla. Havada vurulursan yönün değişir, düşebilirsin.</dd>
           <dt>Rampalar</dt><dd>Plakalar arasındaki tek geçiş: plaka kenarındaki rampaya koş, okun gösterdiği plakaya uçarsın (uçuşta yön veremezsin, disk atabilirsin). Rampalar hiç kapanmaz: basan her zaman uçar.</dd>
-          <dt>Daralma</dt><dd>40. saniyede dış halka (8 plaka) düşer ve <b>yeniden doğuş kapanır</b>; 80. saniyede iç halka. Sonra merkez plaka küçülür. Düşmeden 5 saniye önce plaka titrer: içeri kaç.</dd>
+          <dt>Daralma</dt><dd>40. saniyede dış halka (8 plaka) düşer, 80. saniyede iç halka. Sonra merkez plaka küçülür ve 145. saniyede o da düşer: dalga biter, plakalar geri gelir, yeni dalga başlar. Düşmeden 5 saniye önce plaka titrer: içeri kaç.</dd>
           <dt>Güç diskleri</dt><dd>Merkezde ve iç halkada doğar: <b>üçlü</b> (3 atış yelpaze) ve <b>dondurucu</b> (3 atış, vurulan 2 saniye donar; donmuşu levyeyle it).</dd>
-          <dt>Raund</dt><dd>Doğuş kapandıktan sonra bir takımın kimsesi kalmayınca raund biter. 3 raund alan maçı kazanır. Elenince takım arkadaşını izlersin.</dd>
+          <dt>Süre ve skor</dt><dd>Maç 5 dakika. <b>Düşme hakkı sınırsız</b>: 4 saniye sonra ayakta bir plakada doğarsın (dış plakan düştüyse iç halka, o da düştüyse merkez). Düşürdüğün her rakip takımına 1 puan. Süre bitince en çok düşüren takım kazanır.</dd>
+          <dt>Kipler</dt><dd><b>Herkes tek</b> (5 kişi, herkes herkese), <b>2v2</b>, <b>3v3</b>, <b>4v4</b>, <b>5v5</b>; boş yerleri botlar doldurur. Odada da aynı kipler: yönetici seçer. İnsanlar aynı takımdaysa co-op (rakipler bot), karşı takımdaki boş koltuğa geçince PvP.</dd>
           <dt>V</dt><dd>Kamera: birinci şahıs ↔ omuz üstü.</dd>
           <dt>Esc</dt><dd>Fareyi bırakır ve oyunu durdurur.</dd>
         </dl>
-        <p>Diskler görünmez sınırdan seker (3 kez): arkadan vur. Plakalarda siper yok: sürekli hareket et. Çok oyunculu: giriş ekranından oda kur, kodu ya da linki paylaş; herkes boş koltuğa oturur, boş kalanları botlar oynar.</p>
+        <p>Diskler görünmez sınırdan seker (3 kez): arkadan vur. Plakalarda siper yok: sürekli hareket et. Çok oyunculu: giriş ekranında kipi seç, oda kur, kodu ya da linki paylaş; herkes boş koltuğa oturur, boş kalanları botlar oynar.</p>
         <button id="sp-help-close" class="primary">ANLADIM</button>
       </div>
     </section>
 
     <section id="sp-lobby" class="overlay" hidden>
       <div class="card lobby-card">
-        <span class="eyebrow">ODA · 5v5</span>
+        <span class="eyebrow" id="sp-lobby-title">ODA</span>
         <div class="lobby-head"><h2 id="sp-lobby-code">----</h2><button id="sp-lobby-copy">Linki kopyala</button></div>
+        <label class="lobby-mode">KAÇA KAÇ <select id="sp-lobby-mode" aria-label="Kip"></select></label>
         <p id="sp-lobby-hint"></p>
-        <div class="lobby-teams">
-          <div class="lobby-team blue"><b>MAVİ</b><ol id="sp-seats-0"></ol></div>
-          <div class="lobby-team orange"><b>TURUNCU</b><ol id="sp-seats-1"></ol></div>
-        </div>
+        <div class="lobby-teams" id="sp-lobby-teams"></div>
         <p id="sp-lobby-status" class="lobby-status" role="status"></p>
         <button id="sp-lobby-start" class="primary">MAÇI BAŞLAT <span>↗</span></button>
         <button id="sp-lobby-leave" class="lobby-leave">Odadan çık</button>

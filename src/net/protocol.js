@@ -4,10 +4,11 @@
  */
 export const C2S = {
   HELLO: 'hello',   // { nick, token } — bağlantı kimliği; token varsa eski koltuğa geri bağlanır
-  CREATE: 'create', // oda kur (kuran odanın yöneticisidir)
+  CREATE: 'create', // { teamSize } — oda kur (kuran odanın yöneticisidir); kip: 1 herkes tek, 2-5 iki takım
   JOIN: 'join',     // { code }
-  SEAT: 'seat',     // { slot } — boş koltuğa otur (0-4 mavi, 5-9 turuncu)
+  SEAT: 'seat',     // { slot } — boş koltuğa otur (koltuk = takım × takım boyu + sıra)
   MOVE: 'move',     // { id, slot } — yalnızca yönetici: oyuncuyu koltuğa taşır, koltuk doluysa ikisi yer değiştirir
+  SETTINGS: 'settings', // { teamSize } — yalnızca yönetici, lobide: kip değişir, koltuklar yeniden dizilir
   START: 'start',   // yalnızca yönetici
   LEAVE: 'leave',
   INPUT: 'in',      // { mv: [x, z], yaw, pitch, hold, sp (Shift), e: 'basışlar' } — bkz. EDGES
@@ -15,11 +16,11 @@ export const C2S = {
 };
 export const S2C = {
   WELCOME: 'welcome', // { id, token, nick }
-  LOBBY: 'lobby',     // { code, hostId, state, seats: [{ id, nick, online } | null] x10 }
+  LOBBY: 'lobby',     // { code, hostId, state, settings: { teamSize }, seats: [{ id, nick, online } | null] × oyuncu sayısı }
   ERROR: 'error',     // { msg }
-  START: 'start',     // { you, names: [..10], humans: [..10] } — maç başladı (ya da ortasına katıldın)
+  START: 'start',     // { you, teamSize, names, humans } — maç başladı (ya da ortasına katıldın)
   SNAP: 's',          // durum paketi + o ana kadar biriken olaylar (bkz. snapshot.js)
-  END: 'end',         // { wins, winner, stats: [..10], names }
+  END: 'end',         // { score, winner (-1 berabere), stats, names }
   PONG: 'pong',
   ONLINE: 'on',       // { n } — çevrim içi (açık sekme) sayısı, değişince
 };
@@ -38,7 +39,7 @@ export const NET = {
   clockSmooth: 0.1, clockJump: 0.5,
   /** Cloudflare boşta bağlantıyı kapatmasın: bu aralıkta ping (sn). */
   keepAlive: 20,
-  /** Oda en çok 10 kişi (5v5); koltuk sayısı. */
+  /** Oda en çok 10 kişi (5v5); koltuk sayısı kipe göre daha az olabilir. */
   seats: 10,
 };
 export const roomCode = () => {

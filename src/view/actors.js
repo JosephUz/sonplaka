@@ -11,10 +11,10 @@ const iceGeo = new T.BoxGeometry(1.3, 2.4, 1.3);
 const iceMat = new T.MeshStandardMaterial({ color: '#9fefff', transparent: true, opacity: 0.55, roughness: 0.2, emissive: '#3bc7e8', emissiveIntensity: 0.3 });
 const discGeo = new T.CylinderGeometry(0.5, 0.5, 0.1, 20);
 
-export function createActor(scene, labels, id) {
+export function createActor(scene, labels, id, team) {
   const root = new T.Group(), body = new T.Group();
   root.add(body); scene.add(root);
-  const team = id < 5 ? 0 : 1, color = TEAMS.colors[team];
+  const color = TEAMS.colors[team];
   box(body, 0.76, 0.9, 0.46, color, 0, 1.05, 0);
   box(body, 0.78, 0.26, 0.49, '#263a3a', 0, 0.59, 0);
   box(body, 0.53, 0.55, 0.5, '#d6a17c', 0, 1.75, 0);
@@ -43,9 +43,16 @@ export function createActor(scene, labels, id) {
   }
   const ice = new T.Mesh(iceGeo, iceMat); ice.position.y = 1.2; ice.visible = false; root.add(ice);
   const label = document.createElement('div');
-  label.className = 'actor-label ' + (team === 0 ? 'blue' : 'orange');
+  label.className = 'actor-label'; label.style.color = color;
   labels.append(label);
   return { root, body, limbs, disc, bar, ice, label, hair, hairColor, mine: null, team };
+}
+
+/** Oyuncu görselini sahneden ve etiketini DOM'dan kaldırır (kip değişince yeniden kurulur). */
+export function disposeActor(scene, v) {
+  scene.remove(v.root);
+  v.root.traverse(o => { if (o.geometry && o.geometry !== iceGeo && o.geometry !== discGeo) o.geometry.dispose(); });
+  v.label.remove();
 }
 
 /**

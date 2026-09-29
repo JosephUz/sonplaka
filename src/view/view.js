@@ -1,7 +1,7 @@
 import * as T from 'three';
-import { CAMERA, DISC, TOUCH } from '../config.js';
+import { CAMERA, DISC, TEAMS, TOUCH } from '../config.js';
 import { buildArenaView } from './arena.js';
-import { createActor, syncActors } from './actors.js';
+import { createActor, disposeActor, syncActors } from './actors.js';
 import { createCamera } from './camera.js';
 import { createDiscs } from './discs.js';
 import { createEffects } from './effects.js';
@@ -34,7 +34,7 @@ export function createView(container, { mobile = false } = {}) {
   const cam = createCamera();
   let arena = null;
   const labels = container.querySelector('#sp-labels');
-  const actors = Array.from({ length: 10 }, (_, id) => createActor(scene, labels, id));
+  let actors = [], actorKey = '';
   const discs = createDiscs(scene);
   const effects = createEffects(scene);
   // Birinci şahıs el diski: kameraya bağlı.
@@ -53,8 +53,16 @@ export function createView(container, { mobile = false } = {}) {
     get pitch() { return cam.pitch; },
     /** 'fps' | 'shoulder' */
     setCamera: mode => { cam.setMode(mode); },
-    /** Arena bir kez kurulur (dünya değişince yeniden kullanılır: geometri aynı). */
-    setWorld(w) { if (!arena) arena = buildArenaView(scene, w.arena); },
+    /** Arena bir kez kurulur (dünya değişince yeniden kullanılır: geometri aynı); oyuncu görselleri kipe (oyuncu sayısı ve takımlar) göre kurulur. */
+    setWorld(w) {
+      if (!arena) arena = buildArenaView(scene, w.arena);
+      const key = w.players.map(p => p.team).join(',');
+      if (key !== actorKey) {
+        for (const v of actors) disposeActor(scene, v);
+        actors = w.players.map(p => createActor(scene, labels, p.id, p.team));
+        actorKey = key;
+      }
+    },
     face: (yaw, pitch) => cam.face(yaw, pitch),
     look: (dx, dy) => cam.look(dx, dy),
     movement: (x, z) => cam.movement(x, z),
@@ -84,7 +92,7 @@ export function createView(container, { mobile = false } = {}) {
         hand.scale.set(k, 1, k);
         hand.rotation.y = time * (me.charge > 0 ? 9 : 1.5);
         hand.position.y = -0.26 + Math.sin(time * 2.2) * 0.008 + (me.throwCd > 0 ? -0.08 * me.throwCd / DISC.cooldown : 0);
-        const color = me.charge >= DISC.heavyCharge - 0.01 ? '#ff9a50' : me.power === 'freeze' ? '#8ff3ff' : me.power === 'triple' ? '#ffd35c' : me.team === 0 ? '#39c2cf' : '#f5825b';
+        const color = me.charge >= DISC.heavyCharge - 0.01 ? '#ff9a50' : me.power === 'freeze' ? '#8ff3ff' : me.power === 'triple' ? '#ffd35c' : TEAMS.colors[me.team];
         hand.material.color.set(color); hand.material.emissive.set(color);
         hand.material.emissiveIntensity = 0.7 + (me.charge / DISC.heavyCharge) * 2;
       }

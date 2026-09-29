@@ -1,8 +1,9 @@
 # Son Plaka
 
-Three.js ile tarayıcıda çalışan, birinci şahıs **5v5 disk arenası + daralan boşluk**. Boşlukta asılı 13 plaka raund
-boyunca dıştan içe düşer; diskle rakibi kenardan aşağı atarsın, zıplama plakalarıyla içeri kaçarsın. Can yok, mermi yok.
-Bir insan ve dört takım botu, beş rakip bota karşı; webde **çok oyunculu** (oda, on koltuk, boş koltukta bot).
+Three.js ile tarayıcıda çalışan, birinci şahıs **disk arenası + daralan boşluk**. Boşlukta asılı 13 plaka her dalgada
+dıştan içe düşer; diskle rakibi kenardan aşağı atarsın, rampalarla içeri kaçarsın. Can yok, mermi yok. Düşme hakkı
+sınırsız: 5 dakikalık maçın sonunda en çok düşüren takım kazanır. Kipler **herkes tek** (5 kişi), **2v2 … 5v5**; boş
+yerleri botlar doldurur; webde **çok oyunculu** (oda, aynı kipler, co-op ya da PvP).
 Oyun fikri ve kurallar: [OYUN-FIKRI.md](OYUN-FIKRI.md).
 
 ## Başlatma
@@ -37,10 +38,13 @@ Chromium'unu indirir (kullanıcının Chrome'una ve faresine dokunmaz). Ekran g�
 - **Zıplama** (Boşluk): havada bir kez daha. Uçuşta ve savrulurken yön verilmez.
 - **Rampalar**: plakalar arası tek geçiş; plaka kenarındaki rampaya koş, okun gösterdiği plakaya uçarsın. Rampa hiç kapanmaz.
 - **Hızlı koşu** (Shift; telefonda joystick sonuna kadar): 1,45 kat hız.
-- **Daralma**: 40. sn dış halka düşer, **doğuş kapanır**; 80. sn iç halka; 100-130. sn merkez küçülür; 145. sn merkez düşer.
-  Düşmeden 5 sn önce plaka titrer ve ekranda uyarı çıkar.
-- **Raund**: doğuş kapandıktan sonra bir takımın kimsesi kalmayınca biter. 3 raund alan maçı kazanır. Elenen takım
-  arkadaşını izler. Doğuş açıkken düşen 4 sn sonra kendi dış plakasında doğar.
+- **Daralma (dalga)**: 40. sn dış halka düşer; 80. sn iç halka; 100-130. sn merkez küçülür; 145. sn merkez düşer, dalga
+  biter, 4 sn sonra bütün plakalar geri gelir ve yeni dalga başlar. Düşmeden 5 sn önce plaka titrer ve ekranda uyarı çıkar.
+- **Süre ve skor**: maç 5 dakika (`MATCH.time`). **Düşme hakkı sınırsız**: düşen 4 sn sonra ayakta bir plakada doğar
+  (kendi dış plakası; düştüyse iç halka; o da düştüyse merkez). Düşürdüğün her rakip takımına 1 puan; süre bitince en
+  çok düşüren takım kazanır, eşitlikte berabere. Düşen, doğana kadar düşüşünü ve takım arkadaşını izler.
+- **Kipler** (giriş ekranında seçilir, hatırlanır): **herkes tek** (5 oyuncu, herkes ayrı takım), **2v2**, **3v3**,
+  **4v4**, **5v5**. Boş yerler bot.
 - **Güç diskleri**: merkezde ve iç halkada; üçlü (3 atış yelpaze) ve dondurucu (3 atış, 2 sn donma).
 
 Maç sonunda karne: düşürme, düşme, isabet, atış, güç diski, zıplama plakası.
@@ -65,8 +69,10 @@ kaydırarak bakış, sağ altta **AT** (basılı tut: ağır), **LEVYE**, **ZIPL
 
 ## Çok oyunculu
 
-Giriş ekranında ad yazılır, **Oda kur** ya da **Odaya katıl** (kod ya da `?oda=KOD` linki). Lobide iki takımın beşer
-koltuğu vardır; herkes boş koltuğa oturur, yönetici oyuncuları taşır. Maçı sunucu koşturur (`server/rooms.mjs`,
+Giriş ekranında ad yazılır, kip seçilir, **Oda kur** ya da **Odaya katıl** (kod ya da `?oda=KOD` linki). Lobide
+koltuklar kipe göre dizilir (herkes tek: 5 tekil koltuk; 2v2 … 5v5: iki takım sütunu); yönetici kipi lobide de
+değiştirir, koltuklar yeniden dizilir. Herkes boş koltuğa oturur: bütün insanlar aynı takımdaysa **co-op** (rakipler
+bot), karşı takımdaki boş koltuğa geçen olursa **PvP**. Yönetici oyuncuları taşır. Maçı sunucu koşturur (`server/rooms.mjs`,
 tarayıcıdakiyle aynı `src/world.js`), sayfa girdiyi (hareket, bakış, basışlar) yollar, gelen durumu ara değerle çizer ve
 kendi oyuncunu gecikmesiz göstermek için yerel girdiden kısa bir öne kayma ekler (`src/net/`). Kopan oyuncunun
 koltuğunu bot oynar, aynı sekmeyle geri dönünce yerine oturur. Sunucu kapalıysa oda düğmeleri **Yakında** olur.
@@ -79,9 +85,9 @@ odaları `server/`, oyun kodu `src/` altındadır. three.js npm paketinden `/ven
 
 | Dosya | İçerik |
 |---|---|
-| `src/config.js` | Bütün ayar sayıları (arena, raund takvimi, disk, levye, bot, kamera) |
+| `src/config.js` | Bütün ayar sayıları (arena, dalga takvimi, maç süresi ve kipler, disk, levye, bot, kamera) |
 | `src/arena.js` | Plakalar, kolonlar, zıplama plakaları, güç diski noktaları (paylaşımlı geometri) |
-| `src/world.js` | Simülasyon: raund akışı, plaka çöküşü, fizik, diskler, eleme |
+| `src/world.js` | Simülasyon: kipler, dalga akışı, plaka çöküşü, fizik, diskler, düşme ve doğuş, süre ve skor |
 | `src/actions.js` | Zıplama, disk, levye, savurma, güç diski |
 | `src/ai.js` | Bot kararları ve plakalar arası yol |
 | `src/net/` | Protokol, durum paketi, istemci |

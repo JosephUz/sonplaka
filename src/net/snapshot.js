@@ -28,7 +28,7 @@ const dec = (p, k, v) => {
 /** ts: sunucu saati (sn, gerçek zaman). */
 export function encodeSnapshot(w, ts, events) {
   return {
-    ts: r3(ts), time: r2(w.time), st: STATES.indexOf(w.state), rt: r2(w.t), rd: w.round, wins: w.wins, win: w.winner, ro: w.respawnOpen ? 1 : 0, ov: w.over ? (w.over.team ?? -1) : -2,
+    ts: r3(ts), time: r2(w.time), st: STATES.indexOf(w.state), rt: r2(w.t), rd: w.round, sc: w.score, mt: r2(w.matchT), win: w.winner, ov: w.over ? 1 : 0,
     p: w.players.map(p => PLAYER.map(k => enc(p, k))),
     h: w.players.map(p => (p.human ? 1 : 0)),
     d: w.discs.map(d => [d.id, r2(d.x), r2(d.y), r2(d.z), r2(d.vx), r2(d.vy), r2(d.vz), KINDS.indexOf(d.kind), d.owner, d.team]),
@@ -41,8 +41,8 @@ export function encodeSnapshot(w, ts, events) {
 
 /** Paketteki durumu dünya kopyasına yazar (konumlar dahil; ara değer sonradan üstüne yazar). */
 export function applySnapshot(w, s) {
-  w.time = s.time; w.state = STATES[s.st] || 'play'; w.t = s.rt; w.round = s.rd; w.wins = s.wins; w.winner = s.win ?? null; w.respawnOpen = !!s.ro;
-  w.over = s.ov === -2 ? null : { team: s.ov < 0 ? null : s.ov };
+  w.time = s.time; w.state = STATES[s.st] || 'play'; w.t = s.rt; w.round = s.rd; w.score = s.sc; w.matchT = s.mt; w.winner = s.win ?? null;
+  w.over = s.ov ? { wave: s.rd } : null;
   s.p.forEach((row, i) => { const p = w.players[i]; PLAYER.forEach((k, j) => dec(p, k, row[j])); p.human = !!s.h[i]; });
   w.discs = s.d.map(([id, x, y, z, vx, vy, vz, kind, owner, team]) => ({ id, x, y, z, vx, vy, vz, kind: KINDS[kind] || 'normal', owner, team, age: 0, bounces: 0 }));
   s.pl.forEach(([phase, y, r], i) => Object.assign(w.plates[i], { phase, y, r }));

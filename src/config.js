@@ -2,7 +2,7 @@
 
 /**
  * Arena: boşlukta asılı yuvarlak plakalar. Merkez plaka + iç halka (4 plaka) + dış halka (8 plaka). Açı: x = uzaklık·sin(a),
- * z = uzaklık·cos(a). Dış halkanın +z yarısı mavi, -z yarısı turuncu takımın doğuş plakalarıdır.
+ * z = uzaklık·cos(a). Dış halka takımlara ardışık dilimler hâlinde doğuş plakası olarak paylaştırılır (arena.js).
  * `bound` disklerin sektiği görünmez silindir sınır; `fallDepth` altına düşen elenir. Düşen plaka `fallAccel` ile hızlanır,
  * `gone` altına inince yok olur. Kolonlar (`pillarR`, `pillarH`) diskleri sektirir, oyuncuyu durdurur; siper olmasın ve
  * oyun sürekli hareket istesin diye kapalı (`center.pillars` 0, `ring1.pillar` false): diskler yalnız sınırdan seker.
@@ -20,16 +20,25 @@ export const ARENA = {
 };
 
 /**
- * Raund akışı (saniye, raundun oyun saatine göre): dış halka `ring2At`'te, iç halka `ring1At`'te düşer; her düşüşten
- * `tremble` saniye önce plaka titrer. Dış halka düştüğü an **yeniden doğuş kapanır**. Merkez plaka `shrinkAt`'ten
- * başlayarak `shrinkTime` saniyede `minR` yarıçapına küçülür, `endAt`'te o da düşer. Raund başı `start` saniye geri
- * sayım (kimse kıpırdamaz); raund bitince `between` saniye sonra yenisi. Maçı `wins` raund alan kazanır.
- * Düşen oyuncu (doğuş açıkken) `respawn` saniye sonra kendi takımının dış plakasında doğar.
+ * Dalga akışı (saniye, dalganın oyun saatine göre): dış halka `ring2At`'te, iç halka `ring1At`'te düşer; her düşüşten
+ * `tremble` saniye önce plaka titrer. Merkez plaka `shrinkAt`'ten başlayarak `shrinkTime` saniyede `minR` yarıçapına
+ * küçülür, `endAt`'te o da düşer: dalga biter, `between` saniye sonra bütün plakalar geri gelir ve yeni dalga `start`
+ * saniye geri sayımla (kimse kıpırdamaz) başlar. Düşme hakkı sınırsız: düşen `respawn` saniye sonra ayakta bir plakada
+ * (kendi takımının dış plakası, düştüyse iç halka, o da düştüyse merkez) yeniden doğar.
  */
-export const ROUND = { start: 3, tremble: 5, ring2At: 40, ring1At: 80, shrinkAt: 100, shrinkTime: 30, minR: 2.2, endAt: 145, between: 4, wins: 3, respawn: 4 };
+export const ROUND = { start: 3, tremble: 5, ring2At: 40, ring1At: 80, shrinkAt: 100, shrinkTime: 30, minR: 2.2, endAt: 145, between: 4, respawn: 4 };
 
-/** Maç: takım başı oyuncu; `seed` bot kararlarının tohumu (testler buna dayanır). */
-export const MATCH = { teamSize: 5, seed: 61 };
+/**
+ * Maç: `time` saniye sürer (yalnız oyun anında sayar; geri sayımda ve dalga arasında durur). Süre bitince en çok
+ * düşüren takım kazanır, eşitlikte berabere. Kip: takım başı oyuncu `teamSize` — 1 ise **herkes tek** (`ffaTeams`
+ * oyuncu, herkes ayrı takım), 2–5 ise iki takım (2v2 … 5v5); boş yerleri botlar doldurur. `seed` bot kararlarının
+ * tohumu (testler buna dayanır).
+ */
+export const MATCH = { teamSize: 5, ffaTeams: 5, time: 300, seed: 61 };
+export const MODES = [1, 2, 3, 4, 5];
+export const modeLabel = n => (n === 1 ? 'HERKES TEK' : `${n}v${n}`);
+export const teamsFor = n => (n === 1 ? MATCH.ffaTeams : 2);
+export const playersFor = n => teamsFor(n) * n;
 
 /** Yürüme hızı, Shift ile hızlı koşu çarpanı, yerde ve havada hedef hıza yaklaşma katsayısı (1/sn), yerde savrulma sürtünmesi. */
 export const MOVE = { speed: 7.5, sprint: 1.45, accel: 18, air: 5, friction: 6 };
@@ -90,7 +99,8 @@ export const CAMERA = { fov: 78, far: 260, eye: 1.55, back: 4.2, side: 0.7, heig
  */
 export const TOUCH = { stick: 60, dead: 0.14, look: 2.2, pixelRatio: 1.35, shadow: 1024 };
 
-export const TEAMS = { names: ['MAVİ', 'TURUNCU'], colors: ['#39c2cf', '#f5825b'] };
+/** Takım adları ve renkleri: iki takımlı kiplerde ilk ikisi, herkes tek kipinde beşi de kullanılır. */
+export const TEAMS = { names: ['MAVİ', 'TURUNCU', 'YEŞİL', 'MOR', 'PEMBE'], colors: ['#39c2cf', '#f5825b', '#7dff9a', '#c08bff', '#ff7ab8'] };
 
 /**
  * Çok oyunculu özellikler hangi platformda açık: tarayıcıda (web) açık; Android uygulamasında (app) kapalı, giriş

@@ -7,7 +7,7 @@ import { mkdir } from 'node:fs/promises';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const url = process.env.GAME_URL || 'http://localhost:5187';
 await mkdir('artifacts', { recursive: true });
-const browser = await chromium.launch({ headless: true, args: ['--use-gl=angle', '--use-angle=swiftshader'] });
+const browser = await chromium.launch({ headless: true, args: process.env.SWIFTSHADER ? ['--use-gl=angle', '--use-angle=swiftshader'] : ['--use-gl=angle', '--use-angle=d3d11', '--ignore-gpu-blocklist'] });
 try {
   const page = await browser.newPage({ viewport: { width: 1536, height: 960 } }), errors = [];
   page.on('pageerror', e => errors.push(e.message));
@@ -61,15 +61,16 @@ try {
   await page.keyboard.press('KeyV'); await page.waitForTimeout(100);
   assert.equal(await game(() => window.__sonPlaka.view().cameraMode), 'fps');
 
-  // Dış halka düşsün: 41. saniyeye sar, doğuş kapanır, oyuncu plakayla düşer ve izleme kipine geçer.
+  // Dış halka düşsün: 41. saniyeye sar; oyuncu plakayla düşer (düşme perdesi), 4 sn sonra iç halkada yeniden doğar.
   await game(() => { const w = window.__sonPlaka.world(); w.t = 39.9; });
-  await page.waitForTimeout(3500);
-  assert.equal(await game(() => window.__sonPlaka.world().respawnOpen), false, 'doğuş kapanmadı');
-  await page.screenshot({ path: 'artifacts/04-collapse.png' });
-  await page.waitForTimeout(3000);
-  assert.ok((await hero()).out, 'dış plakayla düşmedi');
+  await page.waitForFunction(() => window.__sonPlaka.world().players[0].out, null, { timeout: 8000 });
   assert.ok(await page.locator('#sp-down').isVisible(), 'düşme perdesi yok');
-  await page.screenshot({ path: 'artifacts/05-spectate.png' });
+  await page.screenshot({ path: 'artifacts/04-fall.png' });
+  await page.waitForFunction(() => { const w = window.__sonPlaka.world(), p = w.players[0]; return !p.out && w.arena.plates[p.plate]?.ring === 1; }, null, { timeout: 10000 });
+  assert.ok(await game(() => window.__sonPlaka.world().plates[5].phase >= 2), 'dış halka düşmedi');
+  assert.equal((await hero()).stats.falls, 1, 'düşme sayılmadı');
+  await page.screenshot({ path: 'artifacts/05-respawn.png' });
+  assert.ok(await page.locator('#sp-scoreboard .team').count() === 2, 'tabelada iki takım yok');
 
   // Esc: mola; devam.
   await page.keyboard.press('Escape'); await page.waitForTimeout(150);
@@ -91,21 +92,27 @@ try {
   await page.waitForTimeout(400);
   if (await page.locator('#sp-pause').isVisible()) { await page.locator('#sp-resume').click(); await page.waitForTimeout(200); }
 
-  // Maç sonu: mavi 3 raund alsın.
-  await game(() => { const w = window.__sonPlaka.world(); w.state = 'play'; w.t = 50; w.respawnOpen = false; w.wins = [2, 0]; for (const p of w.players) { p.out = p.team === 1; p.respawn = 0; } });
+  // Maç sonu: süre dolsun, mavi önde.
+  await game(() => { const w = window.__sonPlaka.world(); w.state = 'play'; w.t = 50; w.score = [3, 1]; w.matchT = 0.05; });
   await page.waitForTimeout(400);
   assert.ok(await page.locator('#sp-results').isVisible(), 'karne açılmadı');
+  assert.match(await page.locator('#sp-result-title').textContent(), /Arena sizin/, 'kazanan yazısı yanlış');
   await page.screenshot({ path: 'artifacts/06-results.png' });
 
-  // Dokunmatik kip (kamera seçimi hatırlanır; temiz başlasın).
-  await game(() => localStorage.removeItem('sp.cam'));
+  // Dokunmatik kip (kamera seçimi hatırlanır; temiz başlasın); herkes tek kipi seçilir: 5 oyuncu, 5 takım.
+  await game(() => { localStorage.removeItem('sp.cam'); localStorage.removeItem('sp.mode'); });
   await page.goto(url + '/?test=1&touch=1');
   await page.waitForFunction(() => !!window.__sonPlaka);
+  await page.locator('.mode-row label:has(input[value="1"])').click();
   await page.locator('#sp-start').click();
   await page.waitForTimeout(800);
   assert.ok(await page.locator('#sp-touch').isVisible(), 'dokunmatik kontroller yok');
   assert.equal(await game(() => window.__sonPlaka.view().cameraMode), 'shoulder', 'telefonda omuzla başlar');
-  await page.screenshot({ path: 'artifacts/07-touch.png' });
+  assert.equal(await game(() => window.__sonPlaka.world().players.length), 5, 'herkes tek kipinde 5 oyuncu olmalı');
+  assert.equal(await game(() => window.__sonPlaka.world().teams), 5);
+  assert.equal(await page.locator('#sp-scoreboard .team').count(), 5, 'tabelada beş takım yok');
+  assert.equal(await game(() => localStorage.getItem('sp.mode')), '1', 'kip hatırlanmadı');
+  await page.screenshot({ path: 'artifacts/07-touch-ffa.png' });
 
   assert.deepEqual(errors, [], 'tarayıcı hataları: ' + errors.join(' | '));
   console.log('Tarayıcı dumanı testi geçti; ekran görüntüleri artifacts/ içinde.');

@@ -45,7 +45,7 @@ export function createNetClient(hooks) {
       case S2C.ERROR: hooks.onError?.(msg.msg); break;
       case S2C.START: {
         const first = !world;
-        if (first) { world = createWorld(); world.online = true; buffer = []; clockReady = false; }
+        if (first) { world = createWorld(undefined, { teamSize: msg.teamSize }); world.online = true; buffer = []; clockReady = false; }
         world.me = msg.you >= 0 ? msg.you : 0;
         world.players.forEach((p, i) => { p.name = msg.names[i]; p.human = msg.humans[i]; });
         hooks.onStart?.(msg, first);
@@ -54,7 +54,7 @@ export function createNetClient(hooks) {
       case S2C.SNAP: onSnapshot(msg); break;
       case S2C.END: {
         if (world) {
-          world.wins = msg.wins; world.winner = msg.winner;
+          world.score = msg.score; world.winner = msg.winner;
           world.players.forEach((p, i) => { p.stats = msg.stats[i]; p.name = msg.names[i]; });
         }
         hooks.onEnd?.(msg, world);
@@ -136,10 +136,11 @@ export function createNetClient(hooks) {
     connect, get connected() { return connected; },
     get world() { return world; },
     hello(nick) { curNick = nick; send({ t: C2S.HELLO, nick, token: store('sp.token') }); },
-    create() { send({ t: C2S.CREATE }); },
+    create(teamSize) { send({ t: C2S.CREATE, teamSize }); },
     join(code) { send({ t: C2S.JOIN, code }); },
     seat(slot) { send({ t: C2S.SEAT, slot }); },
     move(id, slot) { send({ t: C2S.MOVE, id, slot }); },
+    settings(teamSize) { send({ t: C2S.SETTINGS, teamSize }); },
     start() { send({ t: C2S.START }); },
     leave() { send({ t: C2S.LEAVE }); client.lobby = null; world = null; buffer = []; store('sp.room', null); },
     rememberedRoom() { return store('sp.room'); },

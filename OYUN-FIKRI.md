@@ -1,12 +1,12 @@
 # Son Plaka
 
-Ricochet'nin (Valve, 2000) disk arenası ile battle royale'in daralan alanı birleşir; ama alan iki boyutlu bir çember değil, **ayağının altındaki plakaların kendisidir**: boşlukta asılı 13 yuvarlak plaka raund boyunca dıştan içe teker teker düşer. Can barı yok, mermi yok. Rakibi vurmazsın, **kenardan aşağı atarsın**.
+Ricochet'nin (Valve, 2000) disk arenası ile battle royale'in daralan alanı birleşir; ama alan iki boyutlu bir çember değil, **ayağının altındaki plakaların kendisidir**: boşlukta asılı 13 yuvarlak plaka her dalgada dıştan içe teker teker düşer. Can barı yok, mermi yok. Rakibi vurmazsın, **kenardan aşağı atarsın**. Düşme hakkı sınırsız; 5 dakikanın sonunda en çok düşüren kazanır.
 
-5v5, iki takım; tek başına oyunda sen ve dokuz bot, çevrim içinde on koltuk (boş koltuklar bot). Masaüstünde birinci şahıs, telefonda omuz üstü kamera.
+Kipler: **herkes tek** (5 oyuncu, herkes ayrı takım), **2v2**, **3v3**, **4v4**, **5v5**. Tek başına oyunda sen ve botlar; çevrim içinde aynı kipler (koltuk sayısı kipe göre, boş koltuklar bot; insanlar aynı takımdaysa co-op, karşı takıma geçince PvP). Masaüstünde birinci şahıs, telefonda omuz üstü kamera.
 
 ## Arena
 
-Merkez plaka (yarıçap 10) + iç halka (4 plaka, yarıçap 7) + dış halka (8 plaka, yarıçap 6). Kolon yok: siper yok, sürekli hareket. Dış halkanın bir yarısı mavi, öbür yarısı turuncu takımın doğuş plakalarıdır. Plakalar arası tek geçiş **rampalar** (zıplama plakaları): plaka kenarındaki rampaya basan karşı plakanın kenarından içeriye uçar (uçuşta yön verilmez, disk atılabilir). 40 zıplama plakası: dış halka komşuları, dış ↔ iç, iç ↔ merkez. Görünmez silindir sınır diskleri sektirir.
+Merkez plaka (yarıçap 10) + iç halka (4 plaka, yarıçap 7) + dış halka (8 plaka, yarıçap 6). Kolon yok: siper yok, sürekli hareket. Dış halka takımlara ardışık dilimler hâlinde doğuş plakası olarak paylaştırılır (iki takım: 4'er; herkes tek: 2-2-1-2-1). Plakalar arası tek geçiş **rampalar** (zıplama plakaları): plaka kenarındaki rampaya basan karşı plakanın kenarından içeriye uçar (uçuşta yön verilmez, disk atılabilir). 40 zıplama plakası: dış halka komşuları, dış ↔ iç, iç ↔ merkez. Görünmez silindir sınır diskleri sektirir.
 
 ## Eylemler
 
@@ -18,11 +18,11 @@ Merkez plaka (yarıçap 10) + iç halka (4 plaka, yarıçap 7) + dış halka (8 
 
 ## Daralma
 
-Raund saatine göre: 35. saniyede dış halka titrer, 40. saniyede düşer ve **yeniden doğuş kapanır**; 75-80. saniyede iç halka; 100. saniyeden sonra merkez plaka 30 saniyede yarıçap 2,2'ye küçülür; 145. saniyede o da düşer. Düşen plakanın üstündeki onunla gider.
+Dalga saatine göre: 35. saniyede dış halka titrer, 40. saniyede düşer; 75-80. saniyede iç halka; 100. saniyeden sonra merkez plaka 30 saniyede yarıçap 2,2'ye küçülür; 145. saniyede o da düşer: dalga biter, 4 saniye sonra bütün plakalar geri gelir ve yeni dalga 3 saniye geri sayımla başlar. Düşen plakanın üstündeki onunla gider.
 
-## Raund ve maç
+## Süre, skor ve doğuş
 
-Raund başı 3 saniye geri sayım. Doğuş açıkken düşen 4 saniye sonra kendi dış plakasında doğar. Doğuş kapandıktan sonra bir takımın kimsesi kalmayınca raund biter (ikisi de aynı anda biterse berabere). 3 raund alan maçı kazanır. Elenen, ayakta kalan takım arkadaşını izler. Düşen oyuncuya son 4 saniyede vuran rakip "düşürme" alır.
+Maç 5 dakika (yalnız oyun anında sayar; geri sayımda ve dalga arasında durur). **Düşme hakkı sınırsız**: düşen 4 saniye sonra ayakta bir plakada doğar (kendi takımının dış plakası; düştüyse iç halka; o da düştüyse merkez). Düşen oyuncuya son 4 saniyede vuran rakip "düşürme" alır ve takımına 1 puan yazılır. Süre bitince en çok düşüren takım kazanır; eşitlikte berabere. Düşen, doğana kadar düşüşünü, sonra takım arkadaşını izler.
 
 ## Güç diskleri
 

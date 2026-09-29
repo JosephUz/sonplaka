@@ -1,5 +1,5 @@
 import { createAudio } from './audio.js';
-import { CAMERA, DISC, PICKUP, TEAMS } from './config.js';
+import { CAMERA, DISC, MATCH, MODES, PICKUP, TEAMS, modeLabel, playersFor } from './config.js';
 import { createInput } from './input.js';
 import { createLobby } from './lobby.js';
 import { createNetClient } from './net/client.js';
@@ -10,9 +10,10 @@ import { createView } from './view/view.js';
 import { alive, createWorld, step } from './world.js';
 
 /**
- * İstemci uygulaması: dünya, görünüm, girdi, arayüz ve ekran akışı (giriş → maç ↔ mola / yardım → maç sonu).
+ * İstemci uygulaması: dünya, görünüm, girdi, arayüz ve ekran akışı (giriş → maç ↔ mola / yardım → maç sonu). Kip
+ * (herkes tek, 2v2 … 5v5) giriş ekranında seçilir ve hatırlanır; tek başına maç ve oda kurma bu seçimle başlar.
  * Her kare: sabit 1/60 sn adımlarla simülasyon (girdi her adımda okunur; bakış açıları kameradan gelir) → olaylar
- * (efekt, ses, mesaj, sarsıntı) → çizim. Kamera seni izler; elenince (doğuş kapalıyken) ayakta kalan takım arkadaşını
+ * (efekt, ses, mesaj, sarsıntı) → çizim. Kamera seni izler; düşünce düşüşünü, sonra doğana kadar takım arkadaşını
  * omuz üstünden izlersin. Doğunca bakış merkeze çevrilir. Fare kilidi düşerse (Esc) oyun molaya girer.
  *
  * **Çevrim içi** (webde, config.js → ONLINE; bkz. lobby.js, net/): maçı sunucu koşturur, bu sayfa girdiyi yollar ve
@@ -42,6 +43,19 @@ export async function start(root) {
   camButton.onclick = toggleCamera;
   const ui = createUI(root);
   const audio = createAudio();
+  // Kip: giriş ekranındaki seçim (hatırlanır); tek başına maç ve oda kurma buna göre.
+  const modeInputs = [...root.querySelectorAll('input[name="sp-mode"]')];
+  const modeChoice = () => Number(modeInputs.find(i => i.checked)?.value) || MATCH.teamSize;
+  const setMode = n => {
+    for (const i of modeInputs) i.checked = Number(i.value) === n;
+    const bots = String(playersFor(n) - 1).padStart(2, '0');
+    root.querySelector('#sp-home-meta-1').textContent = n === 1 ? `SEN + ${bots} BOT · HERKES HERKESE` : `${modeLabel(n)} · SEN + ${bots} BOT`;
+    try { localStorage.setItem('sp.mode', String(n)); } catch { /* yok */ }
+  };
+  let savedMode = MATCH.teamSize;
+  try { savedMode = Number(localStorage.getItem('sp.mode')) || MATCH.teamSize; } catch { /* yok */ }
+  setMode(MODES.includes(savedMode) ? savedMode : MATCH.teamSize);
+  for (const i of modeInputs) i.onchange = () => setMode(Number(i.value));
   let online = false;
   let w = createWorld(), screen = 'home', started = false, acc = 0, uiClock = 0, helpReturn = 'home', pausedAt = 0, last = performance.now();
   view.setWorld(w);
@@ -74,7 +88,7 @@ export async function start(root) {
   }
   function begin() {
     if (online) { showLobby(); return; }
-    w = createWorld(1 + Math.floor(Math.random() * 1e6)); faceCenter();
+    w = createWorld(1 + Math.floor(Math.random() * 1e6), { teamSize: modeChoice() }); faceCenter();
     started = true; acc = 0;
     if (touch) enterFullscreen();
     show(null); input.lock();
@@ -144,10 +158,12 @@ export async function start(root) {
   let pending = null, inviteCode = null;
   const lobby = createLobby(root, {
     id: () => net?.id,
-    create(nick) { withHello(nick, () => net.create()); },
+    mode: modeChoice,
+    create(nick, teamSize) { withHello(nick, () => net.create(teamSize)); },
     join(nick, code) { withHello(nick, () => net.join(code)); },
     seat: slot => net.seat(slot),
     move: (id, slot) => net.move(id, slot),
+    settings: teamSize => net.settings(teamSize),
     start: () => net.start(),
     leave: leaveRoom,
   });
@@ -190,7 +206,7 @@ export async function start(root) {
         case 'go': ui.message('BAŞLA!', 1); break;
         case 'spawn': if (e.id === me) faceCenter(); break;
         case 'tremble': ui.warn(e.ring === 2 ? 'DIŞ HALKA ÇÖKÜYOR · İÇERİ KAÇ' : 'İÇ HALKA ÇÖKÜYOR · MERKEZE KAÇ', 5); break;
-        case 'collapse': ui.message(e.ring === 2 ? 'DIŞ HALKA DÜŞTÜ · DOĞUŞ KAPANDI' : e.ring === 1 ? 'İÇ HALKA DÜŞTÜ' : 'SON PLAKA DA GİTTİ', 2.5); view.shake(0.35); break;
+        case 'collapse': ui.message(e.ring === 2 ? 'DIŞ HALKA DÜŞTÜ' : e.ring === 1 ? 'İÇ HALKA DÜŞTÜ' : 'SON PLAKA DA GİTTİ', 2.5); view.shake(0.35); break;
         case 'shrinkWarn': ui.warn('MERKEZ DARALIYOR · KENARDAN UZAK DUR', 5); break;
         case 'hit':
           if (e.id === me) { view.shake(CAMERA.knockShake); if (e.kind === 'freeze') ui.message('DONDUN · 2 SN', 1.5); }
@@ -208,8 +224,9 @@ export async function start(root) {
           else if (e.by === me) ui.message(who(w.players[e.id]) + ' DÜŞTÜ · SENİN SAYENDE', 2);
           break;
         case 'pickup': if (e.id === me) ui.message(POWER_NAMES[e.kind] + ' ×' + PICKUP.shots, 1.8); break;
-        case 'roundEnd': ui.message(e.team === null ? 'RAUND BERABERE' : TEAMS.names[e.team] + ' RAUNDU ALDI · ' + e.wins[0] + ':' + e.wins[1], 3); break;
-        case 'round': if (e.n > 1) ui.message('RAUND ' + e.n, 1.5); break;
+        case 'roundEnd': ui.message('DALGA BİTTİ · PLAKALAR GERİ GELİYOR', 3); break;
+        case 'round': if (e.n > 1) ui.message('DALGA ' + e.n, 1.5); break;
+        case 'end': ui.message(e.team == null ? 'SÜRE DOLDU · BERABERE' : 'SÜRE DOLDU · ' + TEAMS.names[e.team] + ' KAZANDI', 3); break;
         default: break;
       }
     }
@@ -233,8 +250,9 @@ export async function start(root) {
       if (fallCam.t < CAMERA.fallView) return { p: fallCam, spectate: false };
       fallCam = null;
     }
-    const mate = w.players.find(p => p.team === me.team && alive(p)) || w.players.find(p => alive(p));
-    if (mate && me.respawn <= 0) return { p: mate, spectate: true };
+    // Doğuşu beklerken (ya da ayakta plaka yokken) ayakta bir takım arkadaşı, yoksa kimse: arena üstünden bakış.
+    const mate = w.players.find(p => p.team === me.team && p.id !== me.id && alive(p));
+    if (mate) return { p: mate, spectate: true };
     // Hayalet bakış: ilk girişte arenayı yukarıdan karşıdan görür, sonra serbestçe bakılır.
     if (!ghostOn) { ghostOn = true; view.face(Math.PI, -0.45); }
     ghost.yaw = view.yaw; ghost.pitch = view.pitch;

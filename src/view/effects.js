@@ -5,7 +5,8 @@ import { box } from './builders.js';
 /**
  * Parçacıklar: isabette kıvılcım (ağır diskte turuncu), düşüşte kenarda büyük saçılma, levyede
  * beyaz çakım, zıplama plakasında yeşil (kapanınca kırmızı) püskürtü, sekmede küçük kıvılcım, güç diskinde altın
- * yağmuru. Plaka çökünce çökme noktasında geniş bir şok halkası yayılır, raund biterken kazanan renginde konfeti.
+ * yağmuru. Plaka çökünce çökme noktasında geniş bir şok halkası yayılır, dalga biterken altın, maç biterken kazanan
+ * renginde konfeti.
  * Küçük kutular fırlayıp yerçekimiyle boşluğa düşer ve ömürleri bitince sahneden kalkar.
  */
 const BURSTS = {
@@ -17,7 +18,8 @@ const BURSTS = {
   pickup: { count: 22, color: () => '#ffd35c', spread: 5, up: [4, 9], life: 1 },
   jump: { count: 3, color: () => '#c9d8ff', spread: 2, size: 0.08, life: 0.4 },
   land: { count: 5, color: () => '#c9d8ff', spread: 4, size: 0.08, life: 0.4, up: [1, 3] },
-  roundEnd: { count: 90, size: 0.25, spread: 18, up: [8, 18], life: 2.2, color: (e, i) => [TEAMS.colors[e.team ?? 0], '#ffffff', '#ffd35c'][i % 3] },
+  roundEnd: { count: 40, size: 0.2, spread: 14, up: [6, 14], life: 1.8, color: (e, i) => ['#ffd35c', '#ffffff', '#7fe0e8'][i % 3] },
+  end: { count: 90, size: 0.25, spread: 18, up: [8, 18], life: 2.2, color: (e, i) => [e.team == null ? '#ffd35c' : TEAMS.colors[e.team], '#ffffff', '#ffd35c'][i % 3] },
 };
 const ringGeo = new T.RingGeometry(0.85, 1, 64);
 
@@ -39,8 +41,8 @@ export function createEffects(scene) {
           live.push({ mesh, vx: Math.sin(a) * s, vz: Math.cos(a) * s, vy: upMin + Math.random() * (upMax - upMin), spin: (Math.random() - 0.5) * 12, life: (kind.life || 0.7) * (0.6 + Math.random() * 0.4) });
         }
       }
-      if (e.type === 'collapse' || e.type === 'roundEnd') {
-        const color = new T.Color(e.type === 'roundEnd' ? TEAMS.colors[e.team ?? 0] : '#ff9a50');
+      if (e.type === 'collapse' || e.type === 'roundEnd' || e.type === 'end') {
+        const color = new T.Color(e.type === 'end' ? (e.team == null ? '#ffd35c' : TEAMS.colors[e.team]) : e.type === 'roundEnd' ? '#ffd35c' : '#ff9a50');
         const mesh = new T.Mesh(ringGeo, new T.MeshBasicMaterial({ color, transparent: true, opacity: 0.9, side: T.DoubleSide, depthWrite: false }));
         mesh.rotation.x = -Math.PI / 2; mesh.position.set(e.x || 0, (e.y ?? 0) + 0.15, e.z || 0); mesh.scale.setScalar(0.01);
         scene.add(mesh);

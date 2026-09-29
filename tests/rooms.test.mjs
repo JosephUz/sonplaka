@@ -82,12 +82,34 @@ test('maç bitince END gider ve oda lobiye döner', async () => {
   const a = join('Ali');
   a.say({ t: 'create' }); a.say({ t: 'start' });
   const room = [...rooms.rooms.values()][0], w = room.world;
-  w.wins = [2, 0]; w.state = 'play'; w.t = 0; w.respawnOpen = false;
-  for (const p of w.players) if (p.team === 1) Object.assign(p, { out: true, respawn: 0 });
+  w.score = [2, 0]; w.state = 'play'; w.t = 0; w.matchT = 0.01;
   await wait(60);
   const end = a.last(S2C.END);
-  assert.ok(end, 'END gelmedi'); assert.equal(end.winner, 0); assert.deepEqual(end.wins, [3, 0]);
+  assert.ok(end, 'END gelmedi'); assert.equal(end.winner, 0); assert.deepEqual(end.score, [2, 0]);
   assert.equal(room.state, 'lobby');
+  rooms.close();
+});
+
+test('yönetici kipi değiştirir: koltuklar yeniden dizilir; herkes tek beş koltuk; maç o kiple başlar', () => {
+  const { rooms, join } = setup();
+  const a = join('Ali'), b = join('Ayşe');
+  a.say({ t: 'create', teamSize: 3 });
+  let lobby = a.last(S2C.LOBBY);
+  assert.equal(lobby.settings.teamSize, 3); assert.equal(lobby.seats.length, 6);
+  b.say({ t: 'join', code: lobby.code });
+  lobby = b.last(S2C.LOBBY);
+  assert.equal(lobby.seats[3].nick, 'Ayşe', 'katılan karşı takımın ilk koltuğuna oturmalı');
+  b.say({ t: 'settings', teamSize: 1 });
+  assert.equal(a.last(S2C.LOBBY).settings.teamSize, 3, 'yalnız yönetici kipi değiştirir');
+  a.say({ t: 'settings', teamSize: 1 });
+  lobby = b.last(S2C.LOBBY);
+  assert.equal(lobby.settings.teamSize, 1); assert.equal(lobby.seats.length, 5);
+  assert.equal(lobby.seats[0].nick, 'Ali'); assert.equal(lobby.seats[1].nick, 'Ayşe');
+  a.say({ t: 'start' });
+  assert.equal(a.last(S2C.START).teamSize, 1); assert.equal(b.last(S2C.START).you, 1);
+  const w = [...rooms.rooms.values()][0].world;
+  assert.equal(w.players.length, 5); assert.equal(w.teams, 5);
+  assert.equal(a.last(S2C.SNAP)?.p.length ?? 5, 5);
   rooms.close();
 });
 

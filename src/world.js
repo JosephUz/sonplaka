@@ -1,37 +1,40 @@
-import { ARENA, CREDIT, DISC, FREEZE, JUMP, MATCH, MOVE, PICKUP, ROUND } from './config.js';
+import { ARENA, CREDIT, DISC, FREEZE, JUMP, MATCH, MOVE, PICKUP, ROUND, teamsFor } from './config.js';
 import { alive, emit, facing, jump, knock, pickup, swing, throwDisc } from './actions.js';
 import { botInput } from './ai.js';
-import { buildArena } from './arena.js';
+import { buildArena, spawnsFor } from './arena.js';
 import { clamp } from './math.js';
 import { createRng } from './rng.js';
 
 export { alive, jump, swing, throwDisc };
 
 /**
- * Maç simülasyonu: DOM ve three.js yok, testler Node'da (ve çevrim içi odada sunucuda) koşar. 5v5: tek başına oyunda
- * 0. oyuncu insan, kalan dokuzu bot; çevrim içinde `human` işaretli her koltuk bir insandır. step sabit adımla
- * ilerletir, olayları w.events'e yazar (görünüm, ses ve mesajlar oradan okur; tüketen boşaltır). `me`: bu tarayıcıdaki
- * oyuncu.
+ * Maç simülasyonu: DOM ve three.js yok, testler Node'da (ve çevrim içi odada sunucuda) koşar. Kip `teamSize`: 1 →
+ * herkes tek (MATCH.ffaTeams oyuncu, her biri ayrı takım), 2–5 → iki takım. Tek başına oyunda 0. oyuncu insan, kalanlar
+ * bot; çevrim içinde `human` işaretli her koltuk bir insandır. step sabit adımla ilerletir, olayları w.events'e yazar
+ * (görünüm, ses ve mesajlar oradan okur; tüketen boşaltır). `me`: bu tarayıcıdaki oyuncu.
  *
- * Raund: `state` 'countdown' (w.t geri sayar) → 'play' (w.t raund saati) → 'over' (w.t bekleme). Plakalar ROUND
- * takvimine göre titrer ve düşer; dış halka düşünce doğuş kapanır; merkez küçülür. Bir takımın ayakta kimsesi kalmayınca
- * raund biter (ikisi de aynı anda bitince berabere). ROUND.wins raund alan maçı kazanır (`winner`).
+ * Maç MATCH.time saniye sürer (`matchT` kalan süre, yalnız 'play' durumunda sayar); düşürme takım skoruna (`score`)
+ * yazılır, süre bitince en çok düşüren takım kazanır (`winner`; eşitlikte -1). Düşme hakkı sınırsız: düşen ROUND.respawn
+ * saniye sonra ayakta bir plakada doğar. Dalga (`round`): `state` 'countdown' (w.t geri sayar) → 'play' (w.t dalga
+ * saati; plakalar ROUND takvimine göre titrer ve düşer, merkez küçülür ve sonunda o da düşer) → 'over' (w.t bekleme;
+ * plakalar geri gelir, yeni dalga).
  *
  * İnsan girdisi (her adım): x, z hareket yönü (dünya uzayı); yaw, pitch bakış; hold sol tık basılı, tap bu adımda
  * basıldı, release bırakıldı (kısa: normal disk, DISC.heavyCharge'dan uzun: ağır disk); secondary levye; jump zıplama.
  * Birden çok insan varsa (sunucu) girdi `{ players: { [id]: girdi } }` biçimindedir.
  */
-export function createWorld(seed = MATCH.seed) {
-  const arena = buildArena();
+export function createWorld(seed = MATCH.seed, { teamSize = MATCH.teamSize } = {}) {
+  const arena = buildArena(), teams = teamsFor(teamSize);
   const w = {
-    me: 0, time: 0, round: 0, state: 'countdown', t: 0, wins: [0, 0], winner: null, over: null, respawnOpen: true, warned: false,
-    events: [], players: [], discs: [], nextDisc: 1, arena, random: createRng(seed),
+    me: 0, time: 0, round: 0, state: 'countdown', t: 0, teamSize, teams, score: Array(teams).fill(0), matchT: MATCH.time,
+    winner: null, over: null, warned: false,
+    events: [], players: [], discs: [], nextDisc: 1, arena, spawns: spawnsFor(arena, teams), random: createRng(seed),
     plates: arena.plates.map(pl => ({ phase: 0, y: 0, vy: 0, r: pl.r })),
     pads: arena.pads.map(() => ({ off: 0 })),
     pickups: arena.pickups.map((_, i) => ({ active: false, t: 0, kind: PICKUP.kinds[i % PICKUP.kinds.length] })),
   };
-  for (let i = 0; i < MATCH.teamSize * 2; i++) {
-    const team = i < MATCH.teamSize ? 0 : 1, role = i % MATCH.teamSize;
+  for (let i = 0; i < teams * teamSize; i++) {
+    const team = Math.floor(i / teamSize), role = i % teamSize;
     w.players.push({
       id: i, team, role, human: i === 0, name: i === 0 ? 'Sen' : 'Bot-' + i,
       x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, yaw: 0, pitch: 0, ground: true, plate: -1, jumps: 0, sprint: false,
@@ -41,15 +44,15 @@ export function createWorld(seed = MATCH.seed) {
       stats: { kills: 0, falls: 0, hits: 0, throws: 0, pickups: 0, pads: 0 },
     });
   }
-  startRound(w);
+  startWave(w);
   return w;
 }
 
 const TIMERS = ['knock', 'flight', 'freeze', 'padLock', 'throwCd', 'barCd', 'think'];
 
-/** Yeni raund: plakalar, zıplama plakaları ve güç diskleri sıfırlanır, herkes doğuş plakasında dizilir, geri sayım. */
-function startRound(w) {
-  w.round++; w.state = 'countdown'; w.t = ROUND.start; w.respawnOpen = true; w.warned = false; w.over = null;
+/** Yeni dalga: plakalar, zıplama plakaları ve güç diskleri sıfırlanır, herkes doğuş plakasında dizilir, geri sayım. Skor kalır. */
+function startWave(w) {
+  w.round++; w.state = 'countdown'; w.t = ROUND.start; w.warned = false; w.over = null;
   w.discs.length = 0;
   w.plates.forEach((s, i) => Object.assign(s, { phase: 0, y: 0, vy: 0, r: w.arena.plates[i].r }));
   for (const s of w.pads) s.off = 0;
@@ -58,15 +61,30 @@ function startRound(w) {
   emit(w, 'round', { n: w.round });
 }
 
-/** Kendi takımının ayakta kalan dış plakasında doğar: rolüne göre plaka; aynı plakadakiler yan yana (kimse kimsenin önünde değil); merkeze bakar. */
+/**
+ * Doğuş plakası: kendi takımının ayakta dış plakası (rolüne göre); dış halka düştüyse ayakta bir iç plaka (takıma göre
+ * dağıtılır); o da düştüyse merkez; hiçbiri ayakta değilse null.
+ */
+function spawnPlate(w, p) {
+  const up = id => w.plates[id].phase < 2;
+  const outer = w.spawns[p.team].filter(up);
+  if (outer.length) return outer[p.role % outer.length];
+  const inner = w.arena.plates.filter(pl => pl.ring === 1 && up(pl.id)).map(pl => pl.id);
+  if (inner.length) return inner[(p.team * 2 + p.role) % inner.length];
+  return up(0) ? 0 : null;
+}
+
+/** Doğar: aynı plakadakiler yan yana (kimse kimsenin önünde değil), merkeze bakar. Ayakta plaka yoksa false. */
 function spawn(w, p) {
-  const ids = w.arena.spawns[p.team].filter(id => w.plates[id].phase < 2);
-  const plate = w.arena.plates[ids.length ? ids[p.role % ids.length] : w.arena.spawns[p.team][0]];
-  const s = w.plates[plate.id], d = Math.hypot(plate.x, plate.z) || 1, px = plate.z / d, pz = -plate.x / d, off = (p.role - 2) * 1.3;
-  Object.assign(p, { x: plate.x + px * off, y: s.y, z: plate.z + pz * off, vx: 0, vy: 0, vz: 0, ground: true, plate: plate.id, jumps: 0,
+  const id = spawnPlate(w, p);
+  if (id === null) return false;
+  const plate = w.arena.plates[id], s = w.plates[id], d = Math.hypot(plate.x, plate.z) || 1, px = plate.z / d, pz = -plate.x / d;
+  const off = (p.role - (w.teamSize - 1) / 2) * 1.3;
+  Object.assign(p, { x: plate.x + px * off, y: s.y, z: plate.z + pz * off, vx: 0, vy: 0, vz: 0, ground: true, plate: id, jumps: 0,
     knock: 0, flight: 0, freeze: 0, respawn: 0, out: false, padLock: 0, discs: DISC.max, regen: 0, charge: 0, chargeSpent: false, throwCd: 0, barCd: 0, power: null, powerLeft: 0, lastHit: null, bot: null });
   p.yaw = Math.atan2(-p.x, -p.z); p.pitch = 0;
   emit(w, 'spawn', { id: p.id });
+  return true;
 }
 
 export function step(w, dt, input = {}) {
@@ -80,7 +98,7 @@ export function step(w, dt, input = {}) {
     return;
   }
   const playing = w.state === 'play';
-  if (playing) { w.t += dt; schedule(w); }
+  if (playing) { w.t += dt; w.matchT = Math.max(0, w.matchT - dt); schedule(w); }
   else { w.t -= dt; }
   plates(w, dt);
   for (const s of w.pads) s.off = Math.max(0, s.off - dt);
@@ -96,8 +114,8 @@ export function step(w, dt, input = {}) {
     physics(w, p, cmd, dt);
   }
   discs(w, dt);
-  if (playing) checkRound(w);
-  else if (w.t <= 0) { if (w.winner === null) startRound(w); }
+  if (playing && w.matchT <= 0) endMatch(w);
+  else if (!playing && w.t <= 0) startWave(w);
 }
 
 const cmdOf = (w, p, input) => (!p.human ? botInput(w, p) : input.players ? input.players[p.id] || {} : input);
@@ -107,22 +125,22 @@ function look(p, cmd) {
   if (Number.isFinite(cmd.pitch)) p.pitch = clamp(cmd.pitch, -1.3, 1.3);
 }
 
-/** Raund takvimi: titreme, düşüş, doğuşun kapanması, merkezin küçülmesi ve sonu. */
+/** Dalga takvimi: titreme, düşüş, merkezin küçülmesi; merkez de düşünce dalga biter (plakalar geri gelecek). */
 function schedule(w) {
   const ring = n => w.plates.filter((_, i) => w.arena.plates[i].ring === n);
   for (const [at, n] of [[ROUND.ring2At, 2], [ROUND.ring1At, 1]]) {
     const list = ring(n);
     if (w.t >= at - ROUND.tremble && list[0].phase === 0) { for (const s of list) s.phase = 1; emit(w, 'tremble', { ring: n }); }
-    if (w.t >= at && list[0].phase === 1) {
-      for (const s of list) s.phase = 2;
-      if (n === 2) w.respawnOpen = false;
-      emit(w, 'collapse', { ring: n });
-    }
+    if (w.t >= at && list[0].phase === 1) { for (const s of list) s.phase = 2; emit(w, 'collapse', { ring: n }); }
   }
   const c = w.plates[0];
   if (w.t >= ROUND.shrinkAt - ROUND.tremble && !w.warned) { w.warned = true; emit(w, 'shrinkWarn'); }
   if (w.t >= ROUND.shrinkAt && c.phase < 2) c.r = Math.max(ROUND.minR, ARENA.center.r - (ARENA.center.r - ROUND.minR) * Math.min(1, (w.t - ROUND.shrinkAt) / ROUND.shrinkTime));
-  if (w.t >= ROUND.endAt && c.phase < 2) { c.phase = 2; emit(w, 'collapse', { ring: 0 }); }
+  if (w.t >= ROUND.endAt && c.phase < 2) {
+    c.phase = 2; emit(w, 'collapse', { ring: 0 });
+    w.state = 'over'; w.t = ROUND.between; w.over = { wave: w.round };
+    emit(w, 'roundEnd', { n: w.round, score: [...w.score] });
+  }
 }
 
 /** Düşen plakalar hızlanarak iner, çok aşağıda yok olur. */
@@ -151,11 +169,11 @@ function pickups(w, dt) {
   });
 }
 
-/** Elenen oyuncu doğuş açıkken ROUND.respawn saniye sonra doğar. */
+/** Düşen oyuncu ROUND.respawn saniye sonra doğar; o an ayakta plaka yoksa az sonra yine dener. */
 function respawn(w, p, dt) {
   if (p.respawn <= 0) return;
   p.respawn = Math.max(0, p.respawn - dt);
-  if (p.respawn === 0 && w.state === 'play') spawn(w, p);
+  if (p.respawn === 0 && w.state === 'play' && !spawn(w, p)) p.respawn = 0.5;
 }
 
 /** Girdiyi eyleme çevirir: zıplama, levye, disk şarjı ve atış. */
@@ -307,32 +325,33 @@ function collide(w, d) {
   return false;
 }
 
-/** Eleme: yalnız boşluğa düşünce. Son CREDIT saniyede vuran rakip düşürmüş sayılır. Doğuş açıksa geri gelir. */
+/**
+ * Düşüş: yalnız boşluğa düşünce. Son CREDIT saniyede vuran rakip düşürmüş sayılır (kendi ve takım skoruna yazılır).
+ * Düşme hakkı sınırsız: ROUND.respawn saniye sonra geri gelir.
+ */
 function eliminate(w, p, cause) {
   if (p.out) return;
   const by = p.lastHit && w.time - p.lastHit.t < CREDIT && w.players[p.lastHit.by]?.team !== p.team ? p.lastHit.by : null;
-  if (by !== null) w.players[by].stats.kills++;
+  if (by !== null) { w.players[by].stats.kills++; w.score[w.players[by].team]++; }
   p.stats.falls++;
   const at = { x: p.x, y: p.y, z: p.z };
   Object.assign(p, { out: true, y: -200, vx: 0, vy: 0, vz: 0, ground: false, plate: -1, knock: 0, flight: 0, freeze: 0, charge: 0, power: null, powerLeft: 0, discs: DISC.max, regen: 0 });
-  p.respawn = w.respawnOpen ? ROUND.respawn : 0;
-  emit(w, 'fall', { id: p.id, by, cause, ...at, respawn: p.respawn > 0 });
+  p.respawn = ROUND.respawn;
+  emit(w, 'fall', { id: p.id, by, cause, ...at, respawn: true, score: [...w.score] });
 }
 
-/** Sayılan oyuncu: ayakta ya da doğmayı bekleyen. */
-export const counted = p => !p.out || p.respawn > 0;
-export const aliveCount = (w, team) => w.players.filter(p => p.team === team && counted(p)).length;
+/** Ayakta olan oyuncu sayısı (takım). */
+export const aliveCount = (w, team) => w.players.filter(p => p.team === team && !p.out).length;
 
-/** Doğuş kapandıktan sonra bir takımın kimsesi kalmayınca raund biter. */
-function checkRound(w) {
-  if (w.respawnOpen) return;
-  const a = aliveCount(w, 0), b = aliveCount(w, 1);
-  if (a > 0 && b > 0) return;
-  const team = a > 0 ? 0 : b > 0 ? 1 : null;
-  w.state = 'over'; w.t = ROUND.between; w.over = { team };
-  if (team !== null) w.wins[team]++;
-  emit(w, 'roundEnd', { team, wins: [...w.wins], n: w.round });
-  if (team !== null && w.wins[team] >= ROUND.wins) { w.winner = team; emit(w, 'end', { team }); }
+/** Önde olan takımlar (en yüksek skor; eşitlikte birden çok). */
+export const leaders = w => { const best = Math.max(...w.score); return w.score.map((s, t) => (s === best ? t : -1)).filter(t => t >= 0); };
+
+/** Süre bitti: en çok düşüren takım kazanır; eşitlikte berabere (winner -1). */
+function endMatch(w) {
+  const top = leaders(w);
+  w.winner = top.length === 1 ? top[0] : -1;
+  w.state = 'over'; w.t = 0;
+  emit(w, 'end', { team: w.winner < 0 ? null : w.winner, score: [...w.score] });
 }
 
 export { facing };
