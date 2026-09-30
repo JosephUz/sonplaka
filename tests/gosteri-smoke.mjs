@@ -58,7 +58,7 @@ try {
   // 5) Kamera kavgayı izler: örneklerin çoğunda ayakta bir oyuncunun omzunda ve yakınında rakip var. (Boşluğa düşen
   // oyuncuyu gösterdiği kısa anlarda kamera plakada kalır, odak uzaklaşır: birkaç örneğin uzak çıkması beklenir.)
   const ornekler = [];
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 20; i++) {
     ornekler.push(await dunya(() => {
       const w = window.__sonPlaka.world(), c = window.__sonPlaka.view().camera.position;
       const odak = w.players[window.__sonPlaka.gosteri().odakId()];
@@ -67,13 +67,13 @@ try {
       for (const t of w.players) if (!t.out && t.team !== odak.team) rakip = Math.min(rakip, Math.hypot(t.x - odak.x, t.z - odak.z));
       return { rakip, uzaklik: Math.hypot(c.x - odak.x, c.z - odak.z), out: odak.out, dusuyor: odak.y < -1.5 };
     }));
-    await page.waitForTimeout(250);
+    await page.waitForTimeout(500);
   }
   assert.ok(ornekler.every(o => o && !o.out), 'kamera hep ayakta bir oyuncuyu izler');
   const omuzda = ornekler.filter(o => o.uzaklik < 12).length;
-  assert.ok(omuzda >= 8, `kamera oyuncunun omzunda (12 örneğin ${omuzda} tanesi)`);
+  assert.ok(omuzda >= 14, `kamera oyuncunun omzunda (20 örneğin ${omuzda} tanesi)`);
   const kavgada = ornekler.filter(o => o.rakip < 30).length;
-  assert.ok(kavgada >= 8, `izlenen oyuncunun yakınında rakip var (12 örneğin ${kavgada} tanesi)`);
+  assert.ok(kavgada >= 14, `izlenen oyuncunun yakınında rakip var (20 örneğin ${kavgada} tanesi)`);
 
   // 6) Maç bitince yenisi başlar (bitişi elle tetikleyip bekliyoruz).
   await dunya(() => { window.__sonPlaka.world().winner = 0; });

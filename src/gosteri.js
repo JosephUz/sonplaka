@@ -163,6 +163,10 @@ export function createGosteri({ view }) {
       if (d > K.cevre) continue;
       s += (t.team === p.team ? K.dost : 1) * (1 - d / K.cevre);
     }
+    // Hiç kimsenin dibinde rakip yokken (herkes yeni doğmuş, plakalar arası yol) kamera en yakın rakibi olanı seçsin:
+    // uzaklıkla sönen küçük bir çekim, beraberliği yaklaşmakta olan kavgadan yana bozar.
+    const yakin = enYakinRakip(p);
+    if (yakin) s += K.uzakRakip / (1 + distance(p, yakin));
     for (const d of w.discs) if (Math.hypot(d.x - p.x, d.z - p.z) < K.cevre) s += K.disk;
     if (p.knock > 0) s += K.savrulma;
     if (p.flight > 0) s += K.ucus;

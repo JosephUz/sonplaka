@@ -146,15 +146,17 @@ export const SERVER = 'sonplaka-sunucu.josephuz.com';
  * - `bot` yalnız bu kipte botun üstüne yazılan ayarlar (bkz. BOT): hızlı düşünür, sık ve isabetli atar, yakın dövüşür,
  *   kenardan çekinmez, doğar doğmaz atar ve rakibin plakasına daha çok geçer.
  * - `kamera`: `tara` saniyede bir en hareketli oyuncu aranır, seçilende en az `tut` saniye kalınır (yenisi `ustunluk`
- *   katı hareketliyse hemen geçilir), `yumusatma` / `donme` çapanın ve bakışın yumuşaklığı (1/sn), `geri` çapanın oyuncunun arkasına düştüğü pay (omuz kamerasını biraz geri çeker), `kes` bu uzaklıktan
- *   öteye geçişte kesme yapılır, `egim` kadrajın sabit eğimi. Düşüş: `bosluk` yüksekliğinin altındaki oyuncu "düşüyor"
- *   sayılır (kamera yerinde kalıp aşağı bakar ve en geç `dususTut` saniye içinde kavgaya döner), `enAlcak` çapanın inebileceği
- *   en alt nokta — kamera arenanın altına geçmez. Puan ağırlıkları: `cevre` aksiyonun sayıldığı yarıçap, `dost` takım
- *   arkadaşının katkısı (rakip 1), `disk` çevredeki her disk, `savrulma` / `ucus` / `sarj` oyuncunun hâli, `dusme`
- *   düşmekte olan oyuncunun (kısa tutulan) puanı.
+ *   katı hareketliyse hemen geçilir), `yumusatma` / `donme` çapanın ve bakışın yumuşaklığı (1/sn), `geri` çapanın
+ *   oyuncunun arkasına düştüğü pay (omuz kamerasını biraz geri çeker), `kes` bu uzaklıktan öteye geçişte kesme yapılır,
+ *   `egim` kadrajın sabit eğimi. Düşüş: `bosluk` yüksekliğinin altındaki oyuncu "düşüyor" sayılır (kamera yerinde kalıp
+ *   aşağı bakar ve en geç `dususTut` saniye içinde kavgaya döner), `enAlcak` çapanın inebileceği en alt nokta — kamera
+ *   arenanın altına geçmez. Puan ağırlıkları: `cevre` aksiyonun sayıldığı yarıçap, `dost` takım arkadaşının katkısı
+ *   (rakip 1), `uzakRakip` uzaktaki en yakın rakibin küçük çekimi (kimse temasta değilken kamerayı yaklaşan kavgaya
+ *   çevirir), `disk` çevredeki her disk, `savrulma` / `ucus` / `sarj` oyuncunun hâli, `dusme` düşmekte olan oyuncunun
+ *   (kısa tutulan) puanı.
  */
 export const GOSTERI = {
   kip: 5, zorluk: 'hard', hiz: 1.5, geriSayim: 0.5, yenidenBasla: 1.5, yayilma: 3.2, enFazlaAdim: 12, can: 12,
   bot: { think: 0.18, thinkJitter: 0.12, range: 7, close: 3, strafe: 0.8, edge: 1.2, fireEvery: 0.45, fireJitter: 0.4, aimError: 0.06, heavyChance: 0.2, dodgeChance: 0.35, crossChance: 0.7, stay: 1.5, spawnWait: 0 },
-  kamera: { tara: 0.6, tut: 3.5, ustunluk: 1.35, yumusatma: 3.5, donme: 4, kes: 26, egim: -0.1, geri: 2.5, bosluk: -1.5, dususTut: 0.35, enAlcak: -2, cevre: 14, dost: 0.35, disk: 0.25, savrulma: 1.5, ucus: 0.8, sarj: 0.3, dusme: 0.4 },
+  kamera: { tara: 0.6, tut: 3.5, ustunluk: 1.35, yumusatma: 3.5, donme: 4, kes: 26, egim: -0.1, geri: 2.5, bosluk: -1.5, dususTut: 0.35, enAlcak: -2, cevre: 14, dost: 0.35, uzakRakip: 2, disk: 0.25, savrulma: 1.5, ucus: 0.8, sarj: 0.3, dusme: 0.4 },
 };
