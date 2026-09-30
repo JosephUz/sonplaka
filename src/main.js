@@ -1,5 +1,6 @@
 import { createAudio } from './audio.js';
 import { CAMERA, DIFFICULTIES, DIFFICULTY_LABEL, DISC, MATCH, MODES, PICKUP, TEAMS, modeLabel, playersFor } from './config.js';
+import { createGosteri, gosteriAcik } from './gosteri.js';
 import { createInput } from './input.js';
 import { createLobby } from './lobby.js';
 import { createNetClient } from './net/client.js';
@@ -22,6 +23,9 @@ import { alive, createWorld, step } from './world.js';
  *
  * Dokunmatik kip (telefon, tablet; ?touch=1 ile masaüstünde de): joystick ve düğmeler (touch.js), omuz kamerası,
  * hafif görüntü, önemli anlarda titreşim.
+ *
+ * **Gösteri kipi** (yalnız web, `?gosteri=1`; bkz. gosteri.js): içerik klipleri için on botun kendi kendine oynadığı
+ * maç. Menü ve lobi atlanır, arayüz gizlenir, girdi ve sunucu yoktur; kamera kavgayı izler, maç bitince yenisi başlar.
  */
 const STEP = 1 / 60, MAX_STEPS = 5;
 const POWER_NAMES = { triple: 'ÜÇLÜ DİSK', freeze: 'DONDURUCU DİSK' };
@@ -62,11 +66,13 @@ export async function start(root) {
   for (const i of modeInputs) i.onchange = () => setMode(Number(i.value));
   for (const i of diffInputs) i.onchange = () => setDiff(i.value);
   let online = false;
+  // Gösteri kipi (?gosteri=1, yalnız web): botlar oynar, arayüz ve girdi yok (bkz. gosteri.js).
+  const gosteri = gosteriAcik() ? createGosteri({ view }) : null;
   let w = createWorld(), screen = 'home', started = false, acc = 0, uiClock = 0, helpReturn = 'home', pausedAt = 0, last = performance.now();
   view.setWorld(w);
   faceCenter();
 
-  const active = () => started && !screen;
+  const active = () => started && !screen && !gosteri;
   input = createInput(view.canvas, {
     testMode,
     touch: touch && root,
@@ -123,7 +129,7 @@ export async function start(root) {
   ui.setSound(audio.enabled);
 
   // ---------- Çevrim içi ----------
-  const net = onlineEnabled() ? createNetClient({
+  const net = onlineEnabled() && !gosteri ? createNetClient({
     onWelcome() {
       lobby.setServer(true);
       if (pending) { const go = pending; pending = null; go(); return; }
@@ -266,6 +272,8 @@ export async function start(root) {
     requestAnimationFrame(frame);
     const dt = Math.min(0.08, (now - last) / 1000);
     last = now;
+    // Gösteri: girdi ve arayüz yok; botlar oynar, kamera en hareketli kavgayı omuz üstünden izler (bkz. gosteri.js).
+    if (gosteri) { w = gosteri.guncelle(dt); view.render(w, dt, true, gosteri.odak(dt), false); return; }
     if (online && started) {
       const move = active() ? input.move(view) : null;
       net.input(active() ? input.read(view) : { x: 0, z: 0, yaw: view.yaw, pitch: view.pitch, hold: false }, dt);
@@ -291,6 +299,15 @@ export async function start(root) {
     if (uiClock <= 0) { uiClock = 0.08; refresh(); }
   }
 
+  if (gosteri) {
+    // Menü ve lobi atlanır, arayüz gizlenir (bkz. style.css `.gosteri`), kamera omuz üstüne alınır, maç hemen başlar.
+    root.classList.add('gosteri');
+    setCamera('shoulder');
+    screen = null; started = true; ui.show(null);
+    const ad = root.querySelector('#sp-gosteri'); if (ad) ad.hidden = false;
+    w = gosteri.basla();
+    window.__sonPlaka = { world: () => w, view: () => view, net: () => null, gosteri: () => gosteri, state: () => ({ screen, started, online }) };
+  }
   if (testMode) {
     window.__sonPlaka = {
       world: () => w, view: () => view, net: () => net, state: () => ({ screen, started, online }),
@@ -307,7 +324,7 @@ export async function start(root) {
 
   refresh();
   requestAnimationFrame(frame);
-  if (!testMode && !net) heartbeat();
+  if (!testMode && !net && !gosteri) heartbeat();
 }
 
 /** Dokunmatikte kısa titreşim: atış, isabet, düşme, çökme. */

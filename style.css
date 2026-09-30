@@ -298,3 +298,13 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 #son-plaka .lobby-head h2{font-size:24px;margin:4px 0}
 #son-plaka .seat{min-height:30px;padding:5px 9px}
 }
+
+/* Gösteri kipi (?gosteri=1, yalnız web; bkz. src/gosteri.js): yalnız oyun dünyası görünür — üst çubuk, skor tabelası,
+   giriş ve perdeler, oyuncu kartı, nişangah, mesajlar, isim etiketleri ve dokunmatik kontroller gizlenir. Sol altta
+   küçük oyun adı durur. */
+#son-plaka.gosteri header,#son-plaka.gosteri #sp-scoreboard,#son-plaka.gosteri #sp-home,#son-plaka.gosteri .overlay,
+#son-plaka.gosteri #sp-player,#son-plaka.gosteri #sp-controls,#son-plaka.gosteri #sp-crosshair,#son-plaka.gosteri #sp-charge,
+#son-plaka.gosteri #sp-message,#son-plaka.gosteri #sp-warn,#son-plaka.gosteri #sp-rule,#son-plaka.gosteri #sp-down,
+#son-plaka.gosteri #sp-freeze,#son-plaka.gosteri #sp-touch,#son-plaka.gosteri #sp-rotate,#son-plaka.gosteri #sp-labels{display:none!important}
+#son-plaka #sp-gosteri{position:absolute;left:24px;bottom:20px;z-index:6;font:800 12px/1 system-ui,sans-serif;letter-spacing:4px;
+  color:#e8eefcbb;text-shadow:0 2px 8px #000a;pointer-events:none}
