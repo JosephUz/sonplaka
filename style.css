@@ -215,11 +215,15 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 #son-plaka #sp-message{top:62px;padding:9px 18px;font-size:12px}
 #son-plaka #sp-warn{top:52px;padding:6px 12px;font-size:10px}
 #son-plaka #sp-rule{padding:5px 10px;font-size:8px;letter-spacing:1px}
-#son-plaka .home-content{padding-top:34px;margin-left:calc(5vw + env(safe-area-inset-left));width:min(440px,70vw)}
+/* Yatay telefonda giriş ekranı 360 px yüksekliğe sığmıyordu: ortalanmış içeriğin altı (ad kutusu, ODA KUR / ODAYA
+   KATIL) ekranın dışında kalıyordu. Kısa ekranda içerik yukarıdan başlar ve giriş ekranı kendi içinde kaydırılır. */
+#son-plaka .home{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain}
+#son-plaka .home-content{padding-top:48px;padding-bottom:16px;margin-left:calc(5vw + env(safe-area-inset-left));width:min(440px,70vw)}
 #son-plaka .home h1{font-size:30px;letter-spacing:-1px;margin:10px 0}
-#son-plaka .home p{font-size:12px;line-height:1.5;margin:8px 0 14px}
+/* Kısa ekranda tanıtım paragrafı ve alt bilgi satırı gizlenir (kural kartları gibi): giriş ekranının tamamı —
+   "ARENAYA GİR", ad kutusu ve oda düğmeleri — ekrana sığsın. Seçili kip zaten düğmelerde işaretli. */
+#son-plaka .home p,#son-plaka .home-meta{display:none}
 #son-plaka .home .primary{min-height:44px;padding:12px 18px;width:230px}
-#son-plaka .home-meta{margin-top:10px}
 #son-plaka .rule-cards{margin-top:14px}
 #son-plaka .rule-cards span{margin-top:5px;line-height:1.4}
 #son-plaka .pitch-note{display:none}

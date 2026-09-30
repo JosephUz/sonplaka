@@ -301,8 +301,10 @@ export async function start(root) {
 
   if (gosteri) {
     // Menü ve lobi atlanır, arayüz gizlenir (bkz. style.css `.gosteri`), kamera omuz üstüne alınır, maç hemen başlar.
+    // Kamera doğrudan görünüme verilir: `setCamera` tercihi `localStorage`'a (`sp.cam`) yazar; gösteri kipi oyuncunun
+    // kendi kamera tercihine dokunmamalı (aynı tarayıcıda normal oyun eskisi gibi açılsın).
     root.classList.add('gosteri');
-    setCamera('shoulder');
+    view.setCamera('shoulder');
     screen = null; started = true; ui.show(null);
     const ad = root.querySelector('#sp-gosteri'); if (ad) ad.hidden = false;
     w = gosteri.basla();
