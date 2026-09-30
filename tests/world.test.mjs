@@ -233,12 +233,12 @@ test('doğmayı bekleyen oyuncu sayılır: doğuş açıkken herkes düşse de m
   assert.equal(w.state, 'play', 'doğmayı bekleyen sayılmalı');
 });
 
-test('merkez düşünce maç biter: ayakta oyuncusu çok olan, eşitse en çok düşüren kazanır, o da eşitse berabere', () => {
+test('süre bitince maç biter: son plakada ayakta oyuncusu çok olan, eşitse en çok düşüren kazanır, o da eşitse berabere', () => {
   const w = setup(); spread(w); w.respawnOpen = false;
   Object.assign(w.players[5], { out: true, respawn: 0 });
   w.t = ROUND.endAt - 0.02;
   run(w, 3);
-  assert.equal(w.state, 'over'); assert.equal(w.plates[0].phase, 2); assert.equal(w.winner, 0, 'ayakta 5-4: mavi kazanmalı');
+  assert.equal(w.state, 'over'); assert.equal(w.winner, 0, 'ayakta 5-4: mavi kazanmalı');
   assert.ok(w.events.some(e => e.type === 'end' && e.why === 'time'));
   const tie = setup(); spread(tie); tie.respawnOpen = false; tie.score = [1, 3];
   tie.t = ROUND.endAt - 0.02; run(tie, 3);
@@ -252,18 +252,80 @@ test('merkez düşünce maç biter: ayakta oyuncusu çok olan, eşitse en çok d
   assert.equal(ffa.winner, 3, 'herkes tek: kalan son oyuncu kazanır');
 });
 
-test('merkez plaka 100. saniyeden sonra küçülür, 145. saniyede düşer', () => {
+test('merkez plaka 100. saniyeden sonra küçülür ama itiş sürsün diye 5,5 yarıçapta durur; hiç düşmez', () => {
   const w = setup(); spread(w);
   w.t = ROUND.shrinkAt + ROUND.shrinkTime / 2;
   run(w, 3);
   assert.ok(w.plates[0].r < ARENA.center.r - 2 && w.plates[0].r > ROUND.minR);
   assert.equal(groundAt(w, ARENA.center.r - 0.5, 0), null, 'küçülen plakanın dışı zemin sayıldı');
-  w.t = ROUND.endAt - 0.02;
+  w.t = ROUND.shrinkAt + ROUND.shrinkTime + 1;
   run(w, 3);
-  assert.equal(w.plates[0].phase, 2);
+  assert.equal(w.plates[0].r, ROUND.minR, "daralma minR'de durmalı");
+  assert.ok(ROUND.minR >= 5, 'son evrede itişecek alan kalmalı: minR en az 5');
+  assert.ok(groundAt(w, ROUND.minR - 0.3, 0), 'daralmış merkez hâlâ zemin olmalı');
 });
 
-test('botlarla tam maç biter: son plakada kalan kazanır (en geç merkez düşünce), koordinatlar geçerli, botlar atar ve düşürür', () => {
+test('süre bitince merkez plaka DÜŞMEZ: maç biter ve o an son plakada kalanlar kazanır', () => {
+  const w = setup(); spread(w); w.respawnOpen = false;
+  // Turuncunun iki oyuncusu merkezde, mavinin biri; kalanlar elenmiş.
+  for (const p of w.players) Object.assign(p, { out: true, respawn: 0 });
+  for (const id of [0, 5, 6]) { const p = center(w, id, id - 5, 0); p.out = false; }
+  w.t = ROUND.endAt - 0.02;
+  run(w, 3);
+  assert.equal(w.state, 'over'); assert.equal(w.over.why, 'time');
+  assert.ok(w.plates[0].phase < 2, 'merkez plaka süre bitince düşmemeli');
+  assert.ok(w.plates[0].y === 0, 'merkez plaka yerinde kalmalı');
+  assert.ok(!w.events.some(e => e.type === 'collapse' && e.ring === 0), 'merkez için çöküş olayı çıkmamalı');
+  assert.equal(w.winner, 1, 'merkezde 2 turuncu 1 mavi: turuncu kazanmalı');
+  for (const id of [0, 5, 6]) assert.equal(w.players[id].out, false, 'son plakadakiler düşmemeli');
+});
+
+test('süre bitince son plakada eşit sayıdaysa en çok düşüren kazanır; herkes tek kipinde merkezde kalan tek kişi', () => {
+  const tie = setup(); spread(tie); tie.respawnOpen = false;
+  for (const p of tie.players) Object.assign(p, { out: true, respawn: 0 });
+  for (const id of [0, 5]) { const p = center(tie, id, id - 2.5, 0); p.out = false; }
+  tie.score = [2, 7];
+  tie.t = ROUND.endAt - 0.02; run(tie, 3);
+  assert.equal(tie.winner, 1, 'merkezde 1-1: düşürme puanı çok olan kazanmalı');
+
+  // Herkes tek: merkezde iki kişi kaldıysa (yoksa 'rakip kalmadı' kuralı zaten hemen bitirir) en çok düşüren kazanır.
+  const ffa = createWorld(1, { teamSize: 1 });
+  ffa.state = 'play'; ffa.respawnOpen = false;
+  for (const p of ffa.players) { p.think = 999; p.human = true; Object.assign(p, { out: true, respawn: 0 }); }
+  for (const id of [2, 3]) center(ffa, id, id - 2.5, 0).out = false;
+  ffa.score = [0, 0, 5, 1, 0];
+  ffa.t = ROUND.endAt - 0.02; run(ffa, 3);
+  assert.equal(ffa.over.why, 'time', 'süre bitince bitmeli');
+  assert.equal(ffa.winner, 2, 'herkes tek: merkezde kalanlar arasında en çok düşüren kazanır');
+});
+
+test('son evrede botlar merkeze gidip orada kalır ve rakibi iter (disk bitse de levye sallar)', () => {
+  const w = createWorld(1, { teamSize: 2 });
+  w.state = 'play'; w.t = ROUND.shrinkAt + 28; w.respawnOpen = false;
+  // Yalnız merkez ayakta; botlar bir iç halka plakasında.
+  for (let i = 1; i < w.plates.length; i++) w.plates[i].phase = i === 1 ? 0 : 2;
+  const inner = w.arena.plates[1];
+  w.players.forEach((p, i) => Object.assign(p, { x: inner.x + i * 0.9, y: 0, z: inner.z, vx: 0, vy: 0, vz: 0, ground: true, plate: 1, out: false, respawn: 0, padLock: 0 }));
+  run(w, 60 * 6);
+  assert.ok(w.players.some(p => !p.out && p.plate === 0), 'botlar son evrede merkeze gitmedi');
+
+  // Disksiz son evre: itiş yalnız levyeyle sürer.
+  const duel = createWorld(1, { teamSize: 2 });
+  duel.state = 'play'; duel.t = ROUND.shrinkAt + 28; duel.respawnOpen = false;
+  for (let i = 1; i < duel.plates.length; i++) duel.plates[i].phase = 2;
+  duel.players.forEach((p, i) => { const a = i / duel.players.length * Math.PI * 2; Object.assign(p, { x: Math.sin(a) * 3, y: 0, z: Math.cos(a) * 3, vx: 0, vy: 0, vz: 0, ground: true, plate: 0, out: false, respawn: 0 }); });
+  let swings = 0;
+  for (let i = 0; i < 60 * 15 && duel.winner === null; i++) {
+    for (const p of duel.players) { p.discs = 0; p.regen = 99; }
+    step(duel, 1 / 60);
+    for (const e of duel.events) if (e.type === 'swing') swings++;
+    duel.events.length = 0;
+  }
+  assert.ok(swings > 0, 'son evrede diski biten bot levye sallamadı');
+  assert.ok(duel.winner !== null, 'itiş kimseyi düşürmedi');
+});
+
+test('botlarla tam maç biter: son plakada kalan kazanır (en geç süre bitince), koordinatlar geçerli, botlar atar ve düşürür', () => {
   for (const teamSize of [5, 1]) {
     const w = createWorld(7, { teamSize });
     let throws = 0;
@@ -273,7 +335,8 @@ test('botlarla tam maç biter: son plakada kalan kazanır (en geç merkez düş�
       w.events.length = 0;
       for (const p of w.players) assert.ok(Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.z));
     }
-    assert.notEqual(w.winner, null, 'maç bitmedi'); assert.ok(w.t <= ROUND.endAt + 0.1, 'maç merkez düşünce bitmeli');
+    assert.notEqual(w.winner, null, 'maç bitmedi'); assert.ok(w.t <= ROUND.endAt + 0.1, 'maç en geç süre bitince bitmeli');
+    assert.ok(w.plates[0].phase < 2, 'merkez plaka hiç düşmemeli');
     assert.equal(w.respawnOpen, false, 'son plaka evresine gelinmeli');
     if (w.winner >= 0) assert.equal(aliveCount(w, w.winner), Math.max(...w.players.map(p => aliveCount(w, p.team))), 'kazanan ayakta oyuncusu en çok olan olmalı');
     assert.ok(throws > 50, 'botlar disk atmadı: ' + throws);

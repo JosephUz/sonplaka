@@ -14,10 +14,11 @@ export { alive, jump, swing, throwDisc };
  * (görünüm, ses ve mesajlar oradan okur; tüketen boşaltır). `me`: bu tarayıcıdaki oyuncu.
  *
  * `state` 'countdown' (w.t geri sayar) → 'play' (w.t oyun saati; plakalar ROUND takvimine göre titrer ve düşer, merkez
- * küçülür ve sonunda o da düşer) → 'over' (maç bitti, `winner`: takım ya da -1 berabere). Dış ve iç halka ayaktayken
+ * küçülür ama **hiç düşmez**) → 'over' (maç bitti, `winner`: takım ya da -1 berabere). Dış ve iç halka ayaktayken
  * düşen ROUND.respawn saniye sonra ayakta bir plakada doğar (`respawnOpen`); iç halka düşünce **son plaka**: doğuş
  * kapanır, elenen elenir. Rakip takımların kimsesi kalmayınca (ayakta ya da doğmayı bekleyen) ayakta kalan takım
- * kazanır; ROUND.endAt gelince ayakta oyuncusu en çok olan, eşitse en çok düşüren (`score`), o da eşitse berabere.
+ * kazanır; ROUND.endAt'te süre biter ve **o an son plakada ayakta kalan kazanır**: ayakta oyuncusu en çok olan takım,
+ * eşitse en çok düşüren (`score`), o da eşitse berabere (herkes tek kipinde merkezde kalan tek kişi).
  *
  * İnsan girdisi (her adım): x, z hareket yönü (dünya uzayı); yaw, pitch bakış; hold sol tık basılı, tap bu adımda
  * basıldı, release bırakıldı (kısa: normal disk, DISC.heavyCharge'dan uzun: ağır disk); secondary levye; jump zıplama.
@@ -123,7 +124,10 @@ function look(p, cmd) {
   if (Number.isFinite(cmd.pitch)) p.pitch = clamp(cmd.pitch, -1.3, 1.3);
 }
 
-/** Takvim: titreme, düşüş (iç halka düşünce son plaka: doğuş kapanır), merkezin küçülmesi ve düşüşü (maç biter). */
+/**
+ * Takvim: titreme, düşüş (iç halka düşünce son plaka: doğuş kapanır), merkezin küçülmesi ve sürenin bitişi.
+ * Merkez plaka **düşmez**: `endAt`'te süre biter ve o an son plakada ayakta kalan kazanır.
+ */
 function schedule(w) {
   const ring = n => w.plates.filter((_, i) => w.arena.plates[i].ring === n);
   for (const [at, n] of [[ROUND.ring2At, 2], [ROUND.ring1At, 1]]) {
@@ -138,7 +142,7 @@ function schedule(w) {
   const c = w.plates[0];
   if (w.t >= ROUND.shrinkAt - ROUND.tremble && !w.warned) { w.warned = true; emit(w, 'shrinkWarn'); }
   if (w.t >= ROUND.shrinkAt && c.phase < 2) c.r = Math.max(ROUND.minR, ARENA.center.r - (ARENA.center.r - ROUND.minR) * Math.min(1, (w.t - ROUND.shrinkAt) / ROUND.shrinkTime));
-  if (w.t >= ROUND.endAt && c.phase < 2) { c.phase = 2; emit(w, 'collapse', { ring: 0 }); endMatch(w, 'time'); }
+  if (w.t >= ROUND.endAt) endMatch(w, 'time');
 }
 
 /** Düşen plakalar hızlanarak iner, çok aşağıda yok olur. */
@@ -338,14 +342,14 @@ function eliminate(w, p, cause) {
   emit(w, 'fall', { id: p.id, by, cause, ...at, respawn: p.respawn > 0, score: [...w.score] });
 }
 
-/** Sayılan oyuncu: ayakta ya da doğmayı bekleyen. */
+/** Sayılan oyuncu: ayakta ya da doğmayı bekleyen. Son plaka evresinde doğuş kapalıdır: sayılan = merkezde ayakta. */
 export const counted = p => !p.out || p.respawn > 0;
-/** Takımın sayılan oyuncu sayısı. */
+/** Takımın sayılan oyuncu sayısı (son plaka evresinde: merkezde ayakta kalan oyuncu sayısı). */
 export const aliveCount = (w, team) => w.players.filter(p => p.team === team && counted(p)).length;
 
 /** En yüksek değere sahip takımlar (eşitlikte birden çok). */
 const tops = values => { const best = Math.max(...values); return values.map((v, t) => (v === best ? t : -1)).filter(t => t >= 0); };
-/** Önde olan takımlar: ayakta oyuncusu en çok olan; eşitse aralarında en çok düşüren. */
+/** Önde olan takımlar: son plakada ayakta oyuncusu en çok olan; eşitse aralarında en çok düşüren. */
 export const leaders = w => {
   const alive = tops(Array.from({ length: w.teams }, (_, t) => aliveCount(w, t)));
   if (alive.length === 1) return alive;
@@ -359,8 +363,12 @@ function checkEnd(w) {
   if (standing.length <= 1) endMatch(w, 'last');
 }
 
-/** Maç sonu: `why` 'last' (kimse kalmadı) ya da 'time' (merkez düştü). Kazanan leaders(); eşitlikte -1 berabere. */
+/**
+ * Maç sonu: `why` 'last' (rakip takımın kimsesi kalmadı) ya da 'time' (süre bitti; merkez düşmez, o an son plakada
+ * ayakta kalan kazanır). Kazanan leaders(); eşitlikte -1 berabere.
+ */
 function endMatch(w, why) {
+  if (w.winner !== null) return;
   const top = leaders(w);
   w.winner = top.length === 1 ? top[0] : -1;
   w.state = 'over'; w.t = 0; w.over = { why };

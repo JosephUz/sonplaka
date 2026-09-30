@@ -3,8 +3,9 @@ import { aliveCount, leaders } from './world.js';
 
 /**
  * Arayüz (DOM): ekranlar (giriş, yardım, mola, maç sonu, lobi), skor tabelası (takımların ayakta oyuncusu ve düşürmesi,
- * son plakanın düşmesine kalan süre, sıradaki evre), sol alttaki oyuncu kartı (disk çubukları, güç), nişangah çevresinde ağır disk dolum
- * halkası, ortadaki mesaj, çökme uyarı şeridi, düşme ve donma perdeleri. Simülasyonu yalnızca okur.
+ * sürenin bitmesine kalan zaman, sıradaki evre), sol alttaki oyuncu kartı (disk çubukları, güç), nişangah çevresinde
+ * ağır disk dolum halkası, ortadaki mesaj, çökme uyarı şeridi, son evrede kural şeridi ("süre bitince son plakada
+ * kalan kazanır" + kalan süre), düşme ve donma perdeleri. Simülasyonu yalnızca okur.
  */
 const SCREENS = ['home', 'help', 'pause', 'results', 'lobby'];
 const STATS = ['kills', 'falls', 'hits', 'throws', 'pickups', 'pads'];
@@ -18,7 +19,7 @@ export function createUI(root) {
     boards: [$('board-l'), $('board-r')], timer: $('timer'), phase: $('phase'),
     side: $('side'), status: $('status'), discText: $('disc-text'), discs: $('discs'), power: $('power'),
     down: $('down'), downTitle: $('down-title'), downCount: $('down-count'), downNote: $('down-note'), freeze: $('freeze'),
-    crosshair: $('crosshair'), message: $('message'), warn: $('warn'),
+    crosshair: $('crosshair'), message: $('message'), warn: $('warn'), rule: $('rule'),
     charge: $('charge'), chargeText: $('charge-text'),
     site: $('site'), resultTitle: $('result-title'), finalScore: $('final-score'), stats: $('stats'), sound: $('sound'), pauseSound: $('pause-sound'),
   };
@@ -66,12 +67,17 @@ export function createUI(root) {
       const key = `${w.teams}:${me.team}`;
       if (key !== boardKey) { boardKey = key; buildBoard(w); }
       w.score.forEach((s, t) => { if (scoreCells[t]) { scoreCells[t].alive.textContent = aliveCount(w, t); scoreCells[t].kills.textContent = s + ' ↓'; } });
-      // Saat: son plakanın düşmesine kalan süre.
+      // Saat: sürenin bitmesine kalan zaman (merkez düşmez, süre bitince son plakada kalan kazanır).
       const t = Math.max(0, w.state === 'countdown' ? ROUND.endAt : ROUND.endAt - w.t);
-      el.timer.textContent = Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
+      const clock = Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
+      el.timer.textContent = clock;
       el.timer.classList.toggle('hot', w.state === 'play' && !w.respawnOpen);
       const [text, hot] = phase(w);
       el.phase.textContent = text; el.phase.classList.toggle('hot', hot);
+      // Son evre şeridi: kural ve kalan süre birlikte görünür.
+      const lastPhase = playing && !screen && w.state === 'play' && !w.respawnOpen;
+      el.rule.hidden = !lastPhase;
+      if (lastPhase) el.rule.innerHTML = `SÜRE BİTİNCE SON PLAKADA KALAN KAZANIR · <b>${clock}</b>`;
       el.side.textContent = 'SEN / ' + TEAMS.names[me.team] + (w.teamSize > 1 ? ' TAKIM' : '');
       el.status.textContent = me.out ? (w.respawnOpen || me.respawn > 0 ? 'DÖNÜYORSUN' : 'ELENDİN') : me.freeze > 0 ? 'DONDUN' : me.knock > 0 ? 'SAVRULDUN' : me.flight > 0 ? 'UÇUŞTA' : me.discs > 0 ? 'DİSKLER HAZIR' : 'DİSK YENİLENİYOR';
       el.discText.textContent = me.discs + ' / ' + DISC.max;
@@ -129,8 +135,8 @@ function phase(w) {
   if (t < ROUND.ring2At) return [`DIŞ HALKA DÜŞER · ${left(ROUND.ring2At)}`, t >= ROUND.ring2At - ROUND.tremble];
   if (t < ROUND.ring1At) return [`İÇ HALKA DÜŞER · DOĞUŞ KAPANIR · ${left(ROUND.ring1At)}`, t >= ROUND.ring1At - ROUND.tremble];
   if (t < ROUND.shrinkAt) return [`SON PLAKA · DARALMA · ${left(ROUND.shrinkAt)}`, t >= ROUND.shrinkAt - ROUND.tremble];
-  if (t < ROUND.endAt) return [`SON PLAKA DÜŞER · ${left(ROUND.endAt)}`, true];
-  return ['BOŞLUK', true];
+  if (t < ROUND.endAt) return [`SÜRE BİTİNCE KALAN KAZANIR · ${left(ROUND.endAt)}`, true];
+  return ['SÜRE BİTTİ', true];
 }
 
 /** Önde olan takımın adı (tek başına öndeyse), yoksa null. */

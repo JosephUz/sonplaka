@@ -2,7 +2,7 @@
 
 Three.js ile tarayıcıda çalışan, birinci şahıs **disk arenası + daralan boşluk**. Boşlukta asılı 13 plaka maç boyunca
 dıştan içe düşer; diskle rakibi kenardan aşağı atarsın, rampalarla içeri kaçarsın. Can yok, mermi yok. Dış halkalar
-ayaktayken düşme hakkı sınırsız; iç halka düşünce **son plaka**: doğuş kapanır, orada ayakta kalan takım kazanır.
+ayaktayken düşme hakkı sınırsız; iç halka düşünce **son plaka**: doğuş kapanır ve süre bitince orada ayakta kalan kazanır.
 Kipler **herkes tek** (5 kişi), **2v2 … 5v5**; boş yerleri botlar doldurur; webde **çok oyunculu** (oda, aynı kipler,
 co-op ya da PvP).
 Oyun fikri ve kurallar: [OYUN-FIKRI.md](OYUN-FIKRI.md).
@@ -39,12 +39,15 @@ Chromium'unu indirir (kullanıcının Chrome'una ve faresine dokunmaz). Ekran g�
 - **Zıplama** (Boşluk): havada bir kez daha. Uçuşta ve savrulurken yön verilmez.
 - **Rampalar**: plakalar arası tek geçiş; plaka kenarındaki rampaya koş, okun gösterdiği plakaya uçarsın. Rampa hiç kapanmaz.
 - **Hızlı koşu** (Shift; telefonda joystick sonuna kadar): 1,45 kat hız.
-- **Daralma**: 40. sn dış halka düşer; 80. sn iç halka (**doğuş kapanır**); 100-130. sn merkez küçülür; 145. sn merkez
-  düşer. Düşmeden 5 sn önce plaka titrer ve ekranda uyarı çıkar.
+- **Daralma**: 40. sn dış halka düşer; 80. sn iç halka (**doğuş kapanır**); 100-130. sn merkez yarıçap 10'dan 5,5'e
+  küçülür ve orada durur — itiş sürsün diye daha fazla daralmaz. **Merkez plaka hiç düşmez**; 145. sn süre biter.
+  Düşmeden 5 sn önce plaka titrer ve ekranda uyarı çıkar.
 - **Doğuş ve kazanan**: dış ve iç halka ayaktayken düşen 4 sn sonra ayakta bir plakada doğar (kendi dış plakası;
   düştüyse iç halka). İç halka düşünce yalnız merkez kalır ve doğuş kapanır: rakip takımların kimsesi kalmayınca
-  ayakta kalan takım kazanır; merkez 145. sn düşerse ayakta oyuncusu en çok olan, eşitse en çok düşüren (`score`), o
-  da eşitse berabere. Düşen, doğana (ya da maç bitene) kadar düşüşünü ve takım arkadaşını izler.
+  ayakta kalan takım hemen kazanır. **145. sn süre bitince son plakada (merkezde) ayakta kalan kazanır**: ayakta
+  oyuncusu en çok olan takım, eşitse en çok düşüren (`score`), o da eşitse berabere; herkes tek kipinde merkezde
+  kalan tek kişi, birden fazlaysa en çok düşüren. Son evre boyunca ekranda kalan süre ve "SÜRE BİTİNCE SON PLAKADA
+  KALAN KAZANIR" şeridi durur. Düşen, doğana (ya da maç bitene) kadar düşüşünü ve takım arkadaşını izler.
 - **Kipler** (giriş ekranında seçilir, hatırlanır): **herkes tek** (5 oyuncu, herkes ayrı takım), **2v2**, **3v3**,
   **4v4**, **5v5**. Boş yerler bot.
 - **Güç diskleri**: merkezde ve iç halkada; üçlü (3 atış yelpaze) ve dondurucu (3 atış, 2 sn donma).

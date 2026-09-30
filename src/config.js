@@ -23,11 +23,12 @@ export const ARENA = {
  * Maç akışı (saniye, oyun saatine göre): `start` saniye geri sayım (kimse kıpırdamaz); dış halka `ring2At`'te, iç halka
  * `ring1At`'te düşer; her düşüşten `tremble` saniye önce plaka titrer. Dış halka düşene kadar düşen `respawn` saniye
  * sonra kendi dış plakasında, sonra iç halkada doğar. İç halka düşünce **son plaka** evresi: yalnız merkez kalır ve
- * **doğuş kapanır**. Merkez `shrinkAt`'ten başlayarak `shrinkTime` saniyede `minR` yarıçapına küçülür, `endAt`'te
- * düşer. Son plakada ayakta kalan takım kazanır: rakip takımların kimsesi kalmayınca hemen; `endAt` gelince ayakta
- * oyuncusu en çok olan, eşitse en çok düşüren, o da eşitse berabere.
+ * **doğuş kapanır**. Merkez `shrinkAt`'ten başlayarak `shrinkTime` saniyede `minR` yarıçapına küçülür; itiş sürsün
+ * diye o kadar daralır ve orada kalır — **merkez hiç düşmez**. `endAt`'te süre biter ve **o an son plakada ayakta
+ * kalan kazanır**: ayakta oyuncusu en çok olan takım, eşitse en çok düşüren, o da eşitse berabere. Rakip takımların
+ * kimsesi kalmayınca maç zaten hemen biter.
  */
-export const ROUND = { start: 3, tremble: 5, ring2At: 40, ring1At: 80, shrinkAt: 100, shrinkTime: 30, minR: 2.2, endAt: 145, respawn: 4 };
+export const ROUND = { start: 3, tremble: 5, ring2At: 40, ring1At: 80, shrinkAt: 100, shrinkTime: 30, minR: 5.5, endAt: 145, respawn: 4 };
 
 /**
  * Maç kipi: takım başı oyuncu `teamSize` — 1 ise **herkes tek** (`ffaTeams` oyuncu, herkes ayrı takım), 2–5 ise iki

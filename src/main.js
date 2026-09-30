@@ -207,7 +207,7 @@ export async function start(root) {
         case 'go': ui.message('BAŞLA!', 1); break;
         case 'spawn': if (e.id === me) faceCenter(); break;
         case 'tremble': ui.warn(e.ring === 2 ? 'DIŞ HALKA ÇÖKÜYOR · İÇERİ KAÇ' : 'İÇ HALKA ÇÖKÜYOR · MERKEZE KAÇ', 5); break;
-        case 'collapse': ui.message(e.ring === 2 ? 'DIŞ HALKA DÜŞTÜ' : e.ring === 1 ? 'SON PLAKA · DOĞUŞ KAPANDI' : 'SON PLAKA DA GİTTİ', 2.5); view.shake(0.35); break;
+        case 'collapse': ui.message(e.ring === 2 ? 'DIŞ HALKA DÜŞTÜ' : 'SON PLAKA · DOĞUŞ KAPANDI · SÜRE BİTİNCE BURADA KALAN KAZANIR', 3); view.shake(0.35); break;
         case 'shrinkWarn': ui.warn('MERKEZ DARALIYOR · KENARDAN UZAK DUR', 5); break;
         case 'hit':
           if (e.id === me) { view.shake(CAMERA.knockShake); if (e.kind === 'freeze') ui.message('DONDUN · 2 SN', 1.5); }
@@ -225,7 +225,7 @@ export async function start(root) {
           else if (e.by === me) ui.message(who(w.players[e.id]) + ' DÜŞTÜ · SENİN SAYENDE', 2);
           break;
         case 'pickup': if (e.id === me) ui.message(POWER_NAMES[e.kind] + ' ×' + PICKUP.shots, 1.8); break;
-        case 'end': ui.message(e.team == null ? 'BERABERE' : (e.why === 'last' ? 'SON PLAKADA KALAN: ' : 'SON PLAKA DÜŞTÜ · ') + TEAMS.names[e.team] + ' KAZANDI', 3); break;
+        case 'end': ui.message(e.team == null ? 'BERABERE' : (e.why === 'last' ? 'SON PLAKADA KALAN: ' : 'SÜRE BİTTİ · SON PLAKADA KALAN: ') + TEAMS.names[e.team] + ' KAZANDI', 3); break;
         default: break;
       }
     }

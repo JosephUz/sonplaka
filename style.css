@@ -85,6 +85,9 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 #son-plaka #sp-message{position:absolute;top:130px;left:50%;transform:translateX(-50%);background:#f5c26b;color:#1c1a12;padding:14px 27px;border-radius:8px;font-weight:900;letter-spacing:.5px;z-index:8;white-space:nowrap}
 #son-plaka #sp-warn{position:absolute;top:92px;left:50%;transform:translateX(-50%);padding:9px 22px;border-radius:8px;background:#7a1f12e6;border:1px solid #ff8a5c;color:#ffe2d2;font:900 13px/1 Segoe UI,Arial,sans-serif;letter-spacing:2px;z-index:8;white-space:nowrap;animation:spWarn .5s ease-in-out infinite alternate}
 @keyframes spWarn{0%{box-shadow:0 0 0 #ff5a1f00}100%{box-shadow:0 0 22px #ff5a1f99}}
+/* Son evre kuralı: süre bitince son plakada kalan kazanır (+ kalan süre). */
+#son-plaka #sp-rule{position:absolute;bottom:72px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:8px;background:#0f1b2ee6;border:1px solid #7fe0e866;color:#d6f4f7;font:900 11px/1 Segoe UI,Arial,sans-serif;letter-spacing:1.6px;z-index:8;white-space:nowrap;pointer-events:none}
+#son-plaka #sp-rule b{color:#ff9a50;font-variant-numeric:tabular-nums}
 #son-plaka #sp-down{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 180px #2a0e0a99;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#0b0f1a44;z-index:5}
 #son-plaka #sp-down strong{font-size:38px;color:#fff1cb;text-shadow:0 3px 18px #742609}
 #son-plaka #sp-down-count{font-size:50px;font-weight:900;color:#ffd199}
@@ -164,6 +167,7 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 #son-plaka.touch canvas{cursor:default}
 #son-plaka #sp-touch{position:absolute;inset:0;touch-action:none;-webkit-user-select:none;-webkit-touch-callout:none}
 #son-plaka.touch #sp-scoreboard,#son-plaka.touch #sp-message,#son-plaka.touch #sp-warn{pointer-events:none}
+#son-plaka.touch #sp-rule{bottom:calc(14px + env(safe-area-inset-bottom))}
 #son-plaka .touch-zone{position:absolute;top:0;bottom:0;z-index:7;touch-action:none}
 #son-plaka .touch-zone.left{left:0;width:44%}
 #son-plaka .touch-zone.right{left:44%;right:0}
@@ -205,6 +209,7 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 #son-plaka .clock small{font-size:6px}
 #son-plaka #sp-message{top:62px;padding:9px 18px;font-size:12px}
 #son-plaka #sp-warn{top:52px;padding:6px 12px;font-size:10px}
+#son-plaka #sp-rule{padding:5px 10px;font-size:8px;letter-spacing:1px}
 #son-plaka .home-content{padding-top:34px;margin-left:calc(5vw + env(safe-area-inset-left));width:min(440px,70vw)}
 #son-plaka .home h1{font-size:30px;letter-spacing:-1px;margin:10px 0}
 #son-plaka .home p{font-size:12px;line-height:1.5;margin:8px 0 14px}

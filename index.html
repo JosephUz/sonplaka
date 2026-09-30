@@ -36,7 +36,7 @@
       <div class="home-content">
         <div class="eyebrow"><i></i> HERKES TEK – 5v5 DİSK ARENASI · DARALAN BOŞLUK</div>
         <h1>Plakalar düşer.<br><span>Sen kalırsın.</span></h1>
-        <p>Diskle rakibi kenardan aşağı at, plakalar teker teker boşluğa düşerken<br>rampalarla içeri kaç. Son plakada doğuş kapanır: orada ayakta kalan takım kazanır.</p>
+        <p>Diskle rakibi kenardan aşağı at, plakalar teker teker boşluğa düşerken<br>rampalarla içeri kaç. Son plakada doğuş kapanır: süre bitince orada ayakta kalan kazanır.</p>
         <div class="mode-row" role="radiogroup" aria-label="Kaça kaç">
           <label><input type="radio" name="sp-mode" value="1">HERKES TEK</label>
           <label><input type="radio" name="sp-mode" value="2">2v2</label>
@@ -45,7 +45,7 @@
           <label><input type="radio" name="sp-mode" value="5" checked>5v5</label>
         </div>
         <button id="sp-start" class="primary">ARENAYA GİR <span>↗</span></button>
-        <div class="home-meta"><span id="sp-home-meta-1">5v5 · SEN + 09 BOT</span><span>SON PLAKADA AYAKTA KALAN KAZANIR</span></div>
+        <div class="home-meta"><span id="sp-home-meta-1">5v5 · SEN + 09 BOT</span><span>SÜRE BİTİNCE SON PLAKADA KALAN KAZANIR</span></div>
         <div class="home-online">
           <label class="nick"><span>ADIN</span><input id="sp-nick" maxlength="16" autocomplete="off" spellcheck="false" aria-label="Oyuncu adı"></label>
           <div class="online-row">
@@ -58,7 +58,7 @@
         <div class="rule-cards">
           <div><b>01 / DİSK</b><span>Vurulan savrulur; can yok, düşen 4 saniyede geri gelir.</span></div>
           <div><b>02 / PLAKA</b><span>Dış halka 40. saniyede düşer; iç halka 80. saniyede: doğuş kapanır.</span></div>
-          <div><b>03 / SON PLAKA</b><span>Merkez daralır. Orada ayakta kalan takım kazanır.</span></div>
+          <div><b>03 / SON PLAKA</b><span>Merkez daralır ama düşmez. Süre bitince orada kalan kazanır.</span></div>
         </div>
       </div>
       <div class="pitch-note"><i></i> BOŞLUK ARENASI <span>13 plaka, 40 zıplama plakası, sınır diskleri sektirir.</span></div>
@@ -67,6 +67,7 @@
     <div id="sp-crosshair" hidden>+</div>
     <div id="sp-charge" hidden><div class="charge-ring"></div><span id="sp-charge-text"></span></div>
     <div id="sp-warn" role="status" hidden></div>
+    <div id="sp-rule" role="status" hidden></div>
     <div id="sp-message" role="status" hidden></div>
     <div id="sp-down" hidden><strong id="sp-down-title">DÜŞTÜN!</strong><span id="sp-down-count"></span><small id="sp-down-note"></small></div>
     <div id="sp-freeze" hidden></div>
@@ -121,9 +122,9 @@
           <dt>Shift</dt><dd>Hızlı koş: rampaya yetişmek ve diskten kaçmak için.</dd>
           <dt>Boşluk</dt><dd>Zıpla; havadayken bir kez daha zıpla. Havada vurulursan yönün değişir, düşebilirsin.</dd>
           <dt>Rampalar</dt><dd>Plakalar arasındaki tek geçiş: plaka kenarındaki rampaya koş, okun gösterdiği plakaya uçarsın (uçuşta yön veremezsin, disk atabilirsin). Rampalar hiç kapanmaz: basan her zaman uçar.</dd>
-          <dt>Daralma</dt><dd>40. saniyede dış halka (8 plaka) düşer, 80. saniyede iç halka. Sonra merkez plaka küçülür ve 145. saniyede o da düşer. Düşmeden 5 saniye önce plaka titrer: içeri kaç.</dd>
+          <dt>Daralma</dt><dd>40. saniyede dış halka (8 plaka) düşer, 80. saniyede iç halka. Sonra merkez plaka 130. saniyeye kadar yarıçap 5,5'e küçülür ve orada durur; merkez hiç düşmez, 145. saniyede süre biter. Düşmeden 5 saniye önce plaka titrer: içeri kaç.</dd>
           <dt>Güç diskleri</dt><dd>Merkezde ve iç halkada doğar: <b>üçlü</b> (3 atış yelpaze) ve <b>dondurucu</b> (3 atış, vurulan 2 saniye donar; donmuşu levyeyle it).</dd>
-          <dt>Son plaka</dt><dd>Dış ve iç halka ayaktayken düşme hakkı sınırsız: 4 saniye sonra ayakta bir plakada doğarsın. İç halka düşünce yalnız merkez kalır ve <b>doğuş kapanır</b>: rakip takımın kimsesi kalmayınca ayakta kalan takım kazanır. Merkez 145. saniyede düşerse ayakta oyuncusu en çok olan takım, eşitse en çok düşüren kazanır.</dd>
+          <dt>Son plaka</dt><dd>Dış ve iç halka ayaktayken düşme hakkı sınırsız: 4 saniye sonra ayakta bir plakada doğarsın. İç halka düşünce yalnız merkez kalır ve <b>doğuş kapanır</b>: rakip takımın kimsesi kalmayınca ayakta kalan takım hemen kazanır. <b>145. saniyede süre bitince son plakada kalan kazanır</b>: ayakta oyuncusu en çok olan takım, eşitse en çok düşüren; herkes tek kipinde merkezde kalan tek kişi.</dd>
           <dt>Kipler</dt><dd><b>Herkes tek</b> (5 kişi, herkes herkese), <b>2v2</b>, <b>3v3</b>, <b>4v4</b>, <b>5v5</b>; boş yerleri botlar doldurur. Odada da aynı kipler: yönetici seçer. İnsanlar aynı takımdaysa co-op (rakipler bot), karşı takımdaki boş koltuğa geçince PvP.</dd>
           <dt>V</dt><dd>Kamera: birinci şahıs ↔ omuz üstü.</dd>
           <dt>Esc</dt><dd>Fareyi bırakır ve oyunu durdurur.</dd>

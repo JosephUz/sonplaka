@@ -1,6 +1,6 @@
 # Son Plaka
 
-Ricochet'nin (Valve, 2000) disk arenası ile battle royale'in daralan alanı birleşir; ama alan iki boyutlu bir çember değil, **ayağının altındaki plakaların kendisidir**: boşlukta asılı 13 yuvarlak plaka maç boyunca dıştan içe teker teker düşer. Can barı yok, mermi yok. Rakibi vurmazsın, **kenardan aşağı atarsın**. Dış halkalar ayaktayken düşme hakkı sınırsız; son plakada doğuş kapanır ve orada ayakta kalan kazanır.
+Ricochet'nin (Valve, 2000) disk arenası ile battle royale'in daralan alanı birleşir; ama alan iki boyutlu bir çember değil, **ayağının altındaki plakaların kendisidir**: boşlukta asılı 13 yuvarlak plaka maç boyunca dıştan içe teker teker düşer. Can barı yok, mermi yok. Rakibi vurmazsın, **kenardan aşağı atarsın**. Dış halkalar ayaktayken düşme hakkı sınırsız; son plakada doğuş kapanır ve süre bitince orada ayakta kalan kazanır.
 
 Kipler: **herkes tek** (5 oyuncu, herkes ayrı takım), **2v2**, **3v3**, **4v4**, **5v5**. Tek başına oyunda sen ve botlar; çevrim içinde aynı kipler (koltuk sayısı kipe göre, boş koltuklar bot; insanlar aynı takımdaysa co-op, karşı takıma geçince PvP). Masaüstünde birinci şahıs, telefonda omuz üstü kamera.
 
@@ -18,11 +18,13 @@ Merkez plaka (yarıçap 10) + iç halka (4 plaka, yarıçap 7) + dış halka (8 
 
 ## Daralma
 
-Oyun saatine göre: 35. saniyede dış halka titrer, 40. saniyede düşer; 75-80. saniyede iç halka ve **doğuş kapanır**; 100. saniyeden sonra merkez plaka 30 saniyede yarıçap 2,2'ye küçülür; 145. saniyede o da düşer ve maç biter. Düşen plakanın üstündeki onunla gider.
+Oyun saatine göre: 35. saniyede dış halka titrer, 40. saniyede düşer; 75-80. saniyede iç halka ve **doğuş kapanır**; 100. saniyeden sonra merkez plaka 30 saniyede yarıçap 5,5'e küçülür ve orada durur — itiş sürsün diye daha fazla daralmaz. **Merkez plaka hiç düşmez**: 145. saniyede süre biter ve maç o an son plakada kimler kaldıysa onlarla biter. Düşen plakanın üstündeki onunla gider.
 
 ## Doğuş, son plaka ve kazanan
 
-Dış ve iç halka ayaktayken düşme hakkı sınırsız: düşen 4 saniye sonra ayakta bir plakada doğar (kendi takımının dış plakası; düştüyse iç halka). Düşen oyuncuya son 4 saniyede vuran rakip "düşürme" alır ve takımına 1 puan yazılır. İç halka düşünce **son plaka** evresi: yalnız merkez kalır, doğuş kapanır, elenen elenir. Rakip takımların kimsesi kalmayınca (ayakta ya da doğmayı bekleyen) ayakta kalan takım hemen kazanır. Merkez 145. saniyede düşerse ayakta oyuncusu en çok olan takım, eşitse en çok düşüren, o da eşitse berabere. Herkes tek kipinde kalan son oyuncu kazanır. Elenen, maç bitene kadar takım arkadaşını izler.
+Dış ve iç halka ayaktayken düşme hakkı sınırsız: düşen 4 saniye sonra ayakta bir plakada doğar (kendi takımının dış plakası; düştüyse iç halka). Düşen oyuncuya son 4 saniyede vuran rakip "düşürme" alır ve takımına 1 puan yazılır. İç halka düşünce **son plaka** evresi: yalnız merkez kalır, doğuş kapanır, elenen elenir. Rakip takımların kimsesi kalmayınca (ayakta ya da doğmayı bekleyen) ayakta kalan takım hemen kazanır.
+
+**Süre bitince son plakada kalan kazanır**: merkez düşmez, 145. saniyede maç biter ve o an merkezde ayakta kalanlara bakılır — ayakta oyuncusu en çok olan takım kazanır; eşitse düşürme puanı çok olan; o da eşitse berabere. Herkes tek kipinde merkezde kalan tek kişi kazanır, birden fazla kişi kaldıysa aralarında en çok düşüren. Son evre boyunca ekranda kalan süre ve "SÜRE BİTİNCE SON PLAKADA KALAN KAZANIR" yazısı durur. Elenen, maç bitene kadar takım arkadaşını izler.
 
 ## Güç diskleri
 
@@ -30,7 +32,7 @@ Merkez plakada ve iç halka plakalarında doğar, alınınca 20 saniye sonra sı
 
 ## Botlar
 
-Her 0,3 saniyede plan: plakası titriyorsa içeri götüren zıplama plakasına kaçar; plakasında güç diski varsa alır; rakiple aynı plakadaysa mesafeyi koruyup yanlara kayarak atar ve yakınsa levye sallar; rakip başka plakadaysa menzildeyse çoğunlukla yerinde kalıp uzaktan atar, değilse zıplama plakalarıyla ona ya da merkeze gider (genişlik öncelikli yol; kapalı ve düşmüş plakalar yok). Yaklaşan diski görünce zıplayarak kaçınır. Ara sıra ağır disk hazırlar.
+Her 0,3 saniyede plan: plakası titriyorsa içeri götüren zıplama plakasına kaçar; plakasında güç diski varsa alır; rakiple aynı plakadaysa mesafeyi koruyup yanlara kayarak atar ve yakınsa levye sallar; rakip başka plakadaysa menzildeyse çoğunlukla yerinde kalıp uzaktan atar, değilse zıplama plakalarıyla ona ya da merkeze gider (genişlik öncelikli yol; kapalı ve düşmüş plakalar yok). **Son plaka evresinde** (doğuş kapalı, süre bitince orada kalan kazanır) merkezde değilse oraya gider, merkezdeyse geri açılmaz: rakibin üstüne gidip kenara doğru iter. Levye diski beklemez, menzile giren rakibe her zaman sallanır. Yaklaşan diski görünce zıplayarak kaçınır. Ara sıra ağır disk hazırlar.
 
 ## Sonraki adımlar
 
