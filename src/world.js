@@ -1,4 +1,4 @@
-import { ARENA, CREDIT, DISC, FREEZE, JUMP, MATCH, MOVE, PICKUP, ROUND, teamsFor } from './config.js';
+import { ARENA, CREDIT, DIFFICULTIES, DISC, FREEZE, JUMP, LIFE, MATCH, MOVE, PICKUP, ROUND, botParams, teamsFor } from './config.js';
 import { alive, emit, facing, jump, knock, pickup, swing, throwDisc } from './actions.js';
 import { botInput } from './ai.js';
 import { buildArena, spawnsFor } from './arena.js';
@@ -24,11 +24,12 @@ export { alive, jump, swing, throwDisc };
  * basıldı, release bırakıldı (kısa: normal disk, DISC.heavyCharge'dan uzun: ağır disk); secondary levye; jump zıplama.
  * Birden çok insan varsa (sunucu) girdi `{ players: { [id]: girdi } }` biçimindedir.
  */
-export function createWorld(seed = MATCH.seed, { teamSize = MATCH.teamSize } = {}) {
+export function createWorld(seed = MATCH.seed, { teamSize = MATCH.teamSize, difficulty = MATCH.difficulty } = {}) {
   const arena = buildArena(), teams = teamsFor(teamSize);
+  if (!DIFFICULTIES.includes(difficulty)) difficulty = MATCH.difficulty;
   const w = {
-    me: 0, time: 0, round: 0, state: 'countdown', t: 0, teamSize, teams, score: Array(teams).fill(0), respawnOpen: true,
-    winner: null, over: null, warned: false,
+    me: 0, time: 0, round: 0, state: 'countdown', t: 0, teamSize, teams, difficulty, bot: botParams(difficulty),
+    score: Array(teams).fill(0), respawnOpen: true, winner: null, over: null, warned: false,
     events: [], players: [], discs: [], nextDisc: 1, arena, spawns: spawnsFor(arena, teams), random: createRng(seed),
     plates: arena.plates.map(pl => ({ phase: 0, y: 0, vy: 0, r: pl.r })),
     pads: arena.pads.map(() => ({ off: 0 })),
@@ -39,7 +40,7 @@ export function createWorld(seed = MATCH.seed, { teamSize = MATCH.teamSize } = {
     w.players.push({
       id: i, team, role, human: i === 0, name: i === 0 ? 'Sen' : 'Bot-' + i,
       x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, yaw: 0, pitch: 0, ground: true, plate: -1, jumps: 0, sprint: false,
-      knock: 0, flight: 0, freeze: 0, respawn: 0, out: false, padLock: 0,
+      knock: 0, flight: 0, freeze: 0, respawn: 0, out: false, padLock: 0, shield: 0, lives: LIFE.lives,
       discs: DISC.max, regen: 0, charge: 0, chargeSpent: false, throwCd: 0, barCd: 0, power: null, powerLeft: 0,
       lastHit: null, think: 0.2 + i * 0.05, bot: null,
       stats: { kills: 0, falls: 0, hits: 0, throws: 0, pickups: 0, pads: 0 },
@@ -49,7 +50,7 @@ export function createWorld(seed = MATCH.seed, { teamSize = MATCH.teamSize } = {
   return w;
 }
 
-const TIMERS = ['knock', 'flight', 'freeze', 'padLock', 'throwCd', 'barCd', 'think'];
+const TIMERS = ['knock', 'flight', 'freeze', 'padLock', 'throwCd', 'barCd', 'think', 'shield'];
 
 /** Maç başı: plakalar, zıplama plakaları ve güç diskleri sıfırlanır, herkes doğuş plakasında dizilir, geri sayım. */
 function startWave(w) {
@@ -58,7 +59,7 @@ function startWave(w) {
   w.plates.forEach((s, i) => Object.assign(s, { phase: 0, y: 0, vy: 0, r: w.arena.plates[i].r }));
   for (const s of w.pads) s.off = 0;
   w.pickups.forEach((s, i) => { s.active = i > 0; s.t = i > 0 ? 0 : PICKUP.first; });
-  for (const p of w.players) { p.out = false; p.respawn = 0; spawn(w, p); }
+  for (const p of w.players) { p.out = false; p.respawn = 0; p.lives = LIFE.lives; spawn(w, p); }
   emit(w, 'round', { n: w.round });
 }
 
@@ -75,14 +76,14 @@ function spawnPlate(w, p) {
   return up(0) ? 0 : null;
 }
 
-/** Doğar: aynı plakadakiler yan yana (kimse kimsenin önünde değil), merkeze bakar. Ayakta plaka yoksa false. */
+/** Doğar: aynı plakadakiler yan yana (kimse kimsenin önünde değil), merkeze bakar, LIFE.shield sn korumalı. Ayakta plaka yoksa false. */
 function spawn(w, p) {
   const id = spawnPlate(w, p);
   if (id === null) return false;
   const plate = w.arena.plates[id], s = w.plates[id], d = Math.hypot(plate.x, plate.z) || 1, px = plate.z / d, pz = -plate.x / d;
   const off = (p.role - (w.teamSize - 1) / 2) * 1.3;
   Object.assign(p, { x: plate.x + px * off, y: s.y, z: plate.z + pz * off, vx: 0, vy: 0, vz: 0, ground: true, plate: id, jumps: 0,
-    knock: 0, flight: 0, freeze: 0, respawn: 0, out: false, padLock: 0, discs: DISC.max, regen: 0, charge: 0, chargeSpent: false, throwCd: 0, barCd: 0, power: null, powerLeft: 0, lastHit: null, bot: null });
+    knock: 0, flight: 0, freeze: 0, respawn: 0, out: false, padLock: 0, shield: LIFE.shield, discs: DISC.max, regen: 0, charge: 0, chargeSpent: false, throwCd: 0, barCd: 0, power: null, powerLeft: 0, lastHit: null, bot: null });
   p.yaw = Math.atan2(-p.x, -p.z); p.pitch = 0;
   emit(w, 'spawn', { id: p.id });
   return true;
@@ -315,7 +316,7 @@ function bounce(w, d) {
 /** Disk bir rakibe değdi mi (rampalar diske aldırmaz). Rakibe değince disk biter (true). */
 function collide(w, d) {
   for (const p of w.players) {
-    if (p.out || p.team === d.team) continue;
+    if (p.out || p.team === d.team || p.shield > 0) continue; // korumalı (yeni doğmuş) oyuncuya disk işlemez
     if (Math.hypot(p.x - d.x, p.z - d.z) > DISC.radius + 0.55 || d.y < p.y - 0.3 || d.y > p.y + 2.2) continue;
     const vh = Math.hypot(d.vx, d.vz) || 1, ux = d.vx / vh, uz = d.vz / vh;
     // Disk elemez, yalnız savurur; ağır disk daha sert. Eleme yalnız boşluğa düşmekle olur.
@@ -329,17 +330,17 @@ function collide(w, d) {
 
 /**
  * Düşüş: yalnız boşluğa düşünce. Son CREDIT saniyede vuran rakip düşürmüş sayılır (kendi ve takım skoruna yazılır).
- * Doğuş açıkken ROUND.respawn saniye sonra geri gelir; son plakada elenir.
+ * Bir düşme hakkı gider; hak kaldıysa ve doğuş açıksa ROUND.respawn saniye sonra geri gelir, yoksa elenir.
  */
 function eliminate(w, p, cause) {
   if (p.out) return;
   const by = p.lastHit && w.time - p.lastHit.t < CREDIT && w.players[p.lastHit.by]?.team !== p.team ? p.lastHit.by : null;
   if (by !== null) { w.players[by].stats.kills++; w.score[w.players[by].team]++; }
-  p.stats.falls++;
+  p.stats.falls++; p.lives = Math.max(0, p.lives - 1);
   const at = { x: p.x, y: p.y, z: p.z };
-  Object.assign(p, { out: true, y: -200, vx: 0, vy: 0, vz: 0, ground: false, plate: -1, knock: 0, flight: 0, freeze: 0, charge: 0, power: null, powerLeft: 0, discs: DISC.max, regen: 0 });
-  p.respawn = w.respawnOpen ? ROUND.respawn : 0;
-  emit(w, 'fall', { id: p.id, by, cause, ...at, respawn: p.respawn > 0, score: [...w.score] });
+  Object.assign(p, { out: true, y: -200, vx: 0, vy: 0, vz: 0, ground: false, plate: -1, knock: 0, flight: 0, freeze: 0, shield: 0, charge: 0, power: null, powerLeft: 0, discs: DISC.max, regen: 0 });
+  p.respawn = w.respawnOpen && p.lives > 0 ? ROUND.respawn : 0;
+  emit(w, 'fall', { id: p.id, by, cause, ...at, respawn: p.respawn > 0, lives: p.lives, score: [...w.score] });
 }
 
 /** Sayılan oyuncu: ayakta ya da doğmayı bekleyen. Son plaka evresinde doğuş kapalıdır: sayılan = merkezde ayakta. */
@@ -356,9 +357,8 @@ export const leaders = w => {
   return tops(w.score.map((s, t) => (alive.includes(t) ? s : -1)));
 };
 
-/** Son plakada rakip takımların kimsesi kalmayınca ayakta kalan takım kazanır. */
+/** Rakip takımların kimsesi kalmayınca (ayakta ya da doğmayı bekleyen; hakkı bitenler sayılmaz) ayakta kalan takım kazanır. */
 function checkEnd(w) {
-  if (w.respawnOpen) return;
   const standing = Array.from({ length: w.teams }, (_, t) => t).filter(t => aliveCount(w, t) > 0);
   if (standing.length <= 1) endMatch(w, 'last');
 }

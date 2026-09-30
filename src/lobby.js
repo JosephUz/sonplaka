@@ -1,9 +1,9 @@
-import { MODES, TEAMS, modeLabel, teamsFor } from './config.js';
+import { DIFFICULTIES, DIFFICULTY_LABEL, MODES, TEAMS, modeLabel, teamsFor } from './config.js';
 
 /**
  * Çok oyunculu ekranlar: giriş ekranındaki oda düğmeleri (ad, Oda kur, Odaya katıl + kod, çevrim içi sayısı) ve lobi
- * (oda kodu, link, kip seçimi, takım sütunları ve koltuklar). Kip (herkes tek, 2v2 … 5v5) oda kurulurken giriş
- * ekranındaki seçimle gelir, lobide yalnız yönetici değiştirir; koltuklar kipe göre dizilir. Herkes boş (bot) koltuğa
+ * (oda kodu, link, kip ve bot zorluğu seçimi, takım sütunları ve koltuklar). Kip (herkes tek, 2v2 … 5v5) ve bot zorluğu
+ * oda kurulurken giriş ekranındaki seçimle gelir, lobide yalnız yönetici değiştirir; koltuklar kipe göre dizilir. Herkes boş (bot) koltuğa
  * tıklayıp oturur: karşı takımdaki boş koltuğa geçince PvP, bütün insanlar aynı takımdaysa co-op (rakipler bot).
  * Yönetici oyuncuları taşır: sürükleyip bir koltuğa bırakır ya da oyuncuya, sonra koltuğa tıklar; dolu koltukta ikisi
  * yer değiştirir. Sunucuya bağlanılamadıkça (kapalı ya da config.js → ONLINE ile kapatılmış) oda düğmeleri "Yakında"
@@ -14,7 +14,7 @@ export function createLobby(root, app) {
   const el = {
     nick: $('nick'), create: $('create'), join: $('join'), joinRow: $('joinrow'), code: $('code'), joinGo: $('join-go'),
     online: $('online'), status: $('home-status'),
-    lobbyCode: $('lobby-code'), title: $('lobby-title'), mode: $('lobby-mode'), teams: $('lobby-teams'), hint: $('lobby-hint'),
+    lobbyCode: $('lobby-code'), title: $('lobby-title'), mode: $('lobby-mode'), diff: $('lobby-diff'), teams: $('lobby-teams'), hint: $('lobby-hint'),
     lobbyStatus: $('lobby-status'), start: $('lobby-start'),
   };
   const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } return v; };
@@ -34,7 +34,7 @@ export function createLobby(root, app) {
   }
   setServer(false);
 
-  el.create.onclick = () => { el.status.textContent = 'Oda kuruluyor…'; app.create(nick(), app.mode()); };
+  el.create.onclick = () => { el.status.textContent = 'Oda kuruluyor…'; app.create(nick(), app.settingsChoice()); };
   el.join.onclick = () => { el.joinRow.hidden = !el.joinRow.hidden; if (!el.joinRow.hidden) el.code.focus(); };
   const joinGo = () => {
     const code = el.code.value.trim().toUpperCase();
@@ -54,17 +54,20 @@ export function createLobby(root, app) {
   el.start.onclick = () => app.start();
   $('lobby-leave').onclick = () => app.leave();
   el.mode.innerHTML = MODES.map(n => `<option value="${n}">${modeLabel(n)}</option>`).join('');
-  el.mode.onchange = () => app.settings(Number(el.mode.value));
+  el.mode.onchange = () => app.settings({ teamSize: Number(el.mode.value) });
+  el.diff.innerHTML = DIFFICULTIES.map(d => `<option value="${d}">${DIFFICULTY_LABEL[d]}</option>`).join('');
+  el.diff.onchange = () => app.settings({ difficulty: el.diff.value });
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
   function render(next) {
     lobby = next; if (!lobby) return;
     const me = app.id(), host = lobby.hostId === me, mine = lobby.seats.findIndex(s => s && s.id === me);
-    const n = lobby.settings?.teamSize || 5, teams = teamsFor(n);
+    const n = lobby.settings?.teamSize || 5, teams = teamsFor(n), diff = lobby.settings?.difficulty || 'normal';
     el.lobbyCode.textContent = lobby.code;
-    el.title.textContent = 'ODA · ' + modeLabel(n);
+    el.title.textContent = `ODA · ${modeLabel(n)} · BOT ${DIFFICULTY_LABEL[diff] || diff}`;
     el.mode.value = String(n); el.mode.disabled = !host || lobby.state === 'playing';
+    el.diff.value = diff; el.diff.disabled = !host || lobby.state === 'playing';
     if (picked != null && !lobby.seats.some(s => s && s.id === picked)) picked = null;
     el.teams.style.setProperty('--cols', teams);
     el.teams.innerHTML = Array.from({ length: teams }, (_, team) => {

@@ -45,7 +45,7 @@ export function throwDisc(w, id, kind = 'normal') {
     w.discs.push({ id: w.nextDisc++, kind, owner: id, team: p.team, age: 0, bounces: 0,
       x: p.x + dx * 0.9, y: p.y + 1.3 + f.y * 0.5, z: p.z + dz * 0.9, vx: dx * speed, vy: f.y * speed, vz: dz * speed });
   }
-  p.discs--; p.throwCd = DISC.cooldown; p.charge = 0;
+  p.discs--; p.throwCd = DISC.cooldown; p.charge = 0; p.shield = 0; // saldıran korumasını kaybeder
   if (p.discs < DISC.max && p.regen <= 0) p.regen = DISC.regen;
   if (p.power && --p.powerLeft <= 0) p.power = null;
   p.stats.throws++;
@@ -57,11 +57,11 @@ export function throwDisc(w, id, kind = 'normal') {
 export function swing(w, id) {
   const p = w.players[id];
   if (idle(w, p) || p.barCd > 0) return false;
-  p.barCd = CROWBAR.cooldown; p.charge = 0;
+  p.barCd = CROWBAR.cooldown; p.charge = 0; p.shield = 0; // saldıran korumasını kaybeder
   const fx = Math.sin(p.yaw), fz = Math.cos(p.yaw);
   emit(w, 'swing', { id, x: p.x, y: p.y + 1.2, z: p.z });
   for (const t of w.players) {
-    if (t.team === p.team || t.out) continue;
+    if (t.team === p.team || t.out || t.shield > 0) continue; // korumalı (yeni doğmuş) oyuncu itilmez
     const dx = t.x - p.x, dz = t.z - p.z, d = Math.hypot(dx, dz);
     if (d > CROWBAR.range || Math.abs(t.y - p.y) > 2.2) continue;
     if (d > 0.05 && (dx * fx + dz * fz) / d < CROWBAR.cone) continue;

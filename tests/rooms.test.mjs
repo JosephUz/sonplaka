@@ -94,9 +94,9 @@ test('maç bitince END gider ve oda lobiye döner', async () => {
 test('yönetici kipi değiştirir: koltuklar yeniden dizilir; herkes tek beş koltuk; maç o kiple başlar', () => {
   const { rooms, join } = setup();
   const a = join('Ali'), b = join('Ayşe');
-  a.say({ t: 'create', teamSize: 3 });
+  a.say({ t: 'create', teamSize: 3, difficulty: 'easy' });
   let lobby = a.last(S2C.LOBBY);
-  assert.equal(lobby.settings.teamSize, 3); assert.equal(lobby.seats.length, 6);
+  assert.equal(lobby.settings.teamSize, 3); assert.equal(lobby.seats.length, 6); assert.equal(lobby.settings.difficulty, 'easy');
   b.say({ t: 'join', code: lobby.code });
   lobby = b.last(S2C.LOBBY);
   assert.equal(lobby.seats[3].nick, 'Ayşe', 'katılan karşı takımın ilk koltuğuna oturmalı');
@@ -105,11 +105,15 @@ test('yönetici kipi değiştirir: koltuklar yeniden dizilir; herkes tek beş ko
   a.say({ t: 'settings', teamSize: 1 });
   lobby = b.last(S2C.LOBBY);
   assert.equal(lobby.settings.teamSize, 1); assert.equal(lobby.seats.length, 5);
+  assert.equal(lobby.settings.difficulty, 'easy', 'kip değişince zorluk korunmalı');
   assert.equal(lobby.seats[0].nick, 'Ali'); assert.equal(lobby.seats[1].nick, 'Ayşe');
+  a.say({ t: 'settings', difficulty: 'hard' });
+  lobby = b.last(S2C.LOBBY);
+  assert.equal(lobby.settings.difficulty, 'hard'); assert.equal(lobby.seats.length, 5, 'yalnız zorluk değişince koltuklar bozulmamalı');
   a.say({ t: 'start' });
-  assert.equal(a.last(S2C.START).teamSize, 1); assert.equal(b.last(S2C.START).you, 1);
+  assert.equal(a.last(S2C.START).teamSize, 1); assert.equal(a.last(S2C.START).difficulty, 'hard'); assert.equal(b.last(S2C.START).you, 1);
   const w = [...rooms.rooms.values()][0].world;
-  assert.equal(w.players.length, 5); assert.equal(w.teams, 5);
+  assert.equal(w.players.length, 5); assert.equal(w.teams, 5); assert.equal(w.difficulty, 'hard');
   assert.equal(a.last(S2C.SNAP)?.p.length ?? 5, 5);
   rooms.close();
 });

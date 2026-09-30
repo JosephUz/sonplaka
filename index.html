@@ -44,6 +44,12 @@
           <label><input type="radio" name="sp-mode" value="4">4v4</label>
           <label><input type="radio" name="sp-mode" value="5" checked>5v5</label>
         </div>
+        <div class="mode-row diff-row" role="radiogroup" aria-label="Bot zorluğu">
+          <span>BOT</span>
+          <label><input type="radio" name="sp-diff" value="easy">KOLAY</label>
+          <label><input type="radio" name="sp-diff" value="normal" checked>NORMAL</label>
+          <label><input type="radio" name="sp-diff" value="hard">ZOR</label>
+        </div>
         <button id="sp-start" class="primary">ARENAYA GİR <span>↗</span></button>
         <div class="home-meta"><span id="sp-home-meta-1">5v5 · SEN + 09 BOT</span><span>SÜRE BİTİNCE SON PLAKADA KALAN KAZANIR</span></div>
         <div class="home-online">
@@ -75,9 +81,10 @@
     <aside id="sp-player" hidden>
       <span class="eyebrow" id="sp-side">SEN / MAVİ TAKIM</span>
       <strong id="sp-status">DİSKLER HAZIR</strong>
-      <div class="meter-label"><span>DİSK</span><span id="sp-disc-text">3 / 3</span></div>
+      <div class="meter-label"><span>DİSK</span><span id="sp-disc-text">5 / 5</span></div>
       <div class="discs" id="sp-discs"></div>
       <div class="meter-label power-row"><span>GÜÇ</span><span id="sp-power">—</span></div>
+      <div class="meter-label"><span>DÜŞME HAKKI</span><span id="sp-lives">♥♥♥♥♥</span></div>
     </aside>
 
     <div id="sp-touch" hidden>
@@ -109,7 +116,7 @@
         <dl class="touch-only">
           <dt>Sol yarı</dt><dd>Parmağını koy, joystick belirir: sürükleyerek yürü; sonuna kadar itersen koşarsın.</dd>
           <dt>Sağ yarı</dt><dd>Parmağını kaydırarak bak ve nişan al (ortadaki artı nişangahtır).</dd>
-          <dt>AT</dt><dd>Dokun: disk. 1,5 saniye basılı tut: ağır disk (çok daha sert savurur). Elinde 3 disk var, 1,5 saniyede bir yenilenir.</dd>
+          <dt>AT</dt><dd>Dokun: disk. 1,5 saniye basılı tut: ağır disk (çok daha sert savurur). Elinde 5 disk var, 1,5 saniyede bir yenilenir.</dd>
           <dt>LEVYE</dt><dd>Yakındaki rakibi kenara doğru iter. Kenar düellosunun silahı.</dd>
           <dt>ZIPLA</dt><dd>Havadayken bir kez daha zıplarsın. Havada vurulursan düşersin.</dd>
           <dt>Kamera 🎥</dt><dd>Telefonda omuz üstü başlar; birinci şahsa geçebilirsin.</dd>
@@ -124,6 +131,8 @@
           <dt>Rampalar</dt><dd>Plakalar arasındaki tek geçiş: plaka kenarındaki rampaya koş, okun gösterdiği plakaya uçarsın (uçuşta yön veremezsin, disk atabilirsin). Rampalar hiç kapanmaz: basan her zaman uçar.</dd>
           <dt>Daralma</dt><dd>40. saniyede dış halka (8 plaka) düşer, 80. saniyede iç halka. Sonra merkez plaka 130. saniyeye kadar yarıçap 5,5'e küçülür ve orada durur; merkez hiç düşmez, 145. saniyede süre biter. Düşmeden 5 saniye önce plaka titrer: içeri kaç.</dd>
           <dt>Güç diskleri</dt><dd>Merkezde ve iç halkada doğar: <b>üçlü</b> (3 atış yelpaze) ve <b>dondurucu</b> (3 atış, vurulan 2 saniye donar; donmuşu levyeyle it).</dd>
+          <dt>Düşme hakkı</dt><dd>Herkesin <b>5 düşme hakkı</b> var: beşinci düşüşte doğuş açık olsa da elenirsin. Yeni doğan 2 saniye korunur (disk ve levye işlemez, botlar hedef almaz); ilk atışın korumayı bitirir. Botlar da doğduktan hemen sonra atmaz.</dd>
+          <dt>Bot zorluğu</dt><dd>Giriş ekranında <b>Kolay / Normal / Zor</b>; odada yönetici seçer. Zor botlar hızlı tepki verir ve isabetli atar; Normal ve Kolay daha seyrek ve sapmalı atar, diskten daha az kaçar.</dd>
           <dt>Son plaka</dt><dd>Dış ve iç halka ayaktayken düşme hakkı sınırsız: 4 saniye sonra ayakta bir plakada doğarsın. İç halka düşünce yalnız merkez kalır ve <b>doğuş kapanır</b>: rakip takımın kimsesi kalmayınca ayakta kalan takım hemen kazanır. <b>145. saniyede süre bitince son plakada kalan kazanır</b>: ayakta oyuncusu en çok olan takım, eşitse en çok düşüren; herkes tek kipinde merkezde kalan tek kişi.</dd>
           <dt>Kipler</dt><dd><b>Herkes tek</b> (5 kişi, herkes herkese), <b>2v2</b>, <b>3v3</b>, <b>4v4</b>, <b>5v5</b>; boş yerleri botlar doldurur. Odada da aynı kipler: yönetici seçer. İnsanlar aynı takımdaysa co-op (rakipler bot), karşı takımdaki boş koltuğa geçince PvP.</dd>
           <dt>V</dt><dd>Kamera: birinci şahıs ↔ omuz üstü.</dd>
@@ -138,7 +147,7 @@
       <div class="card lobby-card">
         <span class="eyebrow" id="sp-lobby-title">ODA</span>
         <div class="lobby-head"><h2 id="sp-lobby-code">----</h2><button id="sp-lobby-copy">Linki kopyala</button></div>
-        <label class="lobby-mode">KAÇA KAÇ <select id="sp-lobby-mode" aria-label="Kip"></select></label>
+        <div class="lobby-settings"><label class="lobby-mode">KAÇA KAÇ <select id="sp-lobby-mode" aria-label="Kip"></select></label><label class="lobby-mode">BOT <select id="sp-lobby-diff" aria-label="Bot zorluğu"></select></label></div>
         <p id="sp-lobby-hint"></p>
         <div class="lobby-teams" id="sp-lobby-teams"></div>
         <p id="sp-lobby-status" class="lobby-status" role="status"></p>

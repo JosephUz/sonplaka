@@ -42,6 +42,11 @@ Chromium'unu indirir (kullanıcının Chrome'una ve faresine dokunmaz). Ekran g�
 - **Daralma**: 40. sn dış halka düşer; 80. sn iç halka (**doğuş kapanır**); 100-130. sn merkez yarıçap 10'dan 5,5'e
   küçülür ve orada durur — itiş sürsün diye daha fazla daralmaz. **Merkez plaka hiç düşmez**; 145. sn süre biter.
   Düşmeden 5 sn önce plaka titrer ve ekranda uyarı çıkar.
+- **Düşme hakkı ve koruma**: herkesin **5 düşme hakkı** var (`LIFE.lives`); beşinci düşüşte doğuş açık olsa da elenir,
+  hakkı biten sayılmaz (bir takımın herkesinin hakkı biterse maç biter). Yeni doğan 2 sn korunur (`LIFE.shield`):
+  disk ve levye işlemez, botlar hedef almaz; ilk atış ya da levye korumayı bitirir. Botlar doğduktan sonra bir süre atmaz.
+- **Bot zorluğu** (giriş ekranında Kolay / Normal / Zor, odada yönetici seçer; `BOT_LEVELS`): Zor = hızlı tepki, isabetli
+  nişan; Normal ve Kolay daha seyrek plan yapar, daha seyrek ve sapmalı atar, diskten daha az kaçar, doğunca daha uzun bekler.
 - **Doğuş ve kazanan**: dış ve iç halka ayaktayken düşen 4 sn sonra ayakta bir plakada doğar (kendi dış plakası;
   düştüyse iç halka). İç halka düşünce yalnız merkez kalır ve doğuş kapanır: rakip takımların kimsesi kalmayınca
   ayakta kalan takım hemen kazanır. **145. sn süre bitince son plakada (merkezde) ayakta kalan kazanır**: ayakta

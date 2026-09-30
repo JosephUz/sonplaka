@@ -1,5 +1,5 @@
 import { createAudio } from './audio.js';
-import { CAMERA, DISC, MATCH, MODES, PICKUP, TEAMS, modeLabel, playersFor } from './config.js';
+import { CAMERA, DIFFICULTIES, DIFFICULTY_LABEL, DISC, MATCH, MODES, PICKUP, TEAMS, modeLabel, playersFor } from './config.js';
 import { createInput } from './input.js';
 import { createLobby } from './lobby.js';
 import { createNetClient } from './net/client.js';
@@ -45,18 +45,22 @@ export async function start(root) {
   const ui = createUI(root);
   const audio = createAudio();
   // Kip: giriş ekranındaki seçim (hatırlanır); tek başına maç ve oda kurma buna göre.
-  const modeInputs = [...root.querySelectorAll('input[name="sp-mode"]')];
+  const modeInputs = [...root.querySelectorAll('input[name="sp-mode"]')], diffInputs = [...root.querySelectorAll('input[name="sp-diff"]')];
   const modeChoice = () => Number(modeInputs.find(i => i.checked)?.value) || MATCH.teamSize;
-  const setMode = n => {
-    for (const i of modeInputs) i.checked = Number(i.value) === n;
-    const bots = String(playersFor(n) - 1).padStart(2, '0');
-    root.querySelector('#sp-home-meta-1').textContent = n === 1 ? `SEN + ${bots} BOT · HERKES HERKESE` : `${modeLabel(n)} · SEN + ${bots} BOT`;
-    try { localStorage.setItem('sp.mode', String(n)); } catch { /* yok */ }
+  const diffChoice = () => diffInputs.find(i => i.checked)?.value || MATCH.difficulty;
+  const settingsChoice = () => ({ teamSize: modeChoice(), difficulty: diffChoice() });
+  const homeMeta = () => {
+    const n = modeChoice(), bots = String(playersFor(n) - 1).padStart(2, '0');
+    root.querySelector('#sp-home-meta-1').textContent = `${n === 1 ? 'HERKES HERKESE' : modeLabel(n)} · SEN + ${bots} BOT · BOT ${DIFFICULTY_LABEL[diffChoice()]}`;
   };
-  let savedMode = MATCH.teamSize;
-  try { savedMode = Number(localStorage.getItem('sp.mode')) || MATCH.teamSize; } catch { /* yok */ }
+  const setMode = n => { for (const i of modeInputs) i.checked = Number(i.value) === n; homeMeta(); try { localStorage.setItem('sp.mode', String(n)); } catch { /* yok */ } };
+  const setDiff = d => { for (const i of diffInputs) i.checked = i.value === d; homeMeta(); try { localStorage.setItem('sp.diff', d); } catch { /* yok */ } };
+  let savedMode = MATCH.teamSize, savedDiff = MATCH.difficulty;
+  try { savedMode = Number(localStorage.getItem('sp.mode')) || MATCH.teamSize; savedDiff = localStorage.getItem('sp.diff') || MATCH.difficulty; } catch { /* yok */ }
   setMode(MODES.includes(savedMode) ? savedMode : MATCH.teamSize);
+  setDiff(DIFFICULTIES.includes(savedDiff) ? savedDiff : MATCH.difficulty);
   for (const i of modeInputs) i.onchange = () => setMode(Number(i.value));
+  for (const i of diffInputs) i.onchange = () => setDiff(i.value);
   let online = false;
   let w = createWorld(), screen = 'home', started = false, acc = 0, uiClock = 0, helpReturn = 'home', pausedAt = 0, last = performance.now();
   view.setWorld(w);
@@ -89,7 +93,7 @@ export async function start(root) {
   }
   function begin() {
     if (online) { showLobby(); return; }
-    w = createWorld(1 + Math.floor(Math.random() * 1e6), { teamSize: modeChoice() }); faceCenter();
+    w = createWorld(1 + Math.floor(Math.random() * 1e6), settingsChoice()); faceCenter();
     started = true; acc = 0;
     if (touch) enterFullscreen();
     show(null); input.lock();
@@ -159,12 +163,12 @@ export async function start(root) {
   let pending = null, inviteCode = null;
   const lobby = createLobby(root, {
     id: () => net?.id,
-    mode: modeChoice,
-    create(nick, teamSize) { withHello(nick, () => net.create(teamSize)); },
+    settingsChoice,
+    create(nick, settings) { withHello(nick, () => net.create(settings)); },
     join(nick, code) { withHello(nick, () => net.join(code)); },
     seat: slot => net.seat(slot),
     move: (id, slot) => net.move(id, slot),
-    settings: teamSize => net.settings(teamSize),
+    settings: s => net.settings(s),
     start: () => net.start(),
     leave: leaveRoom,
   });
@@ -214,7 +218,7 @@ export async function start(root) {
           break;
         case 'fall':
           if (e.id === me) {
-            ui.message(e.by !== null ? who(w.players[e.by]) + ' SENİ DÜŞÜRDÜ' : 'DÜŞTÜN', 2.5);
+            ui.message((e.by !== null ? who(w.players[e.by]) + ' SENİ DÜŞÜRDÜ' : 'DÜŞTÜN') + (e.lives === 0 ? ' · HAK BİTTİ' : e.respawn ? ` · ${e.lives} HAK` : ''), 2.5);
             // Düşüş sineması: kamera düştüğün yerde alçalırken yukarıdaki arenaya bakar.
             // Bakış arenanın merkezine, yukarı: plakalar tepede uzaklaşırken görünsün.
             {

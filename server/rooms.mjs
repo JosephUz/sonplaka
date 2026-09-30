@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { MATCH, MODES, playersFor, teamsFor } from '../src/config.js';
+import { DIFFICULTIES, MATCH, MODES, playersFor, teamsFor } from '../src/config.js';
 import { createWorld, step } from '../src/world.js';
 import { encodeSnapshot } from '../src/net/snapshot.js';
 import { C2S, EDGES, NET, S2C, roomCode } from '../src/net/protocol.js';
@@ -41,7 +41,11 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
   const members = room => room.seats.filter(Boolean);
   const broadcast = (room, obj) => { for (const c of members(room)) send(c, obj); };
   const broadcastLobby = room => broadcast(room, lobbyMsg(room));
-  const sanitize = msg => { const n = Math.round(+msg?.teamSize); return { teamSize: MODES.includes(n) ? n : MATCH.teamSize }; };
+  /** Ayarlar: geçersiz ya da eksik alan `base`'den (oda kurulurken varsayılanlardan) gelir. */
+  const sanitize = (msg, base = { teamSize: MATCH.teamSize, difficulty: MATCH.difficulty }) => {
+    const n = Math.round(+msg?.teamSize), d = String(msg?.difficulty || '');
+    return { teamSize: MODES.includes(n) ? n : base.teamSize, difficulty: DIFFICULTIES.includes(d) ? d : base.difficulty };
+  };
   /** İlk boş koltuk, takımlara dağıtarak (önce her takımın 1. koltuğu, sonra 2. ...); yoksa -1. */
   function freeSeat(room) {
     const n = room.settings.teamSize, teams = teamsFor(n);
@@ -71,7 +75,7 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
       p.name = c ? c.nick : 'Bot-' + i;
     });
   }
-  const startMsg = (room, conn) => ({ t: S2C.START, you: room.seats.indexOf(conn), teamSize: room.world.teamSize, names: room.world.players.map(p => p.name), humans: room.world.players.map(p => p.human) });
+  const startMsg = (room, conn) => ({ t: S2C.START, you: room.seats.indexOf(conn), teamSize: room.world.teamSize, difficulty: room.world.difficulty, names: room.world.players.map(p => p.name), humans: room.world.players.map(p => p.human) });
   function roster(room) { syncHumans(room); for (const c of members(room)) send(c, startMsg(room, c)); }
 
   function leaveRoom(conn) {
@@ -100,7 +104,7 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
 
   function startGame(room) {
     const seed = 1 + Math.floor(Math.random() * 1e6);
-    room.world = createWorld(seed, { teamSize: room.settings.teamSize });
+    room.world = createWorld(seed, { teamSize: room.settings.teamSize, difficulty: room.settings.difficulty });
     room.state = 'playing'; room.acc = 0; room.clock = 0; room.stepNo = 0; room.events = [];
     room.last = performance.now();
     for (const c of members(room)) c.input = blankInput();
@@ -204,13 +208,14 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
         const r = { code, hostId: conn.id, settings, seats: Array(playersFor(settings.teamSize)).fill(null), state: 'lobby', world: null, timer: null, events: [] };
         r.seats[0] = conn;
         rooms.set(code, r); conn.room = r;
-        broadcastLobby(r); log(`oda kuruldu ${code} (${conn.nick}, kip ${settings.teamSize})`);
+        broadcastLobby(r); log(`oda kuruldu ${code} (${conn.nick}, kip ${settings.teamSize}, bot ${settings.difficulty})`);
         return;
       }
       case C2S.SETTINGS: {
         if (!room || room.hostId !== conn.id || room.state !== 'lobby') return;
-        const { teamSize } = sanitize(msg);
-        if (!relayout(room, teamSize)) return error(conn, `Bu kip için oda kalabalık: ${members(room).length} kişi, ${playersFor(teamSize)} koltuk`);
+        const { teamSize, difficulty } = sanitize(msg, room.settings);
+        room.settings.difficulty = difficulty;
+        if (teamSize !== room.settings.teamSize && !relayout(room, teamSize)) return error(conn, `Bu kip için oda kalabalık: ${members(room).length} kişi, ${playersFor(teamSize)} koltuk`);
         broadcastLobby(room);
         return;
       }

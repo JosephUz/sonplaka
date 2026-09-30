@@ -31,10 +31,18 @@ export const ARENA = {
 export const ROUND = { start: 3, tremble: 5, ring2At: 40, ring1At: 80, shrinkAt: 100, shrinkTime: 30, minR: 5.5, endAt: 145, respawn: 4 };
 
 /**
- * Maç kipi: takım başı oyuncu `teamSize` — 1 ise **herkes tek** (`ffaTeams` oyuncu, herkes ayrı takım), 2–5 ise iki
- * takım (2v2 … 5v5); boş yerleri botlar doldurur. `seed` bot kararlarının tohumu (testler buna dayanır).
+ * Düşme hakkı ve doğuş koruması: her oyuncunun `lives` düşme hakkı vardır; beşinci düşüşte doğuş açık olsa da elenir.
+ * Yeni doğan `shield` saniye korunur: disk ve levye onu savuramaz, botlar onu hedef almaz; ilk atış ya da levye
+ * korumayı bitirir.
  */
-export const MATCH = { teamSize: 5, ffaTeams: 5, seed: 61 };
+export const LIFE = { lives: 5, shield: 2 };
+
+/**
+ * Maç kipi: takım başı oyuncu `teamSize` — 1 ise **herkes tek** (`ffaTeams` oyuncu, herkes ayrı takım), 2–5 ise iki
+ * takım (2v2 … 5v5); boş yerleri botlar doldurur. `difficulty` bot zorluğu (bkz. BOT_LEVELS). `seed` bot kararlarının
+ * tohumu (testler buna dayanır).
+ */
+export const MATCH = { teamSize: 5, ffaTeams: 5, difficulty: 'normal', seed: 61 };
 export const MODES = [1, 2, 3, 4, 5];
 export const modeLabel = n => (n === 1 ? 'HERKES TEK' : `${n}v${n}`);
 export const teamsFor = n => (n === 1 ? MATCH.ffaTeams : 2);
@@ -58,7 +66,7 @@ export const PAD = { speed: 20, min: 0.9, max: 1.5 };
  * `knockTime` saniye kontrolsüzdür. Sol tık `heavyCharge` saniye basılıyken bırakılırsa **ağır disk**: yavaş
  * (`heavySpeed`), parlak, `heavyKnock` / `heavyLift` kat sert savurur; o da elemez, eleme yalnız düşmeyle. `cooldown` iki atış arası. Üçlü disk `spread` radyan yelpazeyle çıkar.
  */
-export const DISC = { max: 3, regen: 1.5, speed: 26, heavySpeed: 17, radius: 0.55, life: 4, bounces: 3, knock: 15, lift: 5, knockTime: 0.45, heavyCharge: 1.5, heavyKnock: 1.8, heavyLift: 1.5, cooldown: 0.25, spread: 0.22 };
+export const DISC = { max: 5, regen: 1.5, speed: 26, heavySpeed: 17, radius: 0.55, life: 4, bounces: 3, knock: 15, lift: 5, knockTime: 0.45, heavyCharge: 1.5, heavyKnock: 1.8, heavyLift: 1.5, cooldown: 0.25, spread: 0.22 };
 
 /** Levye (sağ tık): `range` içinde ve bakış konisinde (`cone`: kosinüs) rakibi kendinden uzağa `knock` ile iter. */
 export const CROWBAR = { range: 2.6, cone: 0.5, knock: 22, lift: 6, cooldown: 0.8 };
@@ -82,8 +90,21 @@ export const CREDIT = 4;
  * `fireRange` içindeki hedefe `fireEvery` + rastgele aralıkla atılır, nişan `aimError` radyan sapar; `heavyChance` ile
  * ağır disk hazırlar. Yaklaşan diski `dodgeChance` ile zıplayarak savuşturur. Başka plakadaki rakibe `crossChance` ile
  * uzaktan atar; aksi halde zıplama plakasıyla ona (ya da merkeze) gider. Yeni indiği plakada `stay` saniye kalır.
+ * Doğduktan sonra `spawnWait` saniye atmaz; nişanda hedefin hızını `lead` katsayısıyla önden alır.
+ *
+ * Zorluk (`BOT_LEVELS`): **zor** = bu değerler (tepki hızlı, nişan isabetli); **normal** ve **kolay** daha seyrek plan
+ * yapar, daha seyrek ve daha sapmalı atar, diskten daha az kaçar, doğduktan sonra daha uzun bekler. Tek başına oyunda
+ * giriş ekranında, odada yönetici seçer (her iki takımın botları için).
  */
-export const BOT = { think: 0.3, thinkJitter: 0.25, range: 11, close: 5, strafe: 1.1, edge: 2.2, fireRange: 30, fireEvery: 0.7, fireJitter: 0.9, aimError: 0.08, heavyChance: 0.12, dodgeChance: 0.5, crossChance: 0.25, stay: 4 };
+export const BOT = { think: 0.3, thinkJitter: 0.25, range: 11, close: 5, strafe: 1.1, edge: 2.2, fireRange: 30, fireEvery: 0.7, fireJitter: 0.9, aimError: 0.08, heavyChance: 0.12, dodgeChance: 0.5, crossChance: 0.25, stay: 4, spawnWait: 1.5, lead: 1 };
+export const BOT_LEVELS = {
+  hard: {},
+  normal: { think: 0.55, thinkJitter: 0.4, fireEvery: 1.3, fireJitter: 1.2, aimError: 0.18, heavyChance: 0.08, dodgeChance: 0.3, spawnWait: 2.5, lead: 0.6 },
+  easy: { think: 0.9, thinkJitter: 0.6, fireEvery: 2.2, fireJitter: 1.6, aimError: 0.3, heavyChance: 0.04, dodgeChance: 0.12, spawnWait: 3.5, lead: 0.3 },
+};
+export const DIFFICULTIES = ['easy', 'normal', 'hard'];
+export const DIFFICULTY_LABEL = { easy: 'KOLAY', normal: 'NORMAL', hard: 'ZOR' };
+export const botParams = difficulty => ({ ...BOT, ...(BOT_LEVELS[difficulty] || BOT_LEVELS.normal) });
 
 /**
  * Kamera: masaüstünde **birinci şahıs** (göz `eye` yükseklikte), telefonda omuz üstü (`back` geride, `side` sağda,

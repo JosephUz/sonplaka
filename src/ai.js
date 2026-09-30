@@ -1,10 +1,11 @@
-import { BOT, CROWBAR, DISC, PICKUP } from './config.js';
+import { CROWBAR, DISC } from './config.js';
 import { alive } from './actions.js';
 import { distance } from './math.js';
 
 /**
- * Bot kararı: bu adımın girdisi { x, z, yaw, pitch, tap, release, hold, secondary, jump }. BOT.think aralıkla plan yapar
- * (hedef, gidilecek nokta, düello mu), her adım plana göre yürür ve nişan alır.
+ * Bot kararı: bu adımın girdisi { x, z, yaw, pitch, tap, release, hold, secondary, jump }. Parametreler zorluğa göre
+ * w.bot'tan (config.js → botParams). B.think aralıkla plan yapar (hedef, gidilecek nokta, düello mu), her adım plana
+ * göre yürür ve nişan alır. Doğduktan sonra B.spawnWait saniye atmaz; korumalı (yeni doğmuş) rakibi hedef almaz.
  * - Plakası titriyor / düşüyorsa ya da merkez küçülürken kenardaysa: içeri götüren zıplama plakasına (ya da merkeze) kaçar.
  * - Plakasında güç diski varsa (elinde güç yokken) onu alır.
  * - **Son plaka evresinde** (doğuş kapalı, süre bitince orada kalan kazanır): merkezde değilse oraya gider, merkezdeyse
@@ -14,13 +15,14 @@ import { distance } from './math.js';
  * - Üstüne gelen diski görünce zıplayarak kaçınır.
  */
 export function botInput(w, p) {
-  const b = p.bot ??= { target: null, dest: null, duel: false, cross: false, stay: 0, strafe: 1, strafeT: 0, fireT: 0, charge: false, jumpT: 0, aimErr: 0 };
+  const B = w.bot;
+  const b = p.bot ??= { target: null, dest: null, duel: false, cross: false, stay: 0, strafe: 1, strafeT: 0, fireT: w.time + B.spawnWait, charge: false, jumpT: 0, aimErr: 0 };
   const cmd = { x: 0, z: 0, yaw: p.yaw, pitch: p.pitch };
   if (p.knock > 0 || p.freeze > 0 || p.out) return cmd;
-  if (p.think <= 0) { p.think = BOT.think + w.random() * BOT.thinkJitter; plan(w, p, b); }
+  if (p.think <= 0) { p.think = B.think + w.random() * B.thinkJitter; plan(w, p, b); }
   const enemy = b.target !== null ? w.players[b.target] : null, target = enemy && alive(enemy) ? enemy : null;
   if (target) {
-    const lead = { x: target.x + target.vx * 0.18, y: target.y + target.vy * 0.1, z: target.z + target.vz * 0.18 };
+    const k = 0.18 * B.lead, lead = { x: target.x + target.vx * k, y: target.y + target.vy * 0.1 * B.lead, z: target.z + target.vz * k };
     const dx = lead.x - p.x, dz = lead.z - p.z, dh = Math.hypot(dx, dz);
     cmd.yaw = Math.atan2(dx, dz) + b.aimErr;
     cmd.pitch = Math.atan2(lead.y + 1 - (p.y + 1.3), dh);
@@ -32,43 +34,44 @@ export function botInput(w, p) {
       cmd.sprint = !!b.dest.pad; // rampaya koşarken ve kaçarken hızlı
     }
     if (b.duel && target && p.ground) {
-      if (w.time >= b.strafeT) { b.strafeT = w.time + BOT.strafe * (0.6 + w.random() * 0.8); b.strafe = -b.strafe; }
+      if (w.time >= b.strafeT) { b.strafeT = w.time + B.strafe * (0.6 + w.random() * 0.8); b.strafe = -b.strafe; }
       const dx = target.x - p.x, dz = target.z - p.z, d = Math.hypot(dx, dz) || 1;
       let sx = -dz / d * b.strafe, sz = dx / d * b.strafe;
       const pl = p.plate >= 0 ? w.arena.plates[p.plate] : null, ps = pl ? w.plates[p.plate] : null;
       if (pl) {
         // Kenara yaklaşan yan adım merkeze doğru bükülür.
         const nx = p.x + sx * 1.5 - pl.x, nz = p.z + sz * 1.5 - pl.z;
-        if (Math.hypot(nx, nz) > ps.r - BOT.edge) { sx = (pl.x - p.x) * 0.3; sz = (pl.z - p.z) * 0.3; b.strafe = -b.strafe; }
+        if (Math.hypot(nx, nz) > ps.r - B.edge) { sx = (pl.x - p.x) * 0.3; sz = (pl.z - p.z) * 0.3; b.strafe = -b.strafe; }
       }
       cmd.x += sx * 0.8; cmd.z += sz * 0.8;
     }
   }
   if (target) {
     const d = distance(p, target);
-    if (w.time >= b.fireT && p.discs > 0 && p.throwCd <= 0 && d <= BOT.fireRange && (b.duel || b.cross)) {
-      if (b.charge) { cmd.hold = true; if (p.charge >= DISC.heavyCharge - 0.01) { cmd.release = true; b.charge = false; b.fireT = w.time + BOT.fireEvery + w.random() * BOT.fireJitter; } }
-      else { cmd.tap = true; cmd.release = true; b.fireT = w.time + BOT.fireEvery + w.random() * BOT.fireJitter; b.aimErr = (w.random() - 0.5) * 2 * BOT.aimError; }
+    if (w.time >= b.fireT && p.discs > 0 && p.throwCd <= 0 && d <= B.fireRange && (b.duel || b.cross)) {
+      if (b.charge) { cmd.hold = true; if (p.charge >= DISC.heavyCharge - 0.01) { cmd.release = true; b.charge = false; b.fireT = w.time + B.fireEvery + w.random() * B.fireJitter; } }
+      else { cmd.tap = true; cmd.release = true; b.fireT = w.time + B.fireEvery + w.random() * B.fireJitter; b.aimErr = (w.random() - 0.5) * 2 * B.aimError; }
     }
     // Levye diski beklemez: menzile giren rakibe her zaman sallanır (son plakada kenara itmenin silahı).
     if (d < CROWBAR.range * 0.9 && p.barCd <= 0 && Math.abs(target.y - p.y) < 2) cmd.secondary = true;
   }
-  if (p.ground && w.time >= b.jumpT && incoming(w, p)) { b.jumpT = w.time + 1.2; if (w.random() < BOT.dodgeChance) cmd.jump = true; }
+  if (p.ground && w.time >= b.jumpT && incoming(w, p)) { b.jumpT = w.time + 1.2; if (w.random() < B.dodgeChance) cmd.jump = true; }
   return cmd;
 }
 
 function plan(w, p, b) {
+  const B = w.bot;
   const plate = p.plate >= 0 ? w.arena.plates[p.plate] : null, ps = plate ? w.plates[p.plate] : null;
   b.duel = false; b.cross = false; b.dest = null;
   // Hedef: en yakın rakip; aynı plakadaki çok daha çekici.
   let best = null, score = Infinity;
   for (const t of w.players) {
-    if (t.team === p.team || !alive(t)) continue;
+    if (t.team === p.team || !alive(t) || t.shield > 0) continue;
     const s = distance(p, t) - (t.plate === p.plate && p.plate >= 0 ? 15 : 0);
     if (s < score) { score = s; best = t; }
   }
   b.target = best ? best.id : null;
-  if (!b.charge && best) b.charge = w.random() < BOT.heavyChance;
+  if (!b.charge && best) b.charge = w.random() < B.heavyChance;
   if (!plate) return;
   // Kaçış: plaka titriyor ya da düşüyor, ya da merkez küçülürken kenardayım.
   const shrinking = plate.ring === 0 && ps.r < plate.r - 0.5;
@@ -77,7 +80,7 @@ function plan(w, p, b) {
     b.dest = pad ? { x: pad.x, z: pad.z, pad: true } : { x: plate.x, z: plate.z };
     return;
   }
-  if (shrinking && Math.hypot(p.x - plate.x, p.z - plate.z) > ps.r - BOT.edge) { b.dest = { x: plate.x, z: plate.z }; b.duel = !!best && best.plate === p.plate; return; }
+  if (shrinking && Math.hypot(p.x - plate.x, p.z - plate.z) > ps.r - B.edge) { b.dest = { x: plate.x, z: plate.z }; b.duel = !!best && best.plate === p.plate; return; }
   // Güç diski.
   if (!p.power) {
     for (let i = 0; i < w.pickups.length; i++) {
@@ -91,26 +94,26 @@ function plan(w, p, b) {
   if (last && plate.ring !== 0) {
     const pad = routePad(w, p.plate, 0);
     b.dest = pad ? { x: pad.x, z: pad.z, pad: true } : { x: plate.x, z: plate.z };
-    b.cross = !!best && distance(p, best) <= BOT.fireRange;
+    b.cross = !!best && distance(p, best) <= B.fireRange;
     return;
   }
   if (!best) { b.dest = wander(w, p, plate, ps); return; }
   if (best.plate === p.plate) {
     b.duel = true;
-    const d = distance(p, best), toward = last ? 1 : d > BOT.range ? 1 : d < BOT.close ? -1 : 0;
+    const d = distance(p, best), toward = last ? 1 : d > B.range ? 1 : d < B.close ? -1 : 0;
     const ux = (best.x - p.x) / (d || 1), uz = (best.z - p.z) / (d || 1);
-    b.dest = inside(plate, ps, { x: p.x + ux * toward * 3, z: p.z + uz * toward * 3 });
+    b.dest = inside(w, plate, ps, { x: p.x + ux * toward * 3, z: p.z + uz * toward * 3 });
     return;
   }
   // Başka plakada: menzildeyse çoğunlukla yerinde kalıp uzaktan atar (rakibe bakan kenara yakın, yanlara kayarak);
   // yeni indiği plakada bir süre kalır; aksi halde zıplama plakalarıyla ona (plakası ayaktaysa) ya da merkeze gider.
   const d = distance(p, best);
-  if (p.flight > 0) b.stay = w.time + BOT.stay;
-  b.cross = d <= BOT.fireRange;
-  if (b.cross && (w.time < b.stay || w.random() > BOT.crossChance)) {
+  if (p.flight > 0) b.stay = w.time + B.stay;
+  b.cross = d <= B.fireRange;
+  if (b.cross && (w.time < b.stay || w.random() > B.crossChance)) {
     const ux = (best.x - plate.x) / (Math.hypot(best.x - plate.x, best.z - plate.z) || 1), uz = (best.z - plate.z) / (Math.hypot(best.x - plate.x, best.z - plate.z) || 1);
     b.duel = true;
-    b.dest = inside(plate, ps, { x: plate.x + ux * (ps.r - BOT.edge - 1), z: plate.z + uz * (ps.r - BOT.edge - 1) });
+    b.dest = inside(w, plate, ps, { x: plate.x + ux * (ps.r - B.edge - 1), z: plate.z + uz * (ps.r - B.edge - 1) });
     return;
   }
   const goal = best.plate >= 0 && w.plates[best.plate].phase < 2 ? best.plate : w.plates[0].phase < 2 ? 0 : p.plate;
@@ -120,13 +123,13 @@ function plan(w, p, b) {
 
 /** Plaka içinde rastgele bir nokta (kenardan uzak). */
 function wander(w, p, plate, ps) {
-  const a = w.random() * Math.PI * 2, r = w.random() * Math.max(0, ps.r - BOT.edge);
+  const a = w.random() * Math.PI * 2, r = w.random() * Math.max(0, ps.r - w.bot.edge);
   return { x: plate.x + Math.sin(a) * r, z: plate.z + Math.cos(a) * r };
 }
 
-/** Noktayı plakanın içine (kenardan BOT.edge uzağa) sıkıştırır. */
-function inside(plate, ps, pt) {
-  const dx = pt.x - plate.x, dz = pt.z - plate.z, d = Math.hypot(dx, dz), max = Math.max(0.5, ps.r - BOT.edge);
+/** Noktayı plakanın içine (kenardan B.edge uzağa) sıkıştırır. */
+function inside(w, plate, ps, pt) {
+  const dx = pt.x - plate.x, dz = pt.z - plate.z, d = Math.hypot(dx, dz), max = Math.max(0.5, ps.r - w.bot.edge);
   if (d <= max) return pt;
   return { x: plate.x + dx / d * max, z: plate.z + dz / d * max };
 }

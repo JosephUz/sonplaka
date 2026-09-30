@@ -1,13 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ARENA, CROWBAR, DISC, FREEZE, MOVE, PAD, PICKUP, ROUND } from '../src/config.js';
+import { ARENA, CROWBAR, DISC, FREEZE, LIFE, MATCH, MOVE, PAD, PICKUP, ROUND, botParams } from '../src/config.js';
 import { aliveCount, createWorld, groundAt, jump, step, swing, throwDisc } from '../src/world.js';
 
 /** Raund oynanır durumda, herkes yerinde; botlar düşünmesin diye uzun think. */
 const setup = () => {
   const w = createWorld();
   w.state = 'play'; w.t = 0;
-  for (const p of w.players) { p.think = 999; p.human = true; }
+  for (const p of w.players) { p.think = 999; p.human = true; p.shield = 0; }
   return w;
 };
 const run = (w, n, input = {}) => { for (let i = 0; i < n; i++) step(w, 1 / 60, input); };
@@ -101,13 +101,13 @@ test('ağır disk: 1,5 sn basılı tutup bırakınca çıkar; elemez, normal dis
   assert.ok(t.vy > DISC.lift, 'ağır disk daha çok havalandırmalı');
 });
 
-test('kısa sol tık normal disk atar; diskler 1,5 saniyede bir yenilenir; elde en çok 3', () => {
+test('kısa sol tık normal disk atar; diskler 1,5 saniyede bir yenilenir; elde en çok 5', () => {
   const w = setup(), p = center(w, 0);
-  for (const t of w.players) if (t.id !== 0) t.out = true;
+  for (const t of w.players) if (t.id !== 0) Object.assign(t, { out: true, respawn: 999 }); // kenarda bekler, sayılır
   step(w, 1 / 60, { tap: true, release: true, yaw: 0, pitch: 0 });
-  assert.equal(w.discs.length, 1); assert.equal(w.discs[0].kind, 'normal'); assert.equal(p.discs, 2);
+  assert.equal(w.discs.length, 1); assert.equal(w.discs[0].kind, 'normal'); assert.equal(p.discs, DISC.max - 1);
   run(w, Math.ceil(DISC.regen * 60) + 2);
-  assert.equal(p.discs, 3);
+  assert.equal(p.discs, DISC.max);
   run(w, 200);
   assert.equal(p.discs, DISC.max);
 });
@@ -134,7 +134,7 @@ test('zıplama: yerde kalkar, havada bir kez daha zıplar, üçüncü olmaz', ()
 test('rampaya basan hedef plakaya uçar ve oraya iner; inince hemen geri dönmez', () => {
   const w = setup(), q = w.arena.pads.find(x => x.plate === 0);
   const p = center(w, 0, q.x, q.z); p.padLock = 0;
-  for (const t of w.players) if (t.id !== 0) t.out = true;
+  for (const t of w.players) if (t.id !== 0) Object.assign(t, { out: true, respawn: 999 }); // kenarda bekler, sayılır
   step(w, 1 / 60);
   assert.ok(p.flight > 0, 'uçmadı'); assert.equal(p.stats.pads, 1);
   run(w, Math.ceil(q.time * 60) + 10);
@@ -147,7 +147,7 @@ test('rampa hiç kapanmaz: disk vursa da, biri az önce uçmuş olsa da basan u�
   const w = setup(), q = w.arena.pads.find(x => x.plate === 0);
   const p = center(w, 0, q.x - Math.sin(q.dir) * 4, q.z - Math.cos(q.dir) * 4);
   p.yaw = q.dir; p.pitch = -0.28;
-  for (const t of w.players) if (t.id !== 0) t.out = true;
+  for (const t of w.players) if (t.id !== 0) Object.assign(t, { out: true, respawn: 999 }); // kenarda bekler, sayılır
   assert.ok(throwDisc(w, 0));
   run(w, 30);
   assert.equal(w.pads[q.id].off, 0, 'disk rampayı kapattı');
@@ -161,7 +161,7 @@ test('rampa hiç kapanmaz: disk vursa da, biri az önce uçmuş olsa da basan u�
 
 test('Shift hızlı koşturur', () => {
   const w = setup(), p = center(w, 0);
-  for (const t of w.players) if (t.id !== 0) t.out = true;
+  for (const t of w.players) if (t.id !== 0) Object.assign(t, { out: true, respawn: 999 }); // kenarda bekler, sayılır
   run(w, 40, { x: 1, z: 0, sprint: true });
   assert.ok(p.vx > MOVE.speed * 1.3, 'hızlanmadı: ' + p.vx.toFixed(2));
   run(w, 40, { x: -1, z: 0 });
@@ -170,7 +170,7 @@ test('Shift hızlı koşturur', () => {
 
 test('disk görünmez sınırdan seker, ömrü biter; plakalarda kolon yok', () => {
   const w = setup(), p = center(w, 0, 0, 8);
-  for (const t of w.players) if (t.id !== 0) t.out = true;
+  for (const t of w.players) if (t.id !== 0) Object.assign(t, { out: true, respawn: 999 }); // kenarda bekler, sayılır
   assert.ok(w.arena.plates.every(pl => pl.pillars.length === 0), 'kolon var');
   p.yaw = 0; p.pitch = 0;
   throwDisc(w, 0);
@@ -343,4 +343,73 @@ test('botlarla tam maç biter: son plakada kalan kazanır (en geç süre bitince
     assert.ok(w.players.slice(1).some(p => p.stats.kills > 0), 'hiçbir bot düşürmedi');
     assert.equal(w.score.reduce((a, b) => a + b, 0), w.players.reduce((a, p) => a + p.stats.kills, 0), 'takım skoru düşürmelerin toplamı olmalı');
   }
+});
+
+test('doğuş koruması: yeni doğan 2 sn savrulmaz, botlar onu hedef almaz; ilk atış korumayı bitirir', () => {
+  const w = setup();
+  const p = center(w, 0, -3, 0), t = center(w, 5, 3, 0);
+  t.shield = LIFE.shield; t.vx = 0;
+  p.yaw = Math.PI / 2; // +x yönü: t'ye doğru
+  // Girdi yalnız p'ye (players biçimi): aynı girdi t'ye de gitse t atar ve kendi korumasını bozardı.
+  step(w, 1 / 60, { players: { 0: { tap: true, release: true, yaw: Math.PI / 2, pitch: 0 } } });
+  assert.equal(p.shield, 0, 'atan korumasını kaybetmeli'); assert.ok(t.shield > 0, 't korumasını korumalı');
+  run(w, 40);
+  assert.equal(t.knock, 0, 'korumalı oyuncu savruldu'); assert.ok(Math.abs(t.vx) < 0.01);
+  run(w, Math.ceil(LIFE.shield * 60) + 2);
+  assert.equal(t.shield, 0);
+  // Koruma bitince aynı atış savurur.
+  p.discs = DISC.max; p.throwCd = 0;
+  step(w, 1 / 60, { players: { 0: { tap: true, release: true, yaw: Math.PI / 2, pitch: 0 } } });
+  run(w, 40);
+  assert.ok(t.knock > 0 || t.vx > 1, 'koruma bitince disk işlemedi');
+});
+
+test('botlar doğar doğmaz atmaz (spawnWait), sonra atar', () => {
+  const w = createWorld(3, { difficulty: 'hard' });
+  w.state = 'play'; w.t = 0;
+  const bot = w.players[5], human = w.players[0];
+  center(w, 5, 0, 0); center(w, 0, 6, 0); human.human = true; human.think = 999; human.shield = 0;
+  for (const q of w.players) if (q.id !== 0 && q.id !== 5) q.out = true;
+  Object.assign(bot, { shield: 0, bot: null, think: 0 });
+  let early = 0;
+  for (let i = 0; i < Math.floor((w.bot.spawnWait - 0.2) * 60); i++) { step(w, 1 / 60); for (const e of w.events) if (e.type === 'throw' && e.id === 5) early++; w.events.length = 0; }
+  assert.equal(early, 0, 'bot doğar doğmaz attı');
+  let later = 0;
+  for (let i = 0; i < 60 * 4; i++) { step(w, 1 / 60); for (const e of w.events) if (e.type === 'throw' && e.id === 5) later++; w.events.length = 0; if (human.out) center(w, 0, 6, 0), Object.assign(human, { out: false, respawn: 0, shield: 0 }); }
+  assert.ok(later > 0, 'bot bekleme bitince atmadı');
+});
+
+test('düşme hakkı 5: her düşüş bir hak götürür, beşincide doğuş açıkken de elenir; hakkı biten sayılmaz', () => {
+  const w = setup(), p = center(w, 0, ARENA.center.r - 0.5, 0);
+  assert.equal(p.lives, LIFE.lives);
+  p.lives = 2;
+  run(w, 180, { x: 1, z: 0 });
+  assert.ok(p.out && p.respawn > 0 && p.lives === 1, 'dördüncü düşüşte geri gelmeli');
+  run(w, Math.ceil(ROUND.respawn * 60) + 5);
+  assert.ok(!p.out);
+  center(w, 0, ARENA.center.r - 0.5, 0); p.shield = 0;
+  run(w, 180, { x: 1, z: 0 });
+  assert.ok(p.out && p.respawn === 0 && p.lives === 0, 'beşinci düşüşte elenmeli');
+  assert.equal(w.events.filter(e => e.type === 'fall' && e.id === 0).at(-1)?.lives, 0);
+  assert.equal(aliveCount(w, 0), 4, 'hakkı biten sayılmamalı');
+  // Doğuş açıkken bile bir takımın herkesinin hakkı biterse maç biter.
+  for (const t of w.players) if (t.team === 0 && t.id !== 0) Object.assign(t, { out: true, respawn: 0, lives: 0 });
+  step(w, 1 / 60);
+  assert.equal(w.winner, 1);
+});
+
+test('zorluk: kolay botlar zora göre daha seyrek atar ve daha sapmalı nişan alır; ayarlar dünyaya işlenir', () => {
+  assert.ok(botParams('easy').fireEvery > botParams('normal').fireEvery && botParams('normal').fireEvery > botParams('hard').fireEvery);
+  assert.ok(botParams('easy').aimError > botParams('hard').aimError && botParams('easy').spawnWait > botParams('hard').spawnWait);
+  assert.equal(createWorld(1, { difficulty: 'saçma' }).difficulty, MATCH.difficulty, 'geçersiz zorluk varsayılana dönmeli');
+  const throwsIn = difficulty => {
+    const w = createWorld(11, { teamSize: 2, difficulty });
+    w.state = 'play'; w.t = 0;
+    for (const p of w.players) { p.human = false; p.shield = 0; p.bot = null; }
+    let n = 0;
+    for (let i = 0; i < 60 * 30; i++) { step(w, 1 / 60); for (const e of w.events) if (e.type === 'throw') n++; w.events.length = 0; }
+    return n;
+  };
+  const easy = throwsIn('easy'), hard = throwsIn('hard');
+  assert.ok(easy < hard, `kolay botlar daha az atmalı: kolay ${easy}, zor ${hard}`);
 });

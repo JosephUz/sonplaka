@@ -4,11 +4,11 @@
  */
 export const C2S = {
   HELLO: 'hello',   // { nick, token } — bağlantı kimliği; token varsa eski koltuğa geri bağlanır
-  CREATE: 'create', // { teamSize } — oda kur (kuran odanın yöneticisidir); kip: 1 herkes tek, 2-5 iki takım
+  CREATE: 'create', // { teamSize, difficulty } — oda kur (kuran odanın yöneticisidir); kip: 1 herkes tek, 2-5 iki takım; bot zorluğu easy|normal|hard
   JOIN: 'join',     // { code }
   SEAT: 'seat',     // { slot } — boş koltuğa otur (koltuk = takım × takım boyu + sıra)
   MOVE: 'move',     // { id, slot } — yalnızca yönetici: oyuncuyu koltuğa taşır, koltuk doluysa ikisi yer değiştirir
-  SETTINGS: 'settings', // { teamSize } — yalnızca yönetici, lobide: kip değişir, koltuklar yeniden dizilir
+  SETTINGS: 'settings', // { teamSize?, difficulty? } — yalnızca yönetici, lobide: kip değişince koltuklar yeniden dizilir
   START: 'start',   // yalnızca yönetici
   LEAVE: 'leave',
   INPUT: 'in',      // { mv: [x, z], yaw, pitch, hold, sp (Shift), e: 'basışlar' } — bkz. EDGES
@@ -16,9 +16,9 @@ export const C2S = {
 };
 export const S2C = {
   WELCOME: 'welcome', // { id, token, nick }
-  LOBBY: 'lobby',     // { code, hostId, state, settings: { teamSize }, seats: [{ id, nick, online } | null] × oyuncu sayısı }
+  LOBBY: 'lobby',     // { code, hostId, state, settings: { teamSize, difficulty }, seats: [{ id, nick, online } | null] × oyuncu sayısı }
   ERROR: 'error',     // { msg }
-  START: 'start',     // { you, teamSize, names, humans } — maç başladı (ya da ortasına katıldın)
+  START: 'start',     // { you, teamSize, difficulty, names, humans } — maç başladı (ya da ortasına katıldın)
   SNAP: 's',          // durum paketi + o ana kadar biriken olaylar (bkz. snapshot.js)
   END: 'end',         // { score, winner (-1 berabere), stats, names }
   PONG: 'pong',

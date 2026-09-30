@@ -6,7 +6,7 @@ import { PICKUP } from '../config.js';
  * yumuşatılır, bkz. client.js). Oyuncu alanlarının sırası PLAYER dizisindedir; diskler kimlikleriyle gider (ara değer
  * için istemci kimlikle eşler); plakalar, zıplama plakaları ve güç diskleri kısa diziler.
  */
-export const PLAYER = ['x', 'y', 'z', 'vx', 'vy', 'vz', 'yaw', 'pitch', 'knock', 'flight', 'freeze', 'respawn', 'discs', 'regen', 'charge', 'throwCd', 'barCd', 'sprint', 'plate', 'jumps', 'out', 'ground', 'power', 'powerLeft'];
+export const PLAYER = ['x', 'y', 'z', 'vx', 'vy', 'vz', 'yaw', 'pitch', 'knock', 'flight', 'freeze', 'respawn', 'discs', 'regen', 'charge', 'throwCd', 'barCd', 'sprint', 'plate', 'jumps', 'out', 'ground', 'power', 'powerLeft', 'shield', 'lives'];
 const KINDS = ['normal', 'heavy', 'freeze'];
 const STATES = ['countdown', 'play', 'over'];
 const r2 = v => Math.round(v * 100) / 100, r3 = v => Math.round(v * 1000) / 1000;
@@ -16,7 +16,7 @@ const enc = (p, k) => {
   if (k === 'out' || k === 'ground' || k === 'sprint') return v ? 1 : 0;
   if (k === 'power') return v ? PICKUP.kinds.indexOf(v) : -1;
   if (k === 'yaw' || k === 'pitch') return r3(v || 0);
-  if (k === 'plate' || k === 'jumps' || k === 'discs' || k === 'powerLeft') return v | 0;
+  if (k === 'plate' || k === 'jumps' || k === 'discs' || k === 'powerLeft' || k === 'lives') return v | 0;
   return r2(v || 0);
 };
 const dec = (p, k, v) => {

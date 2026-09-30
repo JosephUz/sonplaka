@@ -104,6 +104,7 @@ try {
   await page.goto(url + '/?test=1&touch=1');
   await page.waitForFunction(() => !!window.__sonPlaka);
   await page.locator('.mode-row label:has(input[value="1"])').click();
+  await page.locator('.diff-row label:has(input[value="easy"])').click();
   await page.locator('#sp-start').click();
   await page.waitForTimeout(800);
   assert.ok(await page.locator('#sp-touch').isVisible(), 'dokunmatik kontroller yok');
@@ -112,6 +113,9 @@ try {
   assert.equal(await game(() => window.__sonPlaka.world().teams), 5);
   assert.equal(await page.locator('#sp-scoreboard .team').count(), 5, 'tabelada beş takım yok');
   assert.equal(await game(() => localStorage.getItem('sp.mode')), '1', 'kip hatırlanmadı');
+  assert.equal(await game(() => window.__sonPlaka.world().difficulty), 'easy', 'bot zorluğu dünyaya işlenmedi');
+  assert.equal(await game(() => localStorage.getItem('sp.diff')), 'easy', 'zorluk hatırlanmadı');
+  assert.equal(await game(() => window.__sonPlaka.world().players[0].lives), 5, 'düşme hakkı 5 olmalı');
   await page.screenshot({ path: 'artifacts/07-touch-ffa.png' });
 
   assert.deepEqual(errors, [], 'tarayıcı hataları: ' + errors.join(' | '));

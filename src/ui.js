@@ -1,4 +1,4 @@
-import { DISC, ROUND, TEAMS } from './config.js';
+import { DISC, LIFE, ROUND, TEAMS } from './config.js';
 import { aliveCount, leaders } from './world.js';
 
 /**
@@ -17,7 +17,7 @@ export function createUI(root) {
     screens: Object.fromEntries(SCREENS.map(s => [s, $(s)])),
     playing: ['scoreboard', 'controls', 'player', 'pause-open'].map($),
     boards: [$('board-l'), $('board-r')], timer: $('timer'), phase: $('phase'),
-    side: $('side'), status: $('status'), discText: $('disc-text'), discs: $('discs'), power: $('power'),
+    side: $('side'), status: $('status'), discText: $('disc-text'), discs: $('discs'), power: $('power'), lives: $('lives'),
     down: $('down'), downTitle: $('down-title'), downCount: $('down-count'), downNote: $('down-note'), freeze: $('freeze'),
     crosshair: $('crosshair'), message: $('message'), warn: $('warn'), rule: $('rule'),
     charge: $('charge'), chargeText: $('charge-text'),
@@ -79,7 +79,10 @@ export function createUI(root) {
       el.rule.hidden = !lastPhase;
       if (lastPhase) el.rule.innerHTML = `SÜRE BİTİNCE SON PLAKADA KALAN KAZANIR · <b>${clock}</b>`;
       el.side.textContent = 'SEN / ' + TEAMS.names[me.team] + (w.teamSize > 1 ? ' TAKIM' : '');
-      el.status.textContent = me.out ? (w.respawnOpen || me.respawn > 0 ? 'DÖNÜYORSUN' : 'ELENDİN') : me.freeze > 0 ? 'DONDUN' : me.knock > 0 ? 'SAVRULDUN' : me.flight > 0 ? 'UÇUŞTA' : me.discs > 0 ? 'DİSKLER HAZIR' : 'DİSK YENİLENİYOR';
+      const returning = me.respawn > 0 || (w.respawnOpen && me.lives > 0);
+      el.status.textContent = me.out ? (returning ? 'DÖNÜYORSUN' : 'ELENDİN') : me.shield > 0 ? 'KORUMA · ' + me.shield.toFixed(1) : me.freeze > 0 ? 'DONDUN' : me.knock > 0 ? 'SAVRULDUN' : me.flight > 0 ? 'UÇUŞTA' : me.discs > 0 ? 'DİSKLER HAZIR' : 'DİSK YENİLENİYOR';
+      el.lives.textContent = '♥'.repeat(me.lives) + '♡'.repeat(Math.max(0, LIFE.lives - me.lives));
+      el.lives.classList.toggle('low', me.lives <= 1);
       el.discText.textContent = me.discs + ' / ' + DISC.max;
       [...el.discs.children].forEach((pip, i) => {
         const full = i < me.discs, filling = i === me.discs && me.discs < DISC.max;
@@ -93,10 +96,10 @@ export function createUI(root) {
       el.down.hidden = !down && !falling;
       if (falling) { el.downTitle.textContent = 'DÜŞÜYORSUN!'; el.downCount.textContent = ''; el.downNote.textContent = ''; }
       else if (down) {
-        const waiting = w.respawnOpen || me.respawn > 0;
+        const waiting = me.respawn > 0 || (w.respawnOpen && me.lives > 0);
         el.downTitle.textContent = waiting ? 'DÜŞTÜN!' : 'ELENDİN';
         el.downCount.textContent = waiting && me.respawn > 0 ? me.respawn.toFixed(1) + ' sn' : '';
-        el.downNote.textContent = w.state === 'over' ? 'Maç bitti.' : waiting ? 'Ayakta bir plakada yeniden doğacaksın.' : 'Son plaka: doğuş kapalı. Takım arkadaşını izliyorsun.';
+        el.downNote.textContent = w.state === 'over' ? 'Maç bitti.' : waiting ? `Ayakta bir plakada yeniden doğacaksın. ${me.lives} hakkın kaldı.` : (me.lives <= 0 ? 'Düşme hakkın bitti.' : 'Son plaka: doğuş kapalı.') + ' Takım arkadaşını izliyorsun.';
       }
       el.downNote.hidden = !el.downNote.textContent;
       el.freeze.hidden = !playing || !!screen || me.freeze <= 0;
