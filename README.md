@@ -22,7 +22,9 @@ Sunucu oyun dosyalarını `no-store` ile verir; `/health` yanıtındaki `surum` 
 sonplaka.josephuz.com). Evdeki PC yalnızca çevrim içi sunucudur (WebSocket odaları, çevrim içi sayısı).
 
 **Cloudflare Tunnel (sonplaka-sunucu.josephuz.com)**: `.env.example` dosyasını `.env` olarak kopyalayıp `TUNNEL_TOKEN=...` yaz ve
-`docker compose --profile tunnel up -d --build`. Tünel konteyneri oyunun ağ alanını paylaşır; Zero Trust → Networks →
+`docker compose --profile tunnel up -d --build` (`Baslat.cmd` `.env` doluysa bunu kendisi yapar). Tünel konteyneri oyunun ağ
+alanını paylaşır, bu yüzden oyun konteyneri **profilsiz** `docker compose up -d --build` ile yenilenirse tünel silinen
+konteynerin ağında kalır ve dış adres 530 verir: kaynak değişince hep profille kaldır; Zero Trust → Networks →
 Tunnels → tünel → **Published application routes** içindeki rota `sonplaka-sunucu.josephuz.com` → `http://localhost:5187`.
 
 **Testler**: `npm test` kural ve oda testlerini (Node, tarayıcısız) koşar. Tarayıcı dumanı testi çalışan sunucuya bağlanır:
