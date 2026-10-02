@@ -1,5 +1,11 @@
-html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
-#son-plaka{position:fixed;inset:0;font-family:Segoe UI,Arial,sans-serif;color:#e8eefc;background:#0b0f1a;font-synthesis:none;user-select:none}
+html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden;overscroll-behavior:none}
+/* Oyun kökü görünen alanı kaplar. Telefonda tarayıcı çubukları görünen alanı kısaltır: `html.vv` (bkz.
+   src/gorunur-alan.js) varsa kök visualViewport dikdörtgenine oturur ve üst çubuk / oda kodu çubuğun altında kalmaz.
+   Değişken yoksa `100dvh`, o da yoksa `100%` yedeği çalışır. `--sp-h` kökün yüksekliğidir: kart yükseklikleri (vh
+   yerine) buna göre hesaplanır. `--sp-top` üstteki güvenli boşluk (çentik / durum çubuğu). */
+#son-plaka{--sp-h:100%;--sp-top:env(safe-area-inset-top,0px);position:fixed;inset:0;font-family:Segoe UI,Arial,sans-serif;color:#e8eefc;background:#0b0f1a;font-synthesis:none;user-select:none;overscroll-behavior:none}
+@supports (height:100dvh){#son-plaka{--sp-h:100dvh}}
+html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv-left);width:var(--vv-w);height:var(--vv-h)}
 #son-plaka *{box-sizing:border-box}
 #son-plaka [hidden]{display:none!important}
 #son-plaka button,#son-plaka a{-webkit-tap-highlight-color:transparent}
@@ -21,8 +27,8 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 #son-plaka canvas{display:block;width:100%;height:100%;cursor:crosshair}
 #son-plaka .grain{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,#05070d55,transparent 22%,transparent 78%,#05070d66)}
 
-/* Üst şerit: logo ve düğmeler. */
-#son-plaka header{position:absolute;top:27px;left:34px;right:34px;display:flex;justify-content:space-between;align-items:center;z-index:8}
+/* Üst şerit: logo ve düğmeler. Üstte çentik / durum çubuğu varsa (--sp-top) onun altından başlar. */
+#son-plaka header{position:absolute;top:calc(27px + var(--sp-top));left:34px;right:34px;display:flex;justify-content:space-between;align-items:center;z-index:8}
 #son-plaka .logo{font-weight:950;font-size:26px;letter-spacing:-1px;color:#eef3ff;text-decoration:none;text-shadow:0 2px 12px #05070d}
 #son-plaka .logo>span{color:#7fe0e8}
 #son-plaka .logo small{display:block;font-size:8px;letter-spacing:2px;margin-top:7px;color:#9fb3d1}
@@ -31,7 +37,7 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 
 /* Giriş ekranı. */
 #son-plaka .home{position:absolute;inset:0;background:linear-gradient(90deg,#0b0f1afc 0%,#0b0f1aef 28%,#0b0f1a77 52%,transparent 74%);display:flex;align-items:center}
-#son-plaka .home-content{width:560px;margin-left:7vw;padding-top:60px}
+#son-plaka .home-content{width:560px;margin-left:7vw;padding-top:calc(60px + var(--sp-top))}
 #son-plaka .home h1{font-size:clamp(40px,4.4vw,72px);letter-spacing:-3px;line-height:1.05;margin:25px 0;color:#eef3ff;font-weight:900}
 #son-plaka .home h1 span{color:#f5c26b}
 #son-plaka .home p{font-size:16px;line-height:1.8;color:#b7c6df;margin:24px 0 32px}
@@ -56,7 +62,7 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 #son-plaka .pitch-note span{display:block;font-size:11px;letter-spacing:0;margin:9px 0 0 15px;color:#b7c6df}
 
 /* Skor tabelası: takım skorları (kipe göre 2 ya da 5 takım, senin takımın parlak), kalan maç süresi ve dalga evresi. */
-#son-plaka #sp-scoreboard{position:absolute;top:22px;left:50%;transform:translateX(-50%);display:flex;gap:23px;align-items:center;padding:12px 23px;background:#111827f0;border:1px solid #ffffff24;border-radius:12px;box-shadow:0 10px 35px #05070d66;z-index:7}
+#son-plaka #sp-scoreboard{position:absolute;top:calc(22px + var(--sp-top));left:50%;transform:translateX(-50%);display:flex;gap:23px;align-items:center;padding:12px 23px;background:#111827f0;border:1px solid #ffffff24;border-radius:12px;box-shadow:0 10px 35px #05070d66;z-index:7}
 #son-plaka .teams{display:flex;gap:18px}
 #son-plaka .team{display:flex;align-items:center;gap:10px;font-size:10px;font-weight:900;letter-spacing:1px;color:var(--tc,#e8eefc);opacity:.75}
 #son-plaka .team.me{opacity:1;text-shadow:0 0 12px var(--tc)}
@@ -87,8 +93,8 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 @keyframes spFull{0%{transform:scale(1)}100%{transform:scale(1.14)}}
 
 /* Ortadaki mesaj, uyarı şeridi (plaka çöküyor), düşme perdesi, donma perdesi. */
-#son-plaka #sp-message{position:absolute;top:130px;left:50%;transform:translateX(-50%);background:#f5c26b;color:#1c1a12;padding:14px 27px;border-radius:8px;font-weight:900;letter-spacing:.5px;z-index:8;white-space:nowrap}
-#son-plaka #sp-warn{position:absolute;top:92px;left:50%;transform:translateX(-50%);padding:9px 22px;border-radius:8px;background:#7a1f12e6;border:1px solid #ff8a5c;color:#ffe2d2;font:900 13px/1 Segoe UI,Arial,sans-serif;letter-spacing:2px;z-index:8;white-space:nowrap;animation:spWarn .5s ease-in-out infinite alternate}
+#son-plaka #sp-message{position:absolute;top:calc(130px + var(--sp-top));left:50%;transform:translateX(-50%);background:#f5c26b;color:#1c1a12;padding:14px 27px;border-radius:8px;font-weight:900;letter-spacing:.5px;z-index:8;white-space:nowrap}
+#son-plaka #sp-warn{position:absolute;top:calc(92px + var(--sp-top));left:50%;transform:translateX(-50%);padding:9px 22px;border-radius:8px;background:#7a1f12e6;border:1px solid #ff8a5c;color:#ffe2d2;font:900 13px/1 Segoe UI,Arial,sans-serif;letter-spacing:2px;z-index:8;white-space:nowrap;animation:spWarn .5s ease-in-out infinite alternate}
 @keyframes spWarn{0%{box-shadow:0 0 0 #ff5a1f00}100%{box-shadow:0 0 22px #ff5a1f99}}
 /* Son evre kuralı: süre bitince son plakada kalan kazanır (+ kalan süre). */
 #son-plaka #sp-rule{position:absolute;bottom:72px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:8px;background:#0f1b2ee6;border:1px solid #7fe0e866;color:#d6f4f7;font:900 11px/1 Segoe UI,Arial,sans-serif;letter-spacing:1.6px;z-index:8;white-space:nowrap;pointer-events:none}
@@ -112,8 +118,8 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 #son-plaka #sp-controls kbd{margin-right:5px;margin-left:0}
 
 /* Açılır kartlar: yardım, mola, maç sonu. */
-#son-plaka .overlay{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:#05070dc9;backdrop-filter:blur(7px);padding:25px}
-#son-plaka .card{width:min(640px,94vw);max-height:92vh;overflow:auto;background:#131a2a;border:1px solid #cfe3ff2b;border-radius:18px;padding:33px;box-shadow:0 25px 85px #00000077}
+#son-plaka .overlay{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:#05070dc9;backdrop-filter:blur(7px);padding:calc(25px + var(--sp-top)) 25px 25px}
+#son-plaka .card{width:min(640px,94vw);max-height:calc(var(--sp-h) * .92);overflow:auto;background:#131a2a;border:1px solid #cfe3ff2b;border-radius:18px;padding:33px;box-shadow:0 25px 85px #00000077}
 #son-plaka .card h2{font-size:35px;line-height:1.12;margin:17px 0 26px;color:#f4d7a5;letter-spacing:-1px}
 #son-plaka .card p{font-size:12px;line-height:1.8;color:#b7c6df}
 #son-plaka .card dl{display:grid;grid-template-columns:150px 1fr;gap:16px 15px;font-size:12px;line-height:1.6}
@@ -135,15 +141,15 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 
 /* Dar ekranlar. */
 @media(max-width:1100px){
-#son-plaka header{left:20px;right:20px;top:20px}
+#son-plaka header{left:20px;right:20px;top:calc(20px + var(--sp-top))}
 #son-plaka .logo{font-size:20px}
 #son-plaka .header-actions button,#son-plaka .header-actions a.btn{font-size:9px;padding:9px}
 #son-plaka .header-actions kbd{display:none}
-#son-plaka #sp-scoreboard{top:88px;gap:12px;padding:8px 14px}
+#son-plaka #sp-scoreboard{top:calc(88px + var(--sp-top));gap:12px;padding:8px 14px}
 #son-plaka .team b{font-size:24px}
 #son-plaka .clock{padding:0 10px;min-width:120px}
-#son-plaka #sp-message{top:167px}
-#son-plaka #sp-warn{top:150px}
+#son-plaka #sp-message{top:calc(167px + var(--sp-top))}
+#son-plaka #sp-warn{top:calc(150px + var(--sp-top))}
 #son-plaka #sp-controls{gap:10px;font-size:8px}
 #son-plaka #sp-player{width:180px;padding:12px;left:18px}
 #son-plaka .home-content{margin-left:5vw;width:450px}
@@ -176,7 +182,9 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 #son-plaka .touch-zone{position:absolute;top:0;bottom:0;z-index:7;touch-action:none}
 #son-plaka .touch-zone.left{left:0;width:44%}
 #son-plaka .touch-zone.right{left:44%;right:0}
-#son-plaka #sp-stick{position:fixed;left:0;top:0;width:0;height:0;z-index:10;pointer-events:none}
+/* Joystick dokunmatik katmanın içinde konumlanır (pencereye göre değil): kök görünür alana kilitlenince parmakla
+   aynı yerde kalsın. */
+#son-plaka #sp-stick{position:absolute;left:0;top:0;width:0;height:0;z-index:10;pointer-events:none}
 #son-plaka #sp-stick::before{content:"";position:absolute;left:-60px;top:-60px;width:120px;height:120px;border-radius:50%;background:#0b0f1ab0;border:2px solid #cfe3ff55;box-shadow:0 6px 24px #05070d66}
 #son-plaka #sp-stick i{position:absolute;left:-27px;top:-27px;width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff6de,#f5c26b);box-shadow:0 4px 14px #05070d88}
 #son-plaka .touch-buttons{position:absolute;right:calc(18px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));width:250px;height:210px;z-index:10;pointer-events:none}
@@ -201,25 +209,29 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 
 /* Kısa (yatay telefon) ekranlar. */
 @media(max-height:560px){
-#son-plaka header{top:calc(10px + env(safe-area-inset-top));left:calc(16px + env(safe-area-inset-left));right:calc(16px + env(safe-area-inset-right))}
+#son-plaka header{top:calc(10px + var(--sp-top));left:calc(16px + env(safe-area-inset-left,0px));right:calc(16px + env(safe-area-inset-right,0px))}
 #son-plaka .logo{font-size:17px}
 #son-plaka .logo small{display:none}
 #son-plaka .header-actions button,#son-plaka .header-actions a.btn{font-size:9px;padding:8px 10px}
-#son-plaka #sp-scoreboard{top:8px;gap:10px;padding:5px 12px;border-radius:9px}
+#son-plaka #sp-scoreboard{top:calc(8px + var(--sp-top));gap:10px;padding:5px 12px;border-radius:9px}
 #son-plaka .team{gap:8px;font-size:8px}
 #son-plaka .team b{font-size:20px}
 #son-plaka .pips i{width:8px;height:8px}
 #son-plaka .clock{padding:0 8px;min-width:90px}
 #son-plaka .clock span{font-size:15px}
 #son-plaka .clock small{font-size:6px}
-#son-plaka #sp-message{top:62px;padding:9px 18px;font-size:12px}
-#son-plaka #sp-warn{top:52px;padding:6px 12px;font-size:10px}
+#son-plaka #sp-message{top:calc(62px + var(--sp-top));padding:9px 18px;font-size:12px}
+#son-plaka #sp-warn{top:calc(52px + var(--sp-top));padding:6px 12px;font-size:10px}
 #son-plaka #sp-rule{padding:5px 10px;font-size:8px;letter-spacing:1px}
 /* Yatay telefonda giriş ekranı 360 px yüksekliğe sığmıyordu: ortalanmış içeriğin altı (ad kutusu, ODA KUR / ODAYA
    KATIL) ekranın dışında kalıyordu. Kısa ekranda içerik yukarıdan başlar ve giriş ekranı kendi içinde kaydırılır. */
 #son-plaka .home{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain}
-#son-plaka .home-content{padding-top:48px;padding-bottom:16px;margin-left:calc(5vw + env(safe-area-inset-left));width:min(440px,70vw)}
-#son-plaka .home h1{font-size:30px;letter-spacing:-1px;margin:10px 0}
+/* Kısa ekranda (yatay telefon) giriş ekranı adres çubuğunun bıraktığı ~334 px'e de sığsın: üst boşluk ve satır
+   araları kısalır, böylece ad kutusu ile ODA KUR / ODAYA KATIL kaydırmadan görünür. */
+#son-plaka .home-content{padding-top:calc(40px + var(--sp-top));padding-bottom:10px;margin-left:calc(5vw + env(safe-area-inset-left,0px));width:min(440px,70vw)}
+#son-plaka .home h1{font-size:30px;letter-spacing:-1px;margin:6px 0 8px}
+#son-plaka .home .mode-row{margin-bottom:8px}
+#son-plaka .home .diff-row{margin-top:-4px}
 /* Kısa ekranda tanıtım paragrafı ve alt bilgi satırı gizlenir (kural kartları gibi): giriş ekranının tamamı —
    "ARENAYA GİR", ad kutusu ve oda düğmeleri — ekrana sığsın. Seçili kip zaten düğmelerde işaretli. */
 #son-plaka .home p,#son-plaka .home-meta{display:none}
@@ -227,8 +239,8 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 #son-plaka .rule-cards{margin-top:14px}
 #son-plaka .rule-cards span{margin-top:5px;line-height:1.4}
 #son-plaka .pitch-note{display:none}
-#son-plaka .overlay{padding:10px}
-#son-plaka .card{padding:18px 22px;max-height:94vh}
+#son-plaka .overlay{padding:calc(10px + var(--sp-top)) 10px 10px}
+#son-plaka .card{padding:18px 22px;max-height:calc(var(--sp-h) * .94)}
 #son-plaka .card h2{font-size:22px;margin:8px 0 12px}
 #son-plaka .card dl{gap:8px 12px;font-size:11px;line-height:1.45}
 #son-plaka .card .primary{margin-top:12px;min-height:42px}
@@ -241,9 +253,14 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 #son-plaka .touch-buttons{transform:scale(.88);transform-origin:100% 100%}
 }
 
-/* Telefonda üst düğmeler simge. */
+/* Telefonda üst düğmeler simge. Tam ekran düğmesi yalnız dokunmatikte görünür (masaüstünde F11 var): adres çubuğunu
+   ve alt çubuğu tümden kaldırmanın en hızlı yolu, bu yüzden belirgin (sarı) durur. */
+#son-plaka #sp-full{display:none}
+#son-plaka.touch #sp-full{display:block;background:#f5c26be8;color:#1c1a12;border-color:#ffd99155}
 #son-plaka.touch .header-actions button{font-size:0;padding:0;width:40px;height:40px}
 #son-plaka.touch .header-actions button::before{font-size:18px}
+#son-plaka.touch #sp-full::before{content:"⛶";font-weight:900}
+#son-plaka.touch #sp-full.on::before{content:"⤡"}
 #son-plaka.touch #sp-cam::before{content:"🎥"}
 #son-plaka.touch #sp-help-open::before{content:"?";font-weight:900}
 #son-plaka.touch #sp-pause-open::before{content:"☰"}
@@ -293,7 +310,7 @@ html,body{margin:0;height:100%;background:#0b0f1a;overflow:hidden}
 #son-plaka .lobby-leave{display:block;width:100%;margin-top:10px}
 #son-plaka .pause-note{font-size:11px;margin:14px 0 0}
 @media(max-height:560px){
-#son-plaka .home-online{margin-top:10px;width:min(440px,70vw);grid-template-columns:1fr 1fr;gap:6px}
+#son-plaka .home-online{margin-top:6px;width:min(440px,70vw);grid-template-columns:1fr 1fr;gap:6px}
 #son-plaka .home-online .nick input{padding:7px 0;font-size:12px}
 #son-plaka .online-row button{padding:8px 10px;font-size:10px}
 #son-plaka .join-row,#son-plaka .home-status{grid-column:1/-1}

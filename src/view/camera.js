@@ -10,7 +10,9 @@ import { clamp, wrap } from '../math.js';
  */
 export function createCamera() {
   const camera = new T.PerspectiveCamera(CAMERA.fov, 1, 0.1, CAMERA.far);
-  let mode = 'fps', yaw = 0, pitch = 0, shake = 0;
+  // Çizim alanının ölçüsü (pencere değil: telefonda oyun kökü görünür alana kilitlenir); etiketlerin ekran konumu
+  // bununla hesaplanır.
+  let mode = 'fps', yaw = 0, pitch = 0, shake = 0, viewW = 1, viewH = 1;
   const forward = () => { const c = Math.cos(pitch); return { x: Math.sin(yaw) * c, y: Math.sin(pitch), z: Math.cos(yaw) * c }; };
 
   return {
@@ -27,7 +29,7 @@ export function createCamera() {
       pitch = clamp(pitch - dy * CAMERA.pitchSpeed, CAMERA.pitchMin, CAMERA.pitchMax);
     },
     shake(power) { shake = Math.max(shake, power); },
-    resize(width, height) { camera.aspect = width / height; camera.updateProjectionMatrix(); },
+    resize(width, height) { viewW = width || 1; viewH = height || 1; camera.aspect = viewW / viewH; camera.updateProjectionMatrix(); },
     follow(p, dt = 0, spectate = false) {
       if (spectate) { const k = Math.min(1, dt * 6); yaw += wrap(p.yaw - yaw) * k; pitch += (p.pitch - pitch) * k; }
       const f = forward(), sx = Math.sin(yaw), cz = Math.cos(yaw);
@@ -49,7 +51,7 @@ export function createCamera() {
     /** Dünya noktasının ekran konumu; behind: kameranın arkasında (etiket gizlenir). */
     project(x, y, z) {
       const v = new T.Vector3(x, y, z).project(camera);
-      return { x: (v.x + 1) * innerWidth / 2, y: (1 - v.y) * innerHeight / 2, behind: v.z > 1 };
+      return { x: (v.x + 1) * viewW / 2, y: (1 - v.y) * viewH / 2, behind: v.z > 1 };
     },
   };
 }

@@ -42,8 +42,15 @@ export function createView(container, { mobile = false } = {}) {
   hand.position.set(0.38, -0.26, -0.9); hand.rotation.set(1.25, 0, 0.35); cam.camera.add(hand); scene.add(cam.camera);
   let time = 0;
 
-  const resize = () => { renderer.setSize(innerWidth, innerHeight); cam.resize(innerWidth, innerHeight); };
+  // Sahne pencereyi değil **kabı** doldurur: telefonda oyun kökü tarayıcı çubuklarının bıraktığı görünür alana
+  // kilitlenir (bkz. src/gorunur-alan.js), bu yüzden innerWidth/innerHeight'tan küçük olabilir. visualViewport
+  // değişince (adres çubuğu açılıp kapanınca) kap da değişir: ResizeObserver yakalar.
+  const resize = () => {
+    const w = container.clientWidth || innerWidth, h = container.clientHeight || innerHeight;
+    renderer.setSize(w, h); cam.resize(w, h);
+  };
   resize(); addEventListener('resize', resize);
+  if (typeof ResizeObserver === 'function') new ResizeObserver(resize).observe(container);
 
   return {
     canvas: renderer.domElement,

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Son Plaka">
+  <!-- Ana ekran simgesi: koyu boşluk, daralan plaka halkaları ve ortada son plaka. Maskeli (maskable) simgede
+       kenarlardan %10 kırpılabilir; önemli her şey ortadaki %80'lik alanda durur. -->
+  <rect width="512" height="512" fill="#0b0f1a"/>
+  <circle cx="256" cy="268" r="150" fill="none" stroke="#39c2cf" stroke-width="10" stroke-opacity=".35"/>
+  <circle cx="256" cy="268" r="108" fill="none" stroke="#7fe0e8" stroke-width="12" stroke-opacity=".6"/>
+  <ellipse cx="256" cy="268" rx="66" ry="30" fill="#f5c26b"/>
+  <ellipse cx="256" cy="282" rx="66" ry="30" fill="#c4914a"/>
+  <rect x="246" y="150" width="20" height="58" rx="10" fill="#7fe0e8"/>
+  <circle cx="256" cy="128" r="22" fill="#eef3ff"/>
+</svg>

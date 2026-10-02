@@ -5,7 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#0b0f1a">
 <title>Son Plaka · Boşluk Arenası</title>
-<link rel="icon" href="data:,">
+<!-- Ana ekrana eklenince (Android: "Uygulama olarak yükle", iOS: Paylaş → Ana Ekrana Ekle) oyun tam ekran ve yatay
+     açılır: adres çubuğu hiç çıkmaz, üst kısım hiçbir çubuğun altında kalmaz. -->
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Son Plaka">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon.svg">
 <link rel="stylesheet" href="/style.css">
 <script type="importmap">{ "imports": { "three": "/vendor/three.module.js" } }</script>
 </head>
@@ -19,6 +27,7 @@
       <a class="logo" href="/">SON<span>PLAKA</span><small>BOŞLUK ARENASI / İLK DENEME</small></a>
       <div class="header-actions">
         <a id="sp-site" class="btn" href="https://www.josephuz.com/">← josephuz.com</a>
+        <button id="sp-full" aria-label="Tam ekran">⛶ Tam ekran</button>
         <button id="sp-cam" aria-label="Kamera: birinci şahıs / omuz">🎥 Omuz</button>
         <button id="sp-help-open">Nasıl oynanır <kbd>F1</kbd></button>
         <button id="sp-pause-open" hidden>Duraklat <kbd>Esc</kbd></button>

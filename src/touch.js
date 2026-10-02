@@ -31,7 +31,10 @@ export function createTouch(root, sink) {
     if (kind === 'stick') {
       if ([...fingers.values()].some(o => o.kind === 'stick')) return;
       el.stick.hidden = false;
-      el.stick.style.transform = `translate(${e.clientX}px,${e.clientY}px)`;
+      // Konum dokunmatik katmana göre: kök görünür alana kilitlendiğinde (telefonda adres çubuğu) katman pencerenin
+      // tepesinden aşağıda başlayabilir.
+      const pad = el.pad.getBoundingClientRect();
+      el.stick.style.transform = `translate(${e.clientX - pad.left}px,${e.clientY - pad.top}px)`;
       el.knob.style.transform = '';
       setStick(0, 0);
     } else if (kind !== 'look') {
@@ -100,4 +103,16 @@ export function enterFullscreen() {
   if (window.Capacitor?.isNativePlatform?.() || document.fullscreenElement) return;
   const go = document.documentElement.requestFullscreen?.({ navigationUI: 'hide' });
   Promise.resolve(go).then(() => screen.orientation?.lock?.('landscape')).catch(() => {});
+}
+
+/** Tam ekran şu an açık mı (üst çubuktaki düğmenin simgesi buna göre). */
+export const fullscreenOn = () => !!document.fullscreenElement;
+
+/**
+ * Üst çubuktaki tam ekran düğmesi (telefonda belirgin): tarayıcı çubuklarını tümden kaldırır, tekrar basınca geri
+ * getirir. Telefonda adres çubuğunun üst kısmı yemesine karşı en kesin çare; desteklenmeyen tarayıcıda sessiz geçer.
+ */
+export function toggleFullscreen() {
+  if (document.fullscreenElement) { document.exitFullscreen?.().catch(() => {}); return; }
+  enterFullscreen();
 }

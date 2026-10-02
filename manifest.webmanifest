@@ -1,0 +1,17 @@
+{
+  "name": "Son Plaka · Boşluk Arenası",
+  "short_name": "Son Plaka",
+  "lang": "tr",
+  "description": "Diskle rakibi kenardan aşağı at; plakalar düşerken son plakada kalan kazanır.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "landscape",
+  "background_color": "#0b0f1a",
+  "theme_color": "#0b0f1a",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
