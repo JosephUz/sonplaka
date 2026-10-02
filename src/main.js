@@ -1,6 +1,7 @@
 import { createAudio } from './audio.js';
 import { CAMERA, DIFFICULTIES, DIFFICULTY_LABEL, DISC, MATCH, MODES, PICKUP, TEAMS, modeLabel, playersFor } from './config.js';
 import { createGosteri, gosteriAcik } from './gosteri.js';
+import { gorunurAlanaKilitle } from './gorunur-alan.js';
 import { createInput } from './input.js';
 import { createLobby } from './lobby.js';
 import { createNetClient } from './net/client.js';
@@ -34,6 +35,9 @@ export async function start(root) {
   const testMode = new URLSearchParams(location.search).has('test');
   const touch = touchDevice();
   root.classList.toggle('touch', touch);
+  // Telefonda oyun kökünü tarayıcının gerçekten görünen alanına kilitler: üst çubuk ve oda kodu adres çubuğunun
+  // altında kalmaz (bkz. src/gorunur-alan.js, style.css → `html.vv`).
+  gorunurAlanaKilitle(window);
   const view = createView(root.querySelector('#sp-view'), { mobile: touch });
   const camButton = root.querySelector('#sp-cam');
   const setCamera = mode => {
