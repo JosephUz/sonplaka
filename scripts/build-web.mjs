@@ -12,7 +12,7 @@ const three = path.join(root, 'node_modules', 'three', 'build');
 
 await rm(dist, { recursive: true, force: true });
 await mkdir(path.join(dist, 'vendor'), { recursive: true });
-for (const f of ['index.html', 'style.css', 'game.js', 'manifest.webmanifest', 'icon.svg']) await cp(path.join(root, f), path.join(dist, f));
+for (const f of ['index.html', 'style.css', 'game.js']) await cp(path.join(root, f), path.join(dist, f));
 await cp(path.join(root, 'src'), path.join(dist, 'src'), { recursive: true });
 for (const f of ['three.module.js', 'three.core.js']) await cp(path.join(three, f), path.join(dist, 'vendor', f));
 console.log('dist/ hazır');

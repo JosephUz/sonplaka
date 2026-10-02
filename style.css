@@ -226,12 +226,8 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 /* Yatay telefonda giriş ekranı 360 px yüksekliğe sığmıyordu: ortalanmış içeriğin altı (ad kutusu, ODA KUR / ODAYA
    KATIL) ekranın dışında kalıyordu. Kısa ekranda içerik yukarıdan başlar ve giriş ekranı kendi içinde kaydırılır. */
 #son-plaka .home{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain}
-/* Kısa ekranda (yatay telefon) giriş ekranı adres çubuğunun bıraktığı ~334 px'e de sığsın: üst boşluk ve satır
-   araları kısalır, böylece ad kutusu ile ODA KUR / ODAYA KATIL kaydırmadan görünür. */
-#son-plaka .home-content{padding-top:calc(40px + var(--sp-top));padding-bottom:10px;margin-left:calc(5vw + env(safe-area-inset-left,0px));width:min(440px,70vw)}
-#son-plaka .home h1{font-size:30px;letter-spacing:-1px;margin:6px 0 8px}
-#son-plaka .home .mode-row{margin-bottom:8px}
-#son-plaka .home .diff-row{margin-top:-4px}
+#son-plaka .home-content{padding-top:calc(48px + var(--sp-top));padding-bottom:16px;margin-left:calc(5vw + env(safe-area-inset-left,0px));width:min(440px,70vw)}
+#son-plaka .home h1{font-size:30px;letter-spacing:-1px;margin:10px 0}
 /* Kısa ekranda tanıtım paragrafı ve alt bilgi satırı gizlenir (kural kartları gibi): giriş ekranının tamamı —
    "ARENAYA GİR", ad kutusu ve oda düğmeleri — ekrana sığsın. Seçili kip zaten düğmelerde işaretli. */
 #son-plaka .home p,#son-plaka .home-meta{display:none}
@@ -253,14 +249,9 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 #son-plaka .touch-buttons{transform:scale(.88);transform-origin:100% 100%}
 }
 
-/* Telefonda üst düğmeler simge. Tam ekran düğmesi yalnız dokunmatikte görünür (masaüstünde F11 var): adres çubuğunu
-   ve alt çubuğu tümden kaldırmanın en hızlı yolu, bu yüzden belirgin (sarı) durur. */
-#son-plaka #sp-full{display:none}
-#son-plaka.touch #sp-full{display:block;background:#f5c26be8;color:#1c1a12;border-color:#ffd99155}
+/* Telefonda üst düğmeler simge. */
 #son-plaka.touch .header-actions button{font-size:0;padding:0;width:40px;height:40px}
 #son-plaka.touch .header-actions button::before{font-size:18px}
-#son-plaka.touch #sp-full::before{content:"⛶";font-weight:900}
-#son-plaka.touch #sp-full.on::before{content:"⤡"}
 #son-plaka.touch #sp-cam::before{content:"🎥"}
 #son-plaka.touch #sp-help-open::before{content:"?";font-weight:900}
 #son-plaka.touch #sp-pause-open::before{content:"☰"}
@@ -310,7 +301,7 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 #son-plaka .lobby-leave{display:block;width:100%;margin-top:10px}
 #son-plaka .pause-note{font-size:11px;margin:14px 0 0}
 @media(max-height:560px){
-#son-plaka .home-online{margin-top:6px;width:min(440px,70vw);grid-template-columns:1fr 1fr;gap:6px}
+#son-plaka .home-online{margin-top:10px;width:min(440px,70vw);grid-template-columns:1fr 1fr;gap:6px}
 #son-plaka .home-online .nick input{padding:7px 0;font-size:12px}
 #son-plaka .online-row button{padding:8px 10px;font-size:10px}
 #son-plaka .join-row,#son-plaka .home-status{grid-column:1/-1}

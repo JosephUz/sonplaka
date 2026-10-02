@@ -104,15 +104,3 @@ export function enterFullscreen() {
   const go = document.documentElement.requestFullscreen?.({ navigationUI: 'hide' });
   Promise.resolve(go).then(() => screen.orientation?.lock?.('landscape')).catch(() => {});
 }
-
-/** Tam ekran şu an açık mı (üst çubuktaki düğmenin simgesi buna göre). */
-export const fullscreenOn = () => !!document.fullscreenElement;
-
-/**
- * Üst çubuktaki tam ekran düğmesi (telefonda belirgin): tarayıcı çubuklarını tümden kaldırır, tekrar basınca geri
- * getirir. Telefonda adres çubuğunun üst kısmı yemesine karşı en kesin çare; desteklenmeyen tarayıcıda sessiz geçer.
- */
-export function toggleFullscreen() {
-  if (document.fullscreenElement) { document.exitFullscreen?.().catch(() => {}); return; }
-  enterFullscreen();
-}

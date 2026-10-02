@@ -28,14 +28,16 @@ konteynerin ağında kalır ve dış adres 530 verir: kaynak değişince hep pro
 Tunnels → tünel → **Published application routes** içindeki rota `sonplaka-sunucu.josephuz.com` → `http://localhost:5187`.
 
 **Testler**: `npm test` kural, oda ve görünür alan testlerini (Node, tarayıcısız) koşar. Tarayıcı dumanı testi çalışan
-sunucuya bağlanır: `npm run test:browser`. Telefon görünümü (adres çubuğu taklidiyle ana ekran + oda kurulmuş lobi):
-`npm run test:mobil`. Playwright projeye kuruludur; ilk kez `npx playwright install chromium` ile kendi başsız
-Chromium'unu indirir (kullanıcının Chrome'una ve faresine dokunmaz). Ekran görüntüleri `artifacts/`.
+sunucuya bağlanır: `npm run test:browser`. Telefon görünümü (ana ekran + oda kurulmuş lobi, iki çubuk senaryosu ve
+yakınlaştırma): `npm run test:mobil`. Playwright projeye kuruludur; ilk kez `npx playwright install chromium` ile kendi
+başsız Chromium'unu indirir (kullanıcının Chrome'una ve faresine dokunmaz). Ekran görüntüleri `artifacts/`.
 
-**Telefonda üst kısım**: oyun kökü `src/gorunur-alan.js` ile `visualViewport`'un bıraktığı görünür alana kilitlenir
-(`--vv-h` / `--vv-top`, style.css → `html.vv`): adres çubuğu açıkken üst çubuk ve oda kodu çubuğun altında kalmaz.
-Üst çubuktaki **tam ekran** düğmesi (telefonda görünür) çubukları tümden kaldırır; `manifest.webmanifest` ile oyun ana
-ekrana eklenip tam ekran açılabilir.
+**Telefonda üst kısım**: oyun kökü `src/gorunur-alan.js` ile tarayıcının **gerçekten görünen** alanına kilitlenir
+(`--vv-h` / `--vv-top`, style.css → `html.vv`), böylece üst çubuk ve oda kodu tarayıcı çubuğunun altında kalmaz. Üç
+ayrı durum var ve her birini farklı parça çözer: çubuk görünümü kısaltıyorsa `--vv-h` (mobilde `100vh` çubuksuz
+görünümdür, gerçek alandan uzundur), sayfa kaymışsa (iOS) `basaAl()`, görünür alan düzen görünümünün içinde aşağı
+inmişse (iOS çubuk geri gelirken, klavye) `--vv-top`. Ayrıntı ve sınırlar dosyanın başındaki açıklamada.
+**Yakınlaştırmada kilit kapanır**: kullanıcı yakınlaştırdığı yeri kaybetmesin diye CSS yedeğine (`100dvh`) dönülür.
 
 ## Kurallar
 

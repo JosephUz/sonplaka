@@ -6,7 +6,7 @@ import { createInput } from './input.js';
 import { createLobby } from './lobby.js';
 import { createNetClient } from './net/client.js';
 import { onlineEnabled, serverHttp } from './platform.js';
-import { enterFullscreen, fullscreenOn, toggleFullscreen, touchDevice } from './touch.js';
+import { enterFullscreen, touchDevice } from './touch.js';
 import { createUI } from './ui.js';
 import { createView } from './view/view.js';
 import { alive, createWorld, step } from './world.js';
@@ -35,9 +35,9 @@ export async function start(root) {
   const testMode = new URLSearchParams(location.search).has('test');
   const touch = touchDevice();
   root.classList.toggle('touch', touch);
-  // Telefonda oyun kökünü tarayıcı çubuklarının bıraktığı görünür alana kilitler: üst çubuk ve oda kodu adres
-  // çubuğunun altında kalmaz (bkz. src/gorunur-alan.js, style.css → `html.vv`).
-  const gorunurAlan = gorunurAlanaKilitle(window);
+  // Telefonda oyun kökünü tarayıcının gerçekten görünen alanına kilitler: üst çubuk ve oda kodu adres çubuğunun
+  // altında kalmaz (bkz. src/gorunur-alan.js, style.css → `html.vv`).
+  gorunurAlanaKilitle(window);
   const view = createView(root.querySelector('#sp-view'), { mobile: touch });
   const camButton = root.querySelector('#sp-cam');
   const setCamera = mode => {
@@ -50,17 +50,6 @@ export async function start(root) {
   setCamera(touch ? (savedCam === 'fps' ? 'fps' : 'shoulder') : savedCam === 'shoulder' ? 'shoulder' : 'fps');
   const toggleCamera = () => setCamera(view.cameraMode === 'fps' ? 'shoulder' : 'fps');
   camButton.onclick = toggleCamera;
-  // Tam ekran düğmesi (telefonda görünür, style.css): adres çubuğunu ve alt çubuğu tümden kaldırır.
-  const fullButton = root.querySelector('#sp-full');
-  const syncFull = () => {
-    const on = fullscreenOn();
-    fullButton.classList.toggle('on', on);
-    fullButton.textContent = on ? '⤡ Tam ekrandan çık' : '⛶ Tam ekran';
-    fullButton.setAttribute('aria-label', on ? 'Tam ekrandan çık' : 'Tam ekran');
-  };
-  fullButton.onclick = () => { toggleFullscreen(); setTimeout(() => { syncFull(); gorunurAlan.guncelle(); }, 120); };
-  document.addEventListener('fullscreenchange', () => { syncFull(); gorunurAlan.guncelle(); });
-  syncFull();
   const ui = createUI(root);
   const audio = createAudio();
   // Kip: giriş ekranındaki seçim (hatırlanır); tek başına maç ve oda kurma buna göre.
