@@ -139,7 +139,7 @@ export async function start(root) {
   /**
    * Oyun içi müzik (bkz. muzik.js): efekt sesinden bağımsız açılıp kapanır, ayarı tarayıcıda kalır. Açma / kapama
    * düğmesi hem üst çubukta hem mola menüsündedir, ses düzeyi sürgüsü mola menüsünde; ikisi de aynı durumu gösterir.
-   * Gösteri kipinde müzik hiç kurulmaz (`muzik.kapali`), o zaman düğmeler gizlenir.
+   * Gösteri kiplerinde müzik hiç kurulmaz (`muzik.kapali`), o zaman düğmeler gizlenir.
    */
   const muzik = createMuzik(root);
   const muzikYaz = () => ui.setMuzik(muzik.acik, muzik.ses);
@@ -295,10 +295,10 @@ export async function start(root) {
     requestAnimationFrame(frame);
     const dt = Math.min(0.08, (now - last) / 1000);
     last = now;
-    // Müzik sahnesi (bkz. muzik.js): maçta ana tema, son plaka evresinde gerilim, geri kalan her yerde (giriş, lobi,
-    // mola, karne) sakin parça. Aynı sahne yeniden verilince hiçbir şey olmaz, bu yüzden her kareden sorulur: ekran
-    // geçişlerini tek tek kancalamaya gerek kalmaz. Gösteride `muzik.kapali` olduğu için çağrı boşa düşer.
-    muzik.sahne(sahneSec(started, screen, w));
+    // Müzik sahnesi (bkz. muzik.js): maçta ana tema, son plaka evresinde (doğuş kapalı) gerilim, geri kalan her
+    // yerde (giriş, lobi, mola, karne) sakin parça. Aynı sahne yeniden verilince hiçbir şey olmaz, bu yüzden her
+    // kareden sorulur: ekran geçişlerini tek tek kancalamaya gerek kalmaz. Gösteride `muzik.kapali`: çağrı boşa düşer.
+    muzik.sahne(sahneSec(started, screen, w, helpReturn));
     // Gösteri: girdi ve arayüz yok; botlar oynar, kamera en hareketli kavgayı omuz üstünden izler (bkz. gosteri.js).
     if (gosteri) { w = gosteri.guncelle(dt); view.render(w, dt, true, gosteri.odak(dt), false); return; }
     if (online && started) {
@@ -335,7 +335,7 @@ export async function start(root) {
     screen = null; started = true; ui.show(null);
     const ad = root.querySelector('#sp-gosteri'); if (ad) ad.hidden = false;
     w = gosteri.basla();
-    window.__sonPlaka = { world: () => w, view: () => view, net: () => null, gosteri: () => gosteri, state: () => ({ screen, started, online }), muzik: () => muzik.durum() };
+    window.__sonPlaka = { world: () => w, view: () => view, net: () => null, gosteri: () => gosteri, muzik: () => muzik.durum(), state: () => ({ screen, started, online }) };
   }
   if (testMode) {
     window.__sonPlaka = {

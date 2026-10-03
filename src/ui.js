@@ -49,7 +49,7 @@ export function createUI(root) {
 
     /**
      * Müzik düğmeleri (üst çubuk ve mola menüsü) ve mola menüsündeki ses düzeyi sürgüsü; efekt sesinden **bağımsız**
-     * (bkz. muzik.js). `ses` 0-1. Gösteri kipinde müzik hiç kurulmaz: `setMuzikVar(false)` düğmeleri gizler.
+     * (bkz. muzik.js). `ses` 0-1. Gösteri kiplerinde müzik hiç kurulmaz: `setMuzikVar(false)` düğmeleri gizler.
      */
     setMuzik(on, ses) {
       const yazi = on ? 'Müzik: açık' : 'Müzik: kapalı';
@@ -58,7 +58,7 @@ export function createUI(root) {
       el.muzikYuzde.textContent = Math.round(ses * 100) + '%';
       if (el.muzikSes.value !== String(Math.round(ses * 100))) el.muzikSes.value = String(Math.round(ses * 100));
     },
-    /** Müzik ayarı var mı (gösteri kipinde yok): düğmeler ve sürgü büsbütün gizlenir. */
+    /** Müzik ayarı var mı (gösteri kiplerinde yok): düğmeler ve sürgü büsbütün gizlenir. */
     setMuzikVar(gorunur) { muzikVar = gorunur; for (const n of [el.pauseMuzik, el.muzikRow]) n.hidden = !gorunur; },
     onMuzikSes(fn) { el.muzikSes.oninput = () => fn(Number(el.muzikSes.value) / 100); },
     message(text, time = 2) { el.message.textContent = text; el.message.hidden = false; messageTime = time; },
@@ -79,8 +79,8 @@ export function createUI(root) {
       for (const node of el.playing) node.hidden = !playing;
       el.site.hidden = playing;
       // Müzik düğmesi standart çubuğun parçasıdır; telefonda maç sırasında gizlenir, çünkü üst çubuktaki beşinci
-      // simge skor tabelasının üstüne biner (bkz. tests/mobil-ust-alan.mjs). Müzik o sırada ☰ → mola menüsünden
-      // açılıp kapatılır; masaüstünde çubukta durmaya devam eder.
+      // simge skor tabelasının üstüne biner (ikisi de ekranın üstünde, bkz. tests/mobil-ust-alan.mjs). Müzik o
+      // sırada ☰ → mola menüsünden açılıp kapatılır; masaüstünde çubukta durmaya devam eder.
       el.muzik.hidden = !muzikVar || (playing && root.classList.contains('touch'));
       const me = w.players[w.me];
       el.crosshair.hidden = !playing || !!screen || me.out;

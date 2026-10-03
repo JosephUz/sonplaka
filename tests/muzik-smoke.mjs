@@ -1,7 +1,8 @@
 // Oyun içi müzik dumanı testi (bkz. src/muzik.js). Denetlenenler: ilk tıklamadan önce hiç çalmaz, tıklayınca menüde
 // sakin parça (`son-2-boslukta`) çalar ve ilerler, maç başlayınca ana temaya (`son-1-hizli-aksiyon`), son plaka
-// evresinde gerilim parçasına (`son-3-son-plaka`) geçer ve parça bitince ana temaya devreder; "Müzik: kapalı" ayarı
-// sayfa yenilenince korunur, efekt sesi düğmesi müziği etkilemez ve `?gosteri=1`'de hiç ses öğesi kurulmaz.
+// evresinde (doğuş kapanınca) gerilim parçasına (`son-3-son-plaka`) geçer ve parça bitince ana temaya devreder;
+// "Müzik: kapalı" ayarı sayfa yenilenince korunur, efekt sesi düğmesi müziği etkilemez ve `?gosteri=1`'de hiç ses
+// öğesi kurulmaz.
 // Tarayıcı sesi `--mute-audio` ile kısılır: ölçüm `audio.currentTime` / `paused` üzerinden yapılır.
 // Oyunun kendisi otomatik tarayıcıda müziği kapatır (navigator.webdriver), bu yüzden `?muzik=1` ile açılır;
 // `?test=1` oyunun okuma amaçlı test kancasını (`window.__sonPlaka`) açar.
@@ -76,15 +77,10 @@ try {
   assert.ok(sakin.paused, 'sakin parça maçta susar');
   olcum.mac = { parca: mac.parca, currentTime: +mac.currentTime.toFixed(2), volume: +mac.volume.toFixed(3), sakinDurdu: sakin.paused };
 
-  // 4) Son plaka evresi: yalnız merkez plaka ayakta kalır, gerilim parçası devralır.
-  // Plakalar "düşmüş" (phase 2) yapılır; maç saati de dondurulur (state 'countdown') ki ölçüm sürerken maç bitmesin —
-  // gerçek maçta son plakada doğuş kapanır ve takımlardan biri birkaç saniyede tükenebilir. Sahne seçiminin gerçek
-  // simülasyonla doğrulanması tests/muzik.test.mjs dosyasındadır.
-  await page.evaluate(() => {
-    const w = window.__sonPlaka.world();
-    w.plates.forEach((s, i) => { if (i > 0) { s.phase = 2; s.y = -200; } });
-    w.state = 'countdown'; w.t = 9999;
-  });
+  // 4) Son plaka evresi (iç halka düştü, doğuş kapandı): gerilim parçası devralır.
+  // Maç geri sayıma alınır: ölçüm boyunca kimse düşmesin, maç kendiliğinden bitip karneye (sakin) dönmesin —
+  // sahne seçimi yalnız `respawnOpen` ve `winner` okur (bkz. src/muzik.js sahneSec), geri sayım ikisini de değiştirmez.
+  await page.evaluate(() => { const w = window.__sonPlaka.world(); w.state = 'countdown'; w.t = 999; w.respawnOpen = false; });
   await page.waitForFunction(() => {
     const a = [...document.querySelectorAll('audio')].find(x => !x.paused && x.volume > 0.3);
     return a && a.dataset.parca === 'son-3-son-plaka' && a.currentTime > 0.2;
@@ -93,6 +89,7 @@ try {
   assert.equal(doruk.parca, 'son-3-son-plaka', 'son plakada gerilim parçasına geçilir');
   assert.equal((await durum()).sahne, 'doruk', 'müzik sahnesi: doruk');
   assert.equal(doruk.loop, false, 'iki parçalı sahnede döngü yok: sırayla çalınır');
+  assert.equal(await page.evaluate(() => window.__sonPlaka.world().winner), null, 'ölçüm sırasında maç sürüyor');
   olcum.doruk = { parca: doruk.parca, currentTime: +doruk.currentTime.toFixed(2), volume: +doruk.volume.toFixed(3) };
 
   // 4b) Parça bitmeden öbürü üstüne açılır: gerilim ↔ ana tema sırayla gider, araya sessizlik girmez.
@@ -111,6 +108,7 @@ try {
 
   // 5) Mola: Esc sakin parçaya döner. Efekt sesi düğmesi müziği etkilemez: ikisi bağımsızdır.
   await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
   assert.ok(await page.locator('#sp-pause').isVisible(), 'Esc duraklatma menüsünü açar');
   assert.equal(await page.locator('#sp-resume').textContent(), 'DEVAM ET →', 'standart ilk düğme');
   // Çapraz geçiş bitene kadar bekle: ortasında iki parça da yarım seslidir.
@@ -120,6 +118,21 @@ try {
   }, null, { timeout: 15000 });
   assert.equal((await durum()).sahne, 'sakin', 'molada sakin parça çalar');
   olcum.mola = { parca: (await calan()).parca, sahne: 'sakin' };
+
+  // 5b) Moladan açılan "Kontroller F1": yardım perdesinin kendi müziği yoktur, altındaki ekranınki sürer.
+  // Duraklatılmış oyunda yardıma girip çıkmak maç müziğini açıp kapatmamalı (bkz. sahneSec `yardimDonus`).
+  await page.locator('#sp-pause-help').click();
+  await page.waitForTimeout(2500); // çapraz geçiş süresinden uzun: yanlış parça başlasaydı duyulurdu
+  assert.ok(await page.locator('#sp-help').isVisible(), 'mola menüsündeki Kontroller yardımı açar');
+  assert.equal((await durum()).sahne, 'sakin', 'moladan açılan yardımda maç müziği başlamaz');
+  const yardimda = await calan();
+  assert.equal(yardimda.parca, 'son-2-boslukta', 'yardım perdesinde sakin parça sürer');
+  olcum.yardimMolada = { parca: yardimda.parca, sahne: 'sakin' };
+  await page.locator('#sp-help-close').click();
+  await page.waitForTimeout(400);
+  assert.ok(await page.locator('#sp-pause').isVisible(), 'yardım kapanınca molaya dönülür');
+  assert.equal((await durum()).sahne, 'sakin', 'dönünce de sakin');
+
   await page.locator('#sp-pause-sound').click();
   assert.equal(await page.evaluate(() => localStorage.getItem('sp.sound')), 'off', 'efekt sesi kapandı');
   await page.waitForTimeout(600);

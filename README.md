@@ -29,11 +29,10 @@ Tunnels → tünel → **Published application routes** içindeki rota `sonplaka
 
 **Testler**: `npm test` kural, oda ve görünür alan testlerini (Node, tarayıcısız) koşar. Tarayıcı dumanı testi çalışan
 sunucuya bağlanır: `npm run test:browser`. Telefon görünümü (ana ekran + oda kurulmuş lobi, iki çubuk senaryosu ve
-yakınlaştırma): `npm run test:mobil`. Oyun içi müzik: `npm run test:muzik` (`?muzik=1` ile; `audio.currentTime` /
-`paused` ölçülür, tarayıcı sesi kısık). Standart üst araç çubuğu ve duraklatma menüsünün yerleşimi (dar / geniş yatay
-ve dikey telefon): `node tests/standart-cubuk.mjs` — GAME_URL verilmezse sunucusunu kendisi açar. Playwright projeye
-kuruludur; ilk kez `npx playwright install chromium` ile kendi başsız Chromium'unu indirir (kullanıcının Chrome'una ve
-faresine dokunmaz). Ekran görüntüleri `artifacts/`.
+yakınlaştırma): `npm run test:mobil`. Gösteri kipi için `node tests/gosteri-smoke.mjs`. Oyun içi müzik için
+`npm run test:muzik` (`?muzik=1` ile; `audio.currentTime` / `paused` ölçülür, tarayıcı sesi kısık). Playwright
+projeye kuruludur; ilk kez `npx playwright install chromium` ile kendi başsız Chromium'unu indirir (kullanıcının
+Chrome'una ve faresine dokunmaz). Ekran görüntüleri `artifacts/`.
 
 **Telefonda üst kısım**: oyun kökü `src/gorunur-alan.js` ile tarayıcının **gerçekten görünen** alanına kilitlenir
 (`--vv-h` / `--vv-top`, style.css → `html.vv`), böylece üst çubuk ve oda kodu tarayıcı çubuğunun altında kalmaz. Üç
@@ -41,6 +40,38 @@ ayrı durum var ve her birini farklı parça çözer: çubuk görünümü kısal
 görünümdür, gerçek alandan uzundur), sayfa kaymışsa (iOS) `basaAl()`, görünür alan düzen görünümünün içinde aşağı
 inmişse (iOS çubuk geri gelirken, klavye) `--vv-top`. Ayrıntı ve sınırlar dosyanın başındaki açıklamada.
 **Yakınlaştırmada kilit kapanır**: kullanıcı yakınlaştırdığı yeri kaybetmesin diye CSS yedeğine (`100dvh`) dönülür.
+
+## Müzik ve standart araç çubuğu
+
+Oyun içi müzik `muzik/` altındaki üç parçadır (kendi bestemiz; 128 kbps, ~2 MB, lisans notu `muzik/LISANS.txt`).
+Sahneyi `src/muzik.js` seçer, geçişler 1,8 saniye çapraz süzülmedir; dosyalar gerektiğinde iner (menüde yalnız sakin
+parça), yollar görelidir (Capacitor'da da çalışır, sonraki APK'ya kendiliğinden girer).
+
+| Sahne | Parça | Nerede |
+| --- | --- | --- |
+| sakin | `son-2-boslukta` · *Boşlukta* | Giriş ekranı, lobi, mola, maç sonu karnesi |
+| mac | `son-1-hizli-aksiyon` · *Hızlı Aksiyon* | Maç sürerken (doğuş açık) |
+| doruk | `son-3-son-plaka` · *Son Plaka Düşüyor* ↔ *Hızlı Aksiyon* | Son plaka evresi: iç halka düştü, doğuş kapandı (`respawnOpen` false); parça bitince sırayla |
+
+Müzik ses düzeyi efektlerin altındadır (varsayılan %35). Açık / kapalı ve düzey tarayıcıda saklanır (`sp.muzik`,
+`sp.muzik.ses`); efekt sesinden (`sp.sound`) **bağımsızdır**. Müzik ilk kullanıcı dokunuşundan sonra başlar, sekme
+gizlenince durur. Gösteri kiplerinde (`?gosteri=...`) ve otomatik tarayıcılarda hiç `<audio>` kurulmaz — video betiği
+müziğini kendi ekler; `?muzik=1` müziği elle açar (testler bunu kullanır), `?muzik=0` kapatır.
+
+Düzeyi normalde `<audio>.volume` verir. **iOS Safari'de `volume` salt okunurdur** (atama yutulur, değer 1 kalır):
+orada varsayılan %35, sürgü ve çapraz geçiş çalışmaz, müzik efektlerin üstüne çıkardı. Bu yüzden `src/muzik.js`
+ilk parçada düzeyin gerçekten uygulanıp uygulanmadığını **ölçer** (`yolSec`); uygulanmıyorsa parçaları Web Audio'ya
+bağlayıp düzeyi kazançla verir (`MediaElementSource → GainNode → çıkış`, `durum().sesYolu` `'oge'` / `'gain'`).
+Masaüstü ve Android'de Web Audio hiç kurulmaz. Sürgü dibe çekilince sessizlik **duraklatmayla** sağlanır (parça
+kaldığı yerde bekler), böylece düzeyi hiç uygulayamayan bir tarayıcıda da gerçekten susar.
+
+**Standart üst araç çubuğu** (bütün JosephUz oyunlarında aynı sıra ve aynı yazılar):
+`← josephuz.com` · `Ses: açık/kapalı` · `Müzik: açık/kapalı` · `Kontroller F1`. Oyuna özgü düğmeler (`Duraklat Esc`,
+`🎥 Kamera`) bu dörtlünün ardına gelir. Telefonda düğmeler simgeye döner; maç sırasında müzik düğmesi çubuktan
+çekilir (skor tabelasına yer açılsın diye) ve ☰ duraklatma menüsünden açılıp kapatılır.
+
+**Standart duraklatma (Esc) menüsü**: `DEVAM ET →` · `Kontroller F1` · `Ses: …` · `Müzik: …` (altında müzik ses
+sürgüsü) · `Yeniden başlat` (çevrimdışı) · `Ana menü` / çevrim içinde `Odadan çık` · `josephuz.com'a dön`.
 
 ## Kurallar
 
@@ -85,31 +116,6 @@ Maç sonunda karne: düşürme, düşme, isabet, atış, güç diski, zıplama p
 | V | Kamera: birinci şahıs ↔ omuz |
 | F1 / Esc | Kontroller / mola |
 
-## Müzik ve standart araç çubuğu
-
-Oyun içi müzik `muzik/` altındaki üç parçadır (kendi bestemiz; 128 kbps, ~2 MB, lisans notu `muzik/LISANS.txt`).
-Sahneyi `src/muzik.js` seçer, geçişler 1,8 saniye çapraz süzülmedir; dosyalar gerektiğinde iner (menüde yalnız sakin
-parça), yollar görelidir (Capacitor'da da çalışır, sonraki APK'ya kendiliğinden girer).
-
-| Sahne | Parça | Nerede |
-| --- | --- | --- |
-| sakin | `son-2-boslukta` · *Boşlukta* | Giriş ekranı, lobi, mola, maç sonu karnesi |
-| mac | `son-1-hizli-aksiyon` · *Hızlı Aksiyon* | Maç |
-| doruk | `son-3-son-plaka` · *Son Plaka Düşüyor* ↔ *Hızlı Aksiyon* | Son plaka evresi (ayakta üç ya da daha az plaka; iç halka titrerken de). Parça bitince sırayla |
-
-Müzik ses düzeyi efektlerin altındadır (varsayılan %35). Açık / kapalı ve düzey tarayıcıda saklanır (`sp.muzik`,
-`sp.muzik.ses`); efekt sesinden (`sp.sound`) **bağımsızdır**. Müzik ilk kullanıcı dokunuşundan sonra başlar, sekme
-gizlenince durur. Gösteri kipinde (`?gosteri=1`) ve otomatik tarayıcılarda hiç `<audio>` kurulmaz — video betiği
-müziğini kendi ekler; `?muzik=1` müziği elle açar (testler bunu kullanır), `?muzik=0` kapatır.
-
-**Standart üst araç çubuğu** (bütün JosephUz oyunlarında aynı sıra ve aynı yazılar):
-`← josephuz.com` · `Ses: açık/kapalı` · `Müzik: açık/kapalı` · `Kontroller F1`. Oyuna özgü düğmeler (`Duraklat Esc`,
-`🎥 Kamera`) bu dörtlünün ardına gelir. Telefonda düğmeler simgeye döner; maç sırasında müzik düğmesi çubuktan
-çekilir (skor tabelasına yer açılsın diye) ve ☰ duraklatma menüsünden açılıp kapatılır.
-
-**Standart duraklatma (Esc) menüsü**: `DEVAM ET →` · `Kontroller F1` · `Ses: …` · `Müzik: …` (altında müzik ses
-sürgüsü) · `Yeniden başlat` (çevrimdışı) · `Ana menü` / çevrim içinde `Odadan çık` · `josephuz.com'a dön`.
-
 ## Telefon
 
 Dokunmatik ekran algılanınca (masaüstünde `?touch`) omuz kamerasıyla başlar; sol yarıda joystick, sağ yarıda parmak
@@ -142,5 +148,5 @@ odaları `server/`, oyun kodu `src/` altındadır. three.js npm paketinden `/ven
 | `src/view/` | Sahne, arena görünümü, oyuncular, diskler, efektler, kamera |
 | `src/ui.js`, `src/input.js`, `src/touch.js`, `src/lobby.js` | Arayüz, klavye / fare, dokunmatik, lobi |
 | `src/muzik.js`, `muzik/` | Oyun içi müzik: üç parça, sahne seçimi, çapraz geçiş; parçalar ve lisans notu |
-| `tests/muzik.test.mjs`, `tests/muzik-smoke.mjs`, `tests/standart-cubuk.mjs` | Müzik ve standart araç çubuğu testleri (tarayıcısız kural testi; tarayıcıda ölçüm ve yerleşim) |
 | `tests/` | Kural testleri, oda testleri, tarayıcı dumanı |
+| `tests/muzik.test.mjs`, `tests/muzik-smoke.mjs` | Müzik ve standart araç çubuğu testleri (tarayıcısız kural testi; tarayıcıda ölçüm) |

@@ -131,8 +131,8 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 /* Müzik ses düzeyi: mola menüsünde Müzik düğmesinin hemen altında bir sürgü; müzik kapalıyken soluk (bkz. src/muzik.js). */
 #son-plaka .card.small .slider{display:flex;align-items:center;gap:10px;margin-top:10px;padding:0 4px;font-size:12px;color:#b7c6df}
 #son-plaka .card.small .slider.off{opacity:.45}
-#son-plaka .card.small .slider input[type=range]{flex:1;min-width:0;accent-color:#7fe0e8}
-#son-plaka .card.small .slider b{min-width:38px;text-align:right;color:#f4d7a5}
+#son-plaka .card.small .slider input[type=range]{flex:1;min-width:0;accent-color:#f4d7a5}
+#son-plaka .card.small .slider b{min-width:38px;text-align:right;color:#f4ead7}
 #son-plaka .result-card{width:min(780px,95vw)}
 #son-plaka #sp-final-score{font-size:22px;font-weight:900;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;letter-spacing:1px}
 #son-plaka #sp-final-score b{font-size:34px;color:#fff7e6;margin-left:4px}
@@ -271,15 +271,15 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 /* Müzik düğmesi: telefonda da nota simgesi, kapalıyken üstü çizili (bkz. src/muzik.js). */
 #son-plaka.touch #sp-muzik::before{content:"♫"}
 #son-plaka.touch #sp-muzik.muted::before{text-decoration:line-through;opacity:.65}
-/* Dar ekran (telefon yatay, küçük pencere): standart araç çubuğu tek satırda kalsın — simgeler ve josephuz bağlantısı
+/* Dar ekran (telefon dikey, küçük yatay): standart araç çubuğu tek satırda kalsın — simgeler ve josephuz bağlantısı
    küçülür, sıra ve düğmeler aynı kalır, çubuk ekranın dışına taşmaz. Bu kurallar yukarıdaki `.touch` simge
    ölçülerinden **sonra** gelmeli: aynı ağırlıktaki seçicilerde sonraki kazanır. */
 @media(max-width:650px){
 #son-plaka header{left:12px;right:12px}
 #son-plaka .logo small{display:none}
 }
-/* Dar ya da kısa ekranda (telefon yatay / dikey) çubuğun simgeleri küçülür: sıra ve düğmeler aynı kalır, çubuk tek
-   satırda durur ve maçta skor tabelasının üstüne binmez (667x375'te dördüncü simge tabelaya değiyordu). */
+/* Simgeler 40 → 34 px. `max-height` şartı **şart**: dar yatay telefon (667x375) 650 px genişlik eşiğine girmiyor,
+   ama orada maç sırasındaki dört simge skor tabelasının üstüne biniyordu (bkz. tests/standart-cubuk.mjs). */
 @media(max-width:650px),(max-height:560px){
 #son-plaka .header-actions{gap:5px}
 #son-plaka.touch .header-actions button{width:34px;height:34px}
