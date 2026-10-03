@@ -120,19 +120,13 @@ async function muzikKur(saklanan = {}, secenek = {}) {
 /** Süzülme `setInterval` ile yürür: gerçek zaman bekler (ADIM 50 ms). */
 const bekle = ms => new Promise(r => setTimeout(r, ms));
 
-test('saklanan müzik ses düzeyi geri okunur — sıfır da geçerli bir seçimdir', async () => {
-  // Hiç ayar yoksa varsayılan %35 (localStorage.getItem null döner; Number(null) 0 olduğu için tuzak burada).
+test('müzik ses düzeyi sabit %35: eski sürümden saklı düzey okunmaz (menüde sürgü yok)', async () => {
   let k = await muzikKur();
-  try { assert.ok(Math.abs(k.muzik.ses - 0.35) < 1e-9, `ayarsız varsayılan %35 (okunan: ${k.muzik.ses})`); } finally { k.geriAl(); }
-  // Sürgü dibe çekilip sayfa yenilenince sessiz kalmalı: eskiden `v > 0` yüzünden %35'e dönüyordu.
-  k = await muzikKur({ 'sp.muzik.ses': '0' });
-  try { assert.equal(k.muzik.ses, 0, 'sıfır ses düzeyi yenilemede korunur'); } finally { k.geriAl(); }
-  k = await muzikKur({ 'sp.muzik.ses': '0.6' });
-  try { assert.equal(k.muzik.ses, 0.6); } finally { k.geriAl(); }
-  // Bozuk / aralık dışı değer varsayılana döner.
-  for (const bozuk of ['', 'abc', '-1', '2']) {
+  try { assert.ok(Math.abs(k.muzik.ses - 0.35) < 1e-9, `varsayılan %35 (okunan: ${k.muzik.ses})`); } finally { k.geriAl(); }
+  // Eski sürümde sürgüyle saklanmış her değer (0 dahil) yok sayılır: herkes aynı standart düzeyde başlar.
+  for (const bozuk of ['0', '0.6', '', 'abc', '-1', '2']) {
     k = await muzikKur({ 'sp.muzik.ses': bozuk });
-    try { assert.ok(Math.abs(k.muzik.ses - 0.35) < 1e-9, `bozuk değer (${JSON.stringify(bozuk)}) varsayılana dönmeli`); } finally { k.geriAl(); }
+    try { assert.ok(Math.abs(k.muzik.ses - 0.35) < 1e-9, `saklı değer (${JSON.stringify(bozuk)}) yok sayılmalı`); } finally { k.geriAl(); }
   }
 });
 
@@ -419,9 +413,10 @@ test('STANDART üst araç çubuğu: ← josephuz.com · Ses · Müzik · Kontrol
 test('STANDART duraklatma menüsü: DEVAM ET → · Kontroller F1 · Ses · Müzik · … · josephuz.com\'a dön', async () => {
   const html = await oku('index.html');
   const kart = html.slice(html.indexOf('<section id="sp-pause"'), html.indexOf('</section>', html.indexOf('<section id="sp-pause"')));
-  const sira = [...kart.matchAll(/id="(sp-[a-z-]+)"/g)].map(m => m[1]).filter(id => id !== 'sp-muzik-ses' && id !== 'sp-muzik-yuzde' && id !== 'sp-pause-note');
-  assert.deepEqual(sira, ['sp-pause', 'sp-resume', 'sp-pause-help', 'sp-pause-sound', 'sp-pause-muzik', 'sp-muzik-row', 'sp-restart', 'sp-menu'],
+  const sira = [...kart.matchAll(/id="(sp-[a-z-]+)"/g)].map(m => m[1]).filter(id => id !== 'sp-pause-note');
+  assert.deepEqual(sira, ['sp-pause', 'sp-resume', 'sp-pause-help', 'sp-pause-sound', 'sp-pause-muzik', 'sp-restart', 'sp-menu'],
     'duraklatma menüsünün sırası standart olmalı');
+  assert.ok(!kart.includes('type="range"'), 'menüde müzik sesi sürgüsü olmamalı (ses düzeyi sabit)');
   assert.ok(kart.includes('>DEVAM ET →<'), 'ilk düğme "DEVAM ET →" olmalı');
   assert.ok(kart.includes("josephuz.com'a dön"), 'menünün sonunda josephuz.com bağlantısı olmalı');
 });

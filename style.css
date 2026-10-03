@@ -128,11 +128,6 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 #son-plaka .card .primary{width:100%;margin-top:23px;justify-content:center}
 #son-plaka .card.small{max-width:370px}
 #son-plaka .card.small button,#son-plaka .card.small a.btn{display:block;width:100%;margin-top:12px}
-/* Müzik ses düzeyi: mola menüsünde Müzik düğmesinin hemen altında bir sürgü; müzik kapalıyken soluk (bkz. src/muzik.js). */
-#son-plaka .card.small .slider{display:flex;align-items:center;gap:10px;margin-top:10px;padding:0 4px;font-size:12px;color:#b7c6df}
-#son-plaka .card.small .slider.off{opacity:.45}
-#son-plaka .card.small .slider input[type=range]{flex:1;min-width:0;accent-color:#f4d7a5}
-#son-plaka .card.small .slider b{min-width:38px;text-align:right;color:#f4ead7}
 #son-plaka .result-card{width:min(780px,95vw)}
 #son-plaka #sp-final-score{font-size:22px;font-weight:900;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;letter-spacing:1px}
 #son-plaka #sp-final-score b{font-size:34px;color:#fff7e6;margin-left:4px}
@@ -246,12 +241,11 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 #son-plaka .card dl{gap:8px 12px;font-size:11px;line-height:1.45}
 #son-plaka .card .primary{margin-top:12px;min-height:42px}
 #son-plaka .card.small button,#son-plaka .card.small a.btn{margin-top:8px;padding:10px}
-/* Standart duraklatma menüsü iki satır uzadı (Kontroller + Müzik + ses sürgüsü): yatay telefonda süsler gider,
+/* Standart duraklatma menüsü iki satır uzadı (Kontroller + Müzik): yatay telefonda süsler gider,
    düğmeler sıkışır ki "Ana menü" ve "josephuz.com'a dön" kaydırmadan görünsün. */
 #son-plaka #sp-pause .eyebrow,#son-plaka #sp-pause h2{display:none}
 #son-plaka #sp-pause .card{padding:14px 18px}
 #son-plaka #sp-pause button,#son-plaka #sp-pause a.btn{margin-top:6px;padding:9px}
-#son-plaka #sp-pause .slider{margin-top:6px;font-size:11px}
 #son-plaka #sp-final-score{font-size:28px;margin-bottom:8px}
 #son-plaka td,#son-plaka th{padding:5px 6px}
 #son-plaka #sp-charge{width:74px;height:74px}

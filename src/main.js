@@ -138,17 +138,16 @@ export async function start(root) {
   ui.button('pause-help', help);
   /**
    * Oyun içi müzik (bkz. muzik.js): efekt sesinden bağımsız açılıp kapanır, ayarı tarayıcıda kalır. Açma / kapama
-   * düğmesi hem üst çubukta hem mola menüsündedir, ses düzeyi sürgüsü mola menüsünde; ikisi de aynı durumu gösterir.
+   * düğmesi hem üst çubukta hem mola menüsündedir; ikisi de aynı durumu gösterir. Ses düzeyi sabit (sürgü yok).
    * Gösteri kiplerinde müzik hiç kurulmaz (`muzik.kapali`), o zaman düğmeler gizlenir.
    */
   const muzik = createMuzik(root);
-  const muzikYaz = () => ui.setMuzik(muzik.acik, muzik.ses);
+  const muzikYaz = () => ui.setMuzik(muzik.acik);
   // Düğmeler yalnız gösteri kipinde gizlenir. Otomatik tarayıcıda (`muzik.kapali`, bkz. muzik.js) da dururlar:
   // standart çubuk her zaman aynı görünür, ayar yine saklanır, yalnız çalacak parça yoktur.
   ui.setMuzikVar(!gosteri);
   const toggleMuzik = () => { muzik.ac(); muzikYaz(); };
   ui.button('muzik', toggleMuzik); ui.button('pause-muzik', toggleMuzik);
-  ui.onMuzikSes(v => { muzik.sesAyarla(v); muzikYaz(); });
   muzikYaz();
 
   // ---------- Çevrim içi ----------

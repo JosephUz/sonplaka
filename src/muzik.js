@@ -11,9 +11,8 @@ import { gosteriAcik } from './gosteri.js';
  * Çalma `<audio>` öğeleriyledir: dosya akarak iner, sahne değişince ses düzeyi karşılıklı süzülür. Dosyalar
  * **gerektiğinde** yüklenir: menüde yalnız sakin parça iner, maç parçası maç başlarken.
  *
- * Ses düzeyi efektlerin (audio.js) altındadır: varsayılan %35. Açık / kapalı ve düzey tarayıcıda saklanır
- * (`sp.muzik`, `sp.muzik.ses`); açma / kapama düğmesi hem üst çubukta hem mola menüsündedir (bkz. ui.js setMuzik),
- * ses düzeyi sürgüsü mola menüsündedir. Efekt sesi düğmesi (`sp.sound`) müziği etkilemez: ikisi bağımsızdır.
+ * Ses düzeyi efektlerin (audio.js) altındadır: varsayılan %35. Düzey sabit, menüde sürgü yok (cihazın sesinden ayarlanır). Açık / kapalı tarayıcıda saklanır
+ * (`sp.muzik`); açma / kapama düğmesi hem üst çubukta hem mola menüsündedir (bkz. ui.js setMuzik). Efekt sesi düğmesi (`sp.sound`) müziği etkilemez: ikisi bağımsızdır.
  * Düzeyi `<audio>.volume` verir; iOS Safari'de `volume` salt okunur olduğundan orada Web Audio kazancına geçilir
  * (bkz. yolSec / sesVer), sıfır düzey ise her yerde duraklatmadır.
  *
@@ -72,9 +71,9 @@ export function createMuzik(root) {
   const kapali = muzikKapali();
   let acik = true, ses = VARSAYILAN_SES;
   try { acik = localStorage.getItem('sp.muzik') !== 'off'; } catch { /* yok */ }
-  // Sıfır geçerli bir seçimdir (sürgüyü dibe çekmek): `v >= 0`. Anahtar yoksa / boşsa `Number` 0 verirdi, bu yüzden
-  // ham değer önce boşluğa karşı denetlenir — yoksa hiç ayar yapmamış oyuncu sessiz başlardı.
-  try { const ham = localStorage.getItem('sp.muzik.ses'); const v = ham ? Number(ham) : NaN; if (Number.isFinite(v) && v >= 0 && v <= 1) ses = v; } catch { /* yok */ }
+  // Müzik düzeyi sabit (VARSAYILAN_SES): menüde ses sürgüsü yok, oyuncu bilgisayarın / telefonun sesinden ayarlar.
+  // Yusuf 4 Ekim: "menülerde müzik sesi olmasın, pc sesinden ayarlasınlar, standart bir ses yüksekliği belirle".
+  // Eski sürümden kalmış saklı düzey (`<oyun>.muzik.ses`) okunmaz.
   const sakla = (k, v) => { try { localStorage.setItem(k, v); } catch { /* yok */ } };
 
   const parcalar = new Map();

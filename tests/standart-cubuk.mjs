@@ -1,6 +1,6 @@
 // STANDART üst araç çubuğu ve duraklatma (Esc) menüsü — bütün JosephUz oyunlarında aynı olmalı:
 //   çubuk: `← josephuz.com` · `Ses: açık/kapalı` · `Müzik: açık/kapalı` · `Kontroller F1` (oyuna özgü düğmeler sonra)
-//   menü:  `DEVAM ET →` · `Kontroller F1` · `Ses: …` · `Müzik: …` (+ ses sürgüsü) · `Yeniden başlat` · `Ana menü` · `josephuz.com'a dön`
+//   menü:  `DEVAM ET →` · `Kontroller F1` · `Ses: …` · `Müzik: …` · `Yeniden başlat` · `Ana menü` · `josephuz.com'a dön`
 // Sıranın ve yazıların HTML'de doğru olduğunu tests/muzik.test.mjs denetler; buradaki ölçü **yerleşim**: dar yatay
 // telefonda (667x375), geniş yatay telefonda (844x390) ve dikeyde (390x844) çubuk tek satırda kalıyor, ekrandan
 // taşmıyor ve oyun adının üstüne binmiyor mu; maçta hangi simgeler kalıyor; duraklatma menüsünün son düğmesi
@@ -184,7 +184,7 @@ try {
   assert.ok(!binisiyor(macCubuk, tabela), 'maçta üst çubuk skor tabelasının üstüne biniyor');
 
   // 3) Standart duraklatma menüsü dar yatay telefonda bütünüyle görünmeli: en alttaki "josephuz.com'a dön"
-  //    kaydırmadan okunsun (menü bu görevde Kontroller, Müzik ve ses sürgüsüyle uzadı).
+  //    kaydırmadan okunsun (menü bu görevde Kontroller ve Müzik ile uzadı).
   await page.tap('#sp-pause-open');
   await page.waitForTimeout(500);
   const molaKart = await olc('#sp-pause .card'), molaSon = await olc('#sp-pause a.btn');
@@ -192,7 +192,7 @@ try {
     .filter(n => getComputedStyle(n).display !== 'none' && !n.hidden).map(n => n.id || n.textContent.trim()));
   await page.screenshot({ path: 'artifacts/standart-cubuk-dar-duraklatma.png' });
   console.log(JSON.stringify({ molaKart, molaSon, molaDugmeler }));
-  assert.deepEqual(molaDugmeler, ['sp-resume', 'sp-pause-help', 'sp-pause-sound', 'sp-pause-muzik', 'sp-muzik-row', 'sp-restart', 'sp-menu', "josephuz.com'a dön"],
+  assert.deepEqual(molaDugmeler, ['sp-resume', 'sp-pause-help', 'sp-pause-sound', 'sp-pause-muzik', 'sp-restart', 'sp-menu', "josephuz.com'a dön"],
     'duraklatma menüsünün sırası standart olmalı');
   assert.ok(molaSon.bottom <= DAR.height, `duraklatma menüsünün son düğmesi ekrandan taşıyor (${molaSon.bottom} > ${DAR.height})`);
   assert.ok(molaKart.bottom <= DAR.height, 'duraklatma kartı ekrandan taşıyor');
