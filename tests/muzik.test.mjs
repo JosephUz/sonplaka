@@ -95,22 +95,25 @@ async function muzikKur(saklanan = {}, secenek = {}) {
     resume() { this.state = 'running'; return Promise.resolve(); }
   }
 
+  const belge = {
+    addEventListener: (ev, fn) => { dinlenen.push(ev); if (!dinleyiciler.has(ev)) dinleyiciler.set(ev, []); dinleyiciler.get(ev).push(fn); },
+    hidden: false,
+  };
   const geriAl = geneliKur({
     location: { search: '?muzik=1', hostname: 'localhost', protocol: 'http:', host: 'localhost' },
     navigator: { webdriver: false },
     window: { Capacitor: undefined },
     localStorage: { getItem: k => (k in kutu ? kutu[k] : null), setItem: (k, v) => { kutu[k] = String(v); } },
-    document: {
-      addEventListener: (ev, fn) => { dinlenen.push(ev); if (!dinleyiciler.has(ev)) dinleyiciler.set(ev, []); dinleyiciler.get(ev).push(fn); },
-      hidden: false,
-    },
+    document: belge,
     Audio: SahteAudio,
     AudioContext: SahteBaglam,
   });
   /** Olayı tetikler (tarayıcıdaki dokunuş / tuş karşılığı). */
   const olay = ev => { for (const fn of dinleyiciler.get(ev) ?? []) fn(); };
+  /** Sekmeyi gizler / geri getirir (tarayıcıdaki `visibilitychange` karşılığı). */
+  const gizle = v => { belge.hidden = v; olay('visibilitychange'); };
   try {
-    return { muzik: createMuzik({ appendChild() {} }), dinlenen, olay, ogeler, baglamlar, kutu, geriAl };
+    return { muzik: createMuzik({ appendChild() {} }), dinlenen, olay, gizle, belge, ogeler, baglamlar, kutu, geriAl };
   } catch (e) { geriAl(); throw e; }
 }
 
@@ -193,6 +196,74 @@ test('iOS: <audio>.volume yutuluyorsa ses düzeyi Web Audio kazancıyla verilir'
 
     k.muzik.sesAyarla(0.8);
     assert.ok(Math.abs(k.muzik.durum().duzey - 0.8) < 1e-6, 'sürgü kazancı anında değiştirmeli');
+  } finally { k.geriAl(); }
+});
+
+/**
+ * iOS uygulamayı arka plana alınca Web Audio bağlamını `suspended` / `interrupted` bırakır ve çalan öğeyi
+ * duraklatır. `visibilitychange` içinden yapılan `resume()` kullanıcı hareketi sayılmadığı için işe yaramaz:
+ * bağlam ancak bir dokunuşun içinden geri gelir. Eskiden dinleyici `dokunuldu` true olduğu için hemen dönüyordu,
+ * yani dönüşten sonraki hiçbir dokunuş bağlamı sürdürmüyordu — öğe "çalıyor" görünürken ses çıkmıyordu.
+ */
+test('iOS: arka plandan dönünce bağlam ve çalma sonraki dokunuşta onarılır', async () => {
+  const k = await muzikKur({}, { iosVolume: true });
+  try {
+    k.muzik.sahne('sakin');
+    k.olay('touchend');
+    const oge = k.ogeler[0], baglam = k.baglamlar[0];
+    assert.equal(baglam.state, 'running', 'ilk dokunuşta bağlam sürdürülür');
+    assert.equal(oge.paused, false);
+
+    // Arka plana atılıp dönüldü: iOS bağlamı kesti ve öğeyi duraklattı (sayfa görünür, `gizli` false).
+    baglam.state = 'interrupted';
+    oge.paused = true;
+    const oncekiCalma = oge.calmaSayisi;
+
+    k.olay('pointerup');
+    assert.equal(baglam.state, 'running', 'dönüşten sonraki dokunuş bağlamı yeniden sürdürmeli');
+    assert.ok(oge.calmaSayisi > oncekiCalma, 'beklenmedik duraklamada parça yeniden başlatılmalı');
+    await bekle(20);
+    assert.equal(oge.paused, false, 'müzik dokunuştan sonra gerçekten çalmalı');
+    assert.equal(k.ogeler.length, 1, 'onarım yeni bir <audio> kurmaz: aynı parça sürer');
+  } finally { k.geriAl(); }
+});
+
+/**
+ * Sekme çapraz geçişin ortasında gizlenirse susması gereken eski parça arka planda çalmayı sürdürüyordu: yalnız
+ * `aktif` duraklatılıyor, süzülme sayacı da arka planda yavaşladığı için geçiş on saniyelerce asılı kalıyordu.
+ */
+test('sekme gizlenince geçişteki parçalar da durur; dönünce yalnız doğru parça sürer', async () => {
+  const k = await muzikKur();
+  try {
+    k.muzik.sahne('sakin');
+    k.olay('click');
+    await bekle(1000); // açılış süzülmesi bitsin
+    const sakin = k.ogeler[0];
+    assert.equal(sakin.paused, false);
+
+    // Maça geçiş: 1,8 sn çapraz süzülme başlar, ortasında sekme gizlenir.
+    k.muzik.sahne('mac');
+    await bekle(200);
+    const mac = k.ogeler[1];
+    assert.ok(mac, 'maç parçası kuruldu');
+    assert.equal(mac.paused, false, 'geçişte iki parça birden çalar');
+    assert.equal(sakin.paused, false);
+
+    k.gizle(true);
+    assert.equal(sakin.paused, true, 'geçişte susmakta olan parça da duraklamalı');
+    assert.equal(mac.paused, true, 'gizli sekmede hiçbir parça çalmaz');
+    assert.equal(sakin.currentTime, 0, 'susan parça başa sarılır: bekleyen temizlik de çalışmalı');
+
+    // Arka planda süzülme sayacı asılı kalmamalı: beklemeye rağmen hiçbir şey kendiliğinden çalmaya başlamaz.
+    await bekle(400);
+    assert.equal(sakin.paused, true);
+    assert.equal(mac.paused, true);
+
+    k.gizle(false);
+    await bekle(500);
+    assert.equal(mac.paused, false, 'dönünce sahnenin parçası kaldığı yerden sürer');
+    assert.equal(sakin.paused, true, 'eski parça sessiz kalır');
+    assert.equal(k.muzik.durum().parca, 'son-1-hizli-aksiyon');
   } finally { k.geriAl(); }
 });
 

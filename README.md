@@ -65,6 +65,13 @@ bağlayıp düzeyi kazançla verir (`MediaElementSource → GainNode → çıkı
 Masaüstü ve Android'de Web Audio hiç kurulmaz. Sürgü dibe çekilince sessizlik **duraklatmayla** sağlanır (parça
 kaldığı yerde bekler), böylece düzeyi hiç uygulayamayan bir tarayıcıda da gerçekten susar.
 
+**Arka plandan dönüş.** Sekme gizlenince süren çapraz geçişler o anda bitirilir ve **çalan her parça** duraklatılır
+(yalnız aktif olan değil: geçişin ortasında gizlenen sayfada susmakta olan parça arka planda çalmayı sürdürüyordu,
+üstelik `setInterval` arka planda yavaşladığı için uzun süre). iOS arka planda ayrıca Web Audio bağlamını `suspended`
+ya da `interrupted` bırakır ve öğeyi duraklatır; bunlar yalnız **gerçek bir kullanıcı hareketinin içinden** onarılabilir
+(`visibilitychange` içinden yapılan `resume()` sayılmaz). Bu yüzden dokunuş dinleyicisi ilk dokunuştan sonra da
+çalışır: her dokunuşta bağlam `running` değilse sürdürülür ve beklenmedik şekilde duraklamış parça yeniden başlatılır.
+
 **Standart üst araç çubuğu** (bütün JosephUz oyunlarında aynı sıra ve aynı yazılar):
 `← josephuz.com` · `Ses: açık/kapalı` · `Müzik: açık/kapalı` · `Kontroller F1`. Oyuna özgü düğmeler (`Duraklat Esc`,
 `🎥 Kamera`) bu dörtlünün ardına gelir. Telefonda düğmeler simgeye döner; maç sırasında müzik düğmesi çubuktan

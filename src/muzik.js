@@ -137,6 +137,20 @@ export function createMuzik(root) {
     return g ? g.gain.value : a.volume;
   }
 
+  /**
+   * Web Audio bağlamını sürdürür (yalnız 'gain' yolunda kurulur; başka yerde `ctx` null kalır ve çağrı boşa düşer).
+   *
+   * iOS uygulamayı arka plana alınca bağlamı `suspended` ya da **`interrupted`** durumuna sokar (telefon çaldığında,
+   * başka uygulama ses çaldığında da). İkisi de ancak **gerçek bir kullanıcı hareketinin içinden** yapılan
+   * `resume()` ile geri gelir: `visibilitychange` içinden çağrılan `resume()` kullanıcı hareketi sayılmaz ve sessizce
+   * başarısız olur. Bu yüzden durum `running` değilse her dokunuşta yeniden denenir — yoksa `<audio>` "çalıyor"
+   * görünürken grafiğin çıkışı sessiz kalırdı (bkz. kullaniciDokunusu).
+   */
+  function baglamiSurdur() {
+    if (!ctx || ctx.state === 'running') return;
+    try { ctx.resume?.()?.catch?.(() => {}); } catch { /* sürdürülemedi: sonraki dokunuşta yeniden denenir */ }
+  }
+
   function tik() {
     for (const [a, f] of suzulme) {
       f.t += ADIM;
@@ -151,6 +165,15 @@ export function createMuzik(root) {
     if (sure <= 0) { suzulme.delete(a); sesVer(a, hedef); bitince?.(); return; }
     suzulme.set(a, { bas: sesAl(a), hedef, t: 0, sure, bitince });
     saat = saat ?? setInterval(tik, ADIM * 1000);
+  }
+  /**
+   * Süren bütün süzülmeleri **o anda bitirir**: her öğe hedef düzeyine çekilir ve bekleyen temizliği (duraklat,
+   * başa sar) çalıştırılır. Sekme gizlenirken gerekir — arka planda `setInterval` saniyede bir kereye kadar
+   * yavaşlar, yani yarım kalmış bir geçiş on saniyelerce asılı kalır.
+   */
+  function suzulmeleriBitir() {
+    for (const [a, f] of [...suzulme]) { suzulme.delete(a); sesVer(a, f.hedef); f.bitince?.(); }
+    if (saat !== null) { clearInterval(saat); saat = null; }
   }
 
   /** Parçanın `<audio>` öğesi; ilk istendiğinde kurulur (dosya o an inmeye başlar). */
@@ -188,7 +211,7 @@ export function createMuzik(root) {
 
   function calistir(a) {
     // Web Audio yolunda bağlam ilk dokunuşa kadar askıdadır: çıkış sessiz kalmasın diye sürdürülür.
-    if (ctx?.state === 'suspended') ctx.resume?.()?.catch?.(() => {});
+    baglamiSurdur();
     const s = a.play();
     // Otomatik oynatma engellendiyse ilk dokunuş sayılmaz: bir sonraki dokunuşta yeniden denenir.
     if (s?.catch) s.catch(() => { dokunuldu = false; });
@@ -228,22 +251,40 @@ export function createMuzik(root) {
   }
 
   /**
-   * İlk kullanıcı girdisi: tarayıcı buradan sonra çalmaya izin verir.
+   * **Her** kullanıcı girdisi. İlkinde müzik başlar; sonrakilerde iOS'un arka planda bozduğu çalma durumu onarılır.
    *
    * **Dokunmatikte basma değil bırakma sayılır:** iOS Safari ses iznini `touchend` / `pointerup` / `click` ile verir,
    * `touchstart` ya da `pointerdown` ile vermez — yalnız basma olaylarını dinlersek `play()` reddedilir ve telefonda
    * müzik hiç başlamayabilir. Bu yüzden altı olay da dinlenir; hangisi önce gelirse müzik orada başlar.
+   *
+   * **İlk dokunuştan sonra da erken dönülmez:** iOS uygulama arka plandan dönünce Web Audio bağlamını askıda
+   * bırakır ve çalan öğeyi duraklatır; ikisi de yalnız bir kullanıcı hareketinin içinden onarılabilir (bkz.
+   * baglamiSurdur). Eskiden `dokunuldu` true olduğu için burada hemen dönülüyordu ve müzik sessiz kalıyordu.
    */
-  function ilkDokunus() {
-    if (kapali || dokunuldu) return;
+  function kullaniciDokunusu() {
+    if (kapali) return;
+    baglamiSurdur();
+    if (dokunuldu) {
+      // Beklenmedik duraklama (iOS kesintisi): sekme görünürken çalması gereken parça duruyorsa yeniden başlatılır.
+      if (aktif && aktif.paused && !gizli) calistir(aktif);
+      return;
+    }
     dokunuldu = true;
     uygula(0.8);
   }
+  /**
+   * Sekme gizlendi: süren geçişler bitirilir ve **çalan her parça** duraklatılır. Yalnız `aktif` duraklatılırsa
+   * geçişin ortasında gizlenen sayfada susması gereken eski parça arka planda çalmayı sürdürüyordu.
+   */
+  function gizlendi() {
+    suzulmeleriBitir();
+    for (const a of parcalar.values()) if (!a.paused) a.pause();
+  }
   if (!kapali) {
-    for (const ev of ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'click', 'keydown']) document.addEventListener(ev, ilkDokunus, { passive: true });
+    for (const ev of ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'click', 'keydown']) document.addEventListener(ev, kullaniciDokunusu, { passive: true });
     document.addEventListener('visibilitychange', () => {
       gizli = document.hidden;
-      if (gizli) { if (aktif) aktif.pause(); return; }
+      if (gizli) { gizlendi(); return; }
       uygula(0.4);
     });
   }
