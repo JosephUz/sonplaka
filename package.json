@@ -10,6 +10,7 @@
     "test:browser": "node tests/browser-smoke.mjs",
     "test:gosteri": "node tests/gosteri-smoke.mjs",
     "test:mobil": "node tests/mobil-ust-alan.mjs",
+    "test:muzik": "node tests/muzik-smoke.mjs",
     "build:web": "node scripts/build-web.mjs",
     "deploy:web": "node scripts/build-web.mjs && npx wrangler@4 deploy"
   },

@@ -29,8 +29,11 @@ Tunnels → tünel → **Published application routes** içindeki rota `sonplaka
 
 **Testler**: `npm test` kural, oda ve görünür alan testlerini (Node, tarayıcısız) koşar. Tarayıcı dumanı testi çalışan
 sunucuya bağlanır: `npm run test:browser`. Telefon görünümü (ana ekran + oda kurulmuş lobi, iki çubuk senaryosu ve
-yakınlaştırma): `npm run test:mobil`. Playwright projeye kuruludur; ilk kez `npx playwright install chromium` ile kendi
-başsız Chromium'unu indirir (kullanıcının Chrome'una ve faresine dokunmaz). Ekran görüntüleri `artifacts/`.
+yakınlaştırma): `npm run test:mobil`. Oyun içi müzik: `npm run test:muzik` (`?muzik=1` ile; `audio.currentTime` /
+`paused` ölçülür, tarayıcı sesi kısık). Standart üst araç çubuğu ve duraklatma menüsünün yerleşimi (dar / geniş yatay
+ve dikey telefon): `node tests/standart-cubuk.mjs` — GAME_URL verilmezse sunucusunu kendisi açar. Playwright projeye
+kuruludur; ilk kez `npx playwright install chromium` ile kendi başsız Chromium'unu indirir (kullanıcının Chrome'una ve
+faresine dokunmaz). Ekran görüntüleri `artifacts/`.
 
 **Telefonda üst kısım**: oyun kökü `src/gorunur-alan.js` ile tarayıcının **gerçekten görünen** alanına kilitlenir
 (`--vv-h` / `--vv-top`, style.css → `html.vv`), böylece üst çubuk ve oda kodu tarayıcı çubuğunun altında kalmaz. Üç
@@ -80,7 +83,32 @@ Maç sonunda karne: düşürme, düşme, isabet, atış, güç diski, zıplama p
 | Shift | Hızlı koş |
 | Boşluk | Zıpla, havada tekrar |
 | V | Kamera: birinci şahıs ↔ omuz |
-| F1 / Esc | Nasıl oynanır / mola |
+| F1 / Esc | Kontroller / mola |
+
+## Müzik ve standart araç çubuğu
+
+Oyun içi müzik `muzik/` altındaki üç parçadır (kendi bestemiz; 128 kbps, ~2 MB, lisans notu `muzik/LISANS.txt`).
+Sahneyi `src/muzik.js` seçer, geçişler 1,8 saniye çapraz süzülmedir; dosyalar gerektiğinde iner (menüde yalnız sakin
+parça), yollar görelidir (Capacitor'da da çalışır, sonraki APK'ya kendiliğinden girer).
+
+| Sahne | Parça | Nerede |
+| --- | --- | --- |
+| sakin | `son-2-boslukta` · *Boşlukta* | Giriş ekranı, lobi, mola, maç sonu karnesi |
+| mac | `son-1-hizli-aksiyon` · *Hızlı Aksiyon* | Maç |
+| doruk | `son-3-son-plaka` · *Son Plaka Düşüyor* ↔ *Hızlı Aksiyon* | Son plaka evresi (ayakta üç ya da daha az plaka; iç halka titrerken de). Parça bitince sırayla |
+
+Müzik ses düzeyi efektlerin altındadır (varsayılan %35). Açık / kapalı ve düzey tarayıcıda saklanır (`sp.muzik`,
+`sp.muzik.ses`); efekt sesinden (`sp.sound`) **bağımsızdır**. Müzik ilk kullanıcı dokunuşundan sonra başlar, sekme
+gizlenince durur. Gösteri kipinde (`?gosteri=1`) ve otomatik tarayıcılarda hiç `<audio>` kurulmaz — video betiği
+müziğini kendi ekler; `?muzik=1` müziği elle açar (testler bunu kullanır), `?muzik=0` kapatır.
+
+**Standart üst araç çubuğu** (bütün JosephUz oyunlarında aynı sıra ve aynı yazılar):
+`← josephuz.com` · `Ses: açık/kapalı` · `Müzik: açık/kapalı` · `Kontroller F1`. Oyuna özgü düğmeler (`Duraklat Esc`,
+`🎥 Kamera`) bu dörtlünün ardına gelir. Telefonda düğmeler simgeye döner; maç sırasında müzik düğmesi çubuktan
+çekilir (skor tabelasına yer açılsın diye) ve ☰ duraklatma menüsünden açılıp kapatılır.
+
+**Standart duraklatma (Esc) menüsü**: `DEVAM ET →` · `Kontroller F1` · `Ses: …` · `Müzik: …` (altında müzik ses
+sürgüsü) · `Yeniden başlat` (çevrimdışı) · `Ana menü` / çevrim içinde `Odadan çık` · `josephuz.com'a dön`.
 
 ## Telefon
 
@@ -113,4 +141,6 @@ odaları `server/`, oyun kodu `src/` altındadır. three.js npm paketinden `/ven
 | `src/net/` | Protokol, durum paketi, istemci |
 | `src/view/` | Sahne, arena görünümü, oyuncular, diskler, efektler, kamera |
 | `src/ui.js`, `src/input.js`, `src/touch.js`, `src/lobby.js` | Arayüz, klavye / fare, dokunmatik, lobi |
+| `src/muzik.js`, `muzik/` | Oyun içi müzik: üç parça, sahne seçimi, çapraz geçiş; parçalar ve lisans notu |
+| `tests/muzik.test.mjs`, `tests/muzik-smoke.mjs`, `tests/standart-cubuk.mjs` | Müzik ve standart araç çubuğu testleri (tarayıcısız kural testi; tarayıcıda ölçüm ve yerleşim) |
 | `tests/` | Kural testleri, oda testleri, tarayıcı dumanı |

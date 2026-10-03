@@ -17,12 +17,16 @@
 
     <header>
       <a class="logo" href="/">SON<span>PLAKA</span><small>BOŞLUK ARENASI / İLK DENEME</small></a>
+      <!-- STANDART üst araç çubuğu (bütün JosephUz oyunlarında aynı sıra ve aynı yazılar):
+           ← josephuz.com · Ses: açık/kapalı · Müzik: açık/kapalı · Kontroller F1.
+           Oyuna özgü düğmeler (duraklat, kamera) standart dörtlünün ardına gelir. -->
       <div class="header-actions">
         <a id="sp-site" class="btn" href="https://www.josephuz.com/">← josephuz.com</a>
-        <button id="sp-cam" aria-label="Kamera: birinci şahıs / omuz">🎥 Omuz</button>
-        <button id="sp-help-open">Nasıl oynanır <kbd>F1</kbd></button>
+        <button id="sp-sound" aria-label="Ses efektlerini aç veya kapat">Ses: açık</button>
+        <button id="sp-muzik" aria-label="Oyun müziğini aç veya kapat" title="Oyun müziği (ses düzeyi Esc menüsünde)">Müzik: açık</button>
+        <button id="sp-help-open">Kontroller <kbd>F1</kbd></button>
         <button id="sp-pause-open" hidden>Duraklat <kbd>Esc</kbd></button>
-        <button id="sp-sound" aria-label="Sesi aç veya kapat">Ses açık</button>
+        <button id="sp-cam" aria-label="Kamera: birinci şahıs / omuz">🎥 Omuz</button>
       </div>
     </header>
 
@@ -161,9 +165,14 @@
       <div class="card small">
         <span class="eyebrow">MOLA</span>
         <h2>Bir nefes al.</h2>
-        <button id="sp-resume" class="primary">OYUNA DÖN</button>
+        <!-- STANDART duraklatma menüsü: DEVAM ET → · Kontroller F1 · Ses · Müzik · Ana menü / Odadan çık · josephuz.com'a dön.
+             "Yeniden başlat" oyuna özgü ek (çevrim içinde gizli), müzik ses düzeyi sürgüsü Müzik düğmesinin altında. -->
+        <button id="sp-resume" class="primary">DEVAM ET →</button>
+        <button id="sp-pause-help">Kontroller <kbd>F1</kbd></button>
+        <button id="sp-pause-sound" aria-label="Ses efektlerini aç veya kapat">Ses: açık</button>
+        <button id="sp-pause-muzik" aria-label="Oyun müziğini aç veya kapat">Müzik: açık</button>
+        <label id="sp-muzik-row" class="slider">Müzik sesi <input type="range" id="sp-muzik-ses" min="0" max="100" step="5" aria-label="Müzik ses düzeyi"><b id="sp-muzik-yuzde">35%</b></label>
         <button id="sp-restart">Yeniden başlat</button>
-        <button id="sp-pause-sound" aria-label="Sesi aç veya kapat">Ses: açık</button>
         <button id="sp-menu">Ana menü</button>
         <p id="sp-pause-note" class="pause-note" hidden>Çevrim içi maç durmaz: sen moladayken oyuncun yerinde durur.</p>
         <a class="btn" href="https://www.josephuz.com/">josephuz.com'a dön</a>

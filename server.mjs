@@ -20,10 +20,31 @@ const types = {
   '.js': 'text/javascript; charset=utf-8',
   '.mjs': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
+  '.mp3': 'audio/mpeg',
+  '.txt': 'text/plain; charset=utf-8',
 };
+/** Kod dışındaki, adıyla sabitlenmiş klasörler: oyun içi müzik (bkz. src/muzik.js). */
+const assetDirs = ['src', 'muzik'];
 const rootFiles = ['index.html', 'style.css', 'game.js'];
 /** Oyun dosyaları önbelleğe alınmaz: tek bir sürüm vardır ve güncelleme anında geçmelidir. */
 const noStore = 'no-store, no-cache, must-revalidate, max-age=0';
+/**
+ * Müzik dosyaları bunun dışındadır: her biri ~2 MB'tır, adları parçanın adıdır ve içerikleri değişmez. Her sayfa
+ * yenilemesinde yeniden inmesinler diye bir hafta önbelleğe alınır; parça değişirse dosya adı da değişir.
+ */
+const mediaCache = 'public, max-age=604800';
+const cacheFor = file => (path.extname(file).toLowerCase() === '.mp3' ? mediaCache : noStore);
+/**
+ * `Range: bytes=a-b` başlığını [başlangıç, son] olarak çözer (tek aralık yeter: tarayıcılar ses için bunu yollar).
+ * Anlaşılmayan ya da dosyanın dışına taşan istek null döner; o zaman dosyanın tamamı 200 ile verilir.
+ */
+function parseRange(header, size) {
+  const m = /^bytes=(\d*)-(\d*)$/.exec(String(header || '').trim());
+  if (!m || (!m[1] && !m[2])) return null;
+  const bas = m[1] ? Number(m[1]) : Math.max(0, size - Number(m[2]));
+  const son = m[1] ? (m[2] ? Math.min(Number(m[2]), size - 1) : size - 1) : size - 1;
+  return bas <= son && bas < size ? [bas, son] : null;
+}
 /** Sürüm damgası: en yeni oyun dosyasının değişme zamanı; /health ile hangi yapının ayakta olduğu görülür. */
 async function buildStamp() {
   let newest = 0;
@@ -51,7 +72,7 @@ function resolveFile(pathname) {
   }
   const top = rel.split(/[\\/]/)[0];
   if (top === rel && !rootFiles.includes(rel)) return null;
-  if (top !== rel && top !== 'src') return null;
+  if (top !== rel && !assetDirs.includes(top)) return null;
   return path.join(root, rel);
 }
 
@@ -97,7 +118,19 @@ const server = http.createServer(async (req, res) => {
   }
   try {
     const bytes = await readFile(file);
-    res.writeHead(200, { 'Content-Type': type, 'Cache-Control': noStore });
+    const headers = { 'Content-Type': type, 'Cache-Control': cacheFor(file) };
+    // Ses dosyalarında parça aralığı: tarayıcı indirmediği bir yere atlarken (ya da akışı sürdürürken) `Range` ister.
+    // Karşılığı verilmezse Chrome yüklenmemiş bir noktaya sarılamaz; müzik baştan dinlenir (bkz. src/muzik.js).
+    if (type.startsWith('audio/')) {
+      headers['Accept-Ranges'] = 'bytes';
+      const dilim = parseRange(req.headers.range, bytes.length);
+      if (dilim) {
+        const [bas, son] = dilim;
+        res.writeHead(206, { ...headers, 'Content-Range': `bytes ${bas}-${son}/${bytes.length}`, 'Content-Length': son - bas + 1 });
+        res.end(req.method === 'HEAD' ? undefined : bytes.subarray(bas, son + 1)); return;
+      }
+    }
+    res.writeHead(200, headers);
     res.end(req.method === 'HEAD' ? undefined : bytes);
   } catch {
     res.writeHead(file.startsWith(vendorDir) ? 500 : 404);

@@ -4,6 +4,7 @@ import { createGosteri, gosteriAcik } from './gosteri.js';
 import { gorunurAlanaKilitle } from './gorunur-alan.js';
 import { createInput } from './input.js';
 import { createLobby } from './lobby.js';
+import { createMuzik, sahneSec } from './muzik.js';
 import { createNetClient } from './net/client.js';
 import { onlineEnabled, serverHttp } from './platform.js';
 import { enterFullscreen, touchDevice } from './touch.js';
@@ -96,7 +97,9 @@ export async function start(root) {
     if (next) input.unlock();
     ui.show(next);
     input.clear();
+    // Çevrim içinde mola yalnız bir perdedir: yeniden başlatma yok, çıkış odadan çıkar (standart menüdeki ad da değişir).
     root.querySelector('#sp-restart').hidden = online;
+    root.querySelector('#sp-menu').textContent = online ? 'Odadan çık' : 'Ana menü';
     root.querySelector('#sp-pause-note').hidden = !online;
     root.querySelector('#sp-again').textContent = online ? 'LOBİYE DÖN' : 'BİR MAÇ DAHA';
     refresh();
@@ -131,6 +134,22 @@ export async function start(root) {
   const toggleSound = () => ui.setSound(audio.toggle());
   ui.button('sound', toggleSound); ui.button('pause-sound', toggleSound);
   ui.setSound(audio.enabled);
+  // Üst çubuktaki ve mola menüsündeki "Kontroller F1" aynı perdeyi açar (standart araç çubuğu).
+  ui.button('pause-help', help);
+  /**
+   * Oyun içi müzik (bkz. muzik.js): efekt sesinden bağımsız açılıp kapanır, ayarı tarayıcıda kalır. Açma / kapama
+   * düğmesi hem üst çubukta hem mola menüsündedir, ses düzeyi sürgüsü mola menüsünde; ikisi de aynı durumu gösterir.
+   * Gösteri kipinde müzik hiç kurulmaz (`muzik.kapali`), o zaman düğmeler gizlenir.
+   */
+  const muzik = createMuzik(root);
+  const muzikYaz = () => ui.setMuzik(muzik.acik, muzik.ses);
+  // Düğmeler yalnız gösteri kipinde gizlenir. Otomatik tarayıcıda (`muzik.kapali`, bkz. muzik.js) da dururlar:
+  // standart çubuk her zaman aynı görünür, ayar yine saklanır, yalnız çalacak parça yoktur.
+  ui.setMuzikVar(!gosteri);
+  const toggleMuzik = () => { muzik.ac(); muzikYaz(); };
+  ui.button('muzik', toggleMuzik); ui.button('pause-muzik', toggleMuzik);
+  ui.onMuzikSes(v => { muzik.sesAyarla(v); muzikYaz(); });
+  muzikYaz();
 
   // ---------- Çevrim içi ----------
   const net = onlineEnabled() && !gosteri ? createNetClient({
@@ -276,6 +295,10 @@ export async function start(root) {
     requestAnimationFrame(frame);
     const dt = Math.min(0.08, (now - last) / 1000);
     last = now;
+    // Müzik sahnesi (bkz. muzik.js): maçta ana tema, son plaka evresinde gerilim, geri kalan her yerde (giriş, lobi,
+    // mola, karne) sakin parça. Aynı sahne yeniden verilince hiçbir şey olmaz, bu yüzden her kareden sorulur: ekran
+    // geçişlerini tek tek kancalamaya gerek kalmaz. Gösteride `muzik.kapali` olduğu için çağrı boşa düşer.
+    muzik.sahne(sahneSec(started, screen, w));
     // Gösteri: girdi ve arayüz yok; botlar oynar, kamera en hareketli kavgayı omuz üstünden izler (bkz. gosteri.js).
     if (gosteri) { w = gosteri.guncelle(dt); view.render(w, dt, true, gosteri.odak(dt), false); return; }
     if (online && started) {
@@ -312,11 +335,12 @@ export async function start(root) {
     screen = null; started = true; ui.show(null);
     const ad = root.querySelector('#sp-gosteri'); if (ad) ad.hidden = false;
     w = gosteri.basla();
-    window.__sonPlaka = { world: () => w, view: () => view, net: () => null, gosteri: () => gosteri, state: () => ({ screen, started, online }) };
+    window.__sonPlaka = { world: () => w, view: () => view, net: () => null, gosteri: () => gosteri, state: () => ({ screen, started, online }), muzik: () => muzik.durum() };
   }
   if (testMode) {
     window.__sonPlaka = {
       world: () => w, view: () => view, net: () => net, state: () => ({ screen, started, online }),
+      muzik: () => muzik.durum(),
       step: n => { for (let i = 0; i < n; i++) step(w, STEP); consume(); refresh(); },
     };
   }
