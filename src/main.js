@@ -1,6 +1,7 @@
 import { createAudio } from './audio.js';
 import { CAMERA, DIFFICULTIES, DIFFICULTY_LABEL, DISC, MATCH, MODES, PICKUP, TEAMS, modeLabel, playersFor } from './config.js';
 import { createGosteri, gosteriAcik } from './gosteri.js';
+import { createOtopilot, otopilotAcik } from './otopilot.js';
 import { gorunurAlanaKilitle } from './gorunur-alan.js';
 import { createInput } from './input.js';
 import { createLobby } from './lobby.js';
@@ -73,6 +74,11 @@ export async function start(root) {
   let online = false;
   // Gösteri kipi (?gosteri=1, yalnız web): botlar oynar, arayüz ve girdi yok (bkz. gosteri.js).
   const gosteri = gosteriAcik() ? createGosteri({ view }) : null;
+  /**
+   * Otopilot (?otopilot=1, bkz. otopilot.js): gösteri değil **gerçek maç**; senin oyuncunu da bot oynar, kamera ve
+   * arayüz normal oyundaki gibi kalır. Gösteriyle birlikte açılmaz (gösteri önceliklidir).
+   */
+  const otopilot = gosteri || !otopilotAcik() ? null : createOtopilot();
   let w = createWorld(), screen = 'home', started = false, acc = 0, uiClock = 0, helpReturn = 'home', pausedAt = 0, last = performance.now();
   view.setWorld(w);
   faceCenter();
@@ -81,13 +87,13 @@ export async function start(root) {
   input = createInput(view.canvas, {
     testMode,
     touch: touch && root,
-    playing: active,
+    playing: () => !otopilot && active(),
     onHelp: help,
     onCamera: () => toggleCamera(),
     onPause: pause,
     onLook: (dx, dy) => view.look(dx, dy),
-    onUnlock: () => { if (active()) show('pause'); },
-    onBlur: () => { if (active()) show('pause'); else input.clear(); },
+    onUnlock: () => { if (!otopilot && active()) show('pause'); },
+    onBlur: () => { if (otopilot) return; if (active()) show('pause'); else input.clear(); },
   });
 
   function faceCenter() { const p = w.players[w.me]; view.face(p.yaw, 0); }
@@ -108,6 +114,8 @@ export async function start(root) {
     if (online) { showLobby(); return; }
     w = createWorld(1 + Math.floor(Math.random() * 1e6), settingsChoice()); faceCenter();
     started = true; acc = 0;
+    // Otopilot: senin koltuğun da bota verilir; tam ekran ve fare kilidi istenmez (bkz. otopilot.js).
+    if (otopilot) { otopilot.kur(w); show(null); return; }
     if (touch) enterFullscreen();
     show(null); input.lock();
   }
@@ -151,7 +159,7 @@ export async function start(root) {
   muzikYaz();
 
   // ---------- Çevrim içi ----------
-  const net = onlineEnabled() && !gosteri ? createNetClient({
+  const net = onlineEnabled() && !gosteri && !otopilot ? createNetClient({
     onWelcome() {
       lobby.setServer(true);
       if (pending) { const go = pending; pending = null; go(); return; }
@@ -262,7 +270,8 @@ export async function start(root) {
       }
     }
     w.events.length = 0;
-    if (!online && w.winner !== null && screen !== 'results') { show('results'); ui.results(w); }
+    // Otopilotta karne açılmaz: birkaç saniye sonra yeni maç kurulur (bkz. otopilot.guncelle).
+    if (!otopilot && !online && w.winner !== null && screen !== 'results') { show('results'); ui.results(w); }
   }
 
   const refresh = () => ui.hud(w, started && screen !== 'home' && screen !== 'lobby', screen);
@@ -314,6 +323,8 @@ export async function start(root) {
         acc -= STEP;
         if (screen) break;
       }
+      // Otopilot: kameranın bakışını fare yerine botun nişanı verir, maç bitince yenisi kurulur (bkz. otopilot.js).
+      if (otopilot) { otopilot.bakis(w, view); otopilot.guncelle(dt, w, begin); }
     } else acc = 0;
     ui.tick(dt, w, active());
     ui.charge(chargeState());
@@ -336,7 +347,10 @@ export async function start(root) {
     w = gosteri.basla();
     window.__sonPlaka = { world: () => w, view: () => view, net: () => null, gosteri: () => gosteri, muzik: () => muzik.durum(), state: () => ({ screen, started, online }) };
   }
-  if (testMode) {
+  // Otopilot: menü ve lobi atlanır, kamera omuz üstüne alınır, maç hemen başlar. Arayüz **gizlenmez** (bu bir
+  // gösteri değil, oynanan maç); yalnız tuşlara basan sen değilsin (bkz. otopilot.js).
+  if (otopilot) { view.setCamera('shoulder'); begin(); }
+  if (testMode || otopilot) {
     window.__sonPlaka = {
       world: () => w, view: () => view, net: () => net, state: () => ({ screen, started, online }),
       muzik: () => muzik.durum(),
@@ -353,7 +367,7 @@ export async function start(root) {
 
   refresh();
   requestAnimationFrame(frame);
-  if (!testMode && !net && !gosteri) heartbeat();
+  if (!testMode && !net && !gosteri && !otopilot) heartbeat();
 }
 
 /** Dokunmatikte kısa titreşim: atış, isabet, düşme, çökme. */
