@@ -15,6 +15,7 @@ await mkdir(path.join(dist, 'vendor'), { recursive: true });
 for (const f of ['index.html', 'style.css', 'game.js']) await cp(path.join(root, f), path.join(dist, f));
 await cp(path.join(root, 'src'), path.join(dist, 'src'), { recursive: true });
 // Oyun içi müzik (bkz. src/muzik.js): yolları göreli olduğu için uygulamada da (Capacitor) aynı dosyalar çalar.
-await cp(path.join(root, 'muzik'), path.join(dist, 'muzik'), { recursive: true });
+// muzik/archive/: ilk (gürültülü bulunan) orkestra sürümleri depoda örnek olarak durur, yayına ve uygulamaya girmez.
+await cp(path.join(root, 'muzik'), path.join(dist, 'muzik'), { recursive: true, filter: (kaynak) => path.basename(kaynak) !== 'archive' });
 for (const f of ['three.module.js', 'three.core.js']) await cp(path.join(three, f), path.join(dist, 'vendor', f));
 console.log('dist/ hazır');

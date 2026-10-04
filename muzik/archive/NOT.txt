@@ -1,0 +1,7 @@
+Arşiv: ilk orkestra sürümleri (3 Ekim 2026).
+
+Yusuf 4 Ekim: müzik videolarını izlerken bu parçalar çok gürültülü bulundu; yerlerine sakin / dinlendirici /
+odaklandırıcı sürümler geldi (bir üst klasör). Bunlar silinmedi: yanlış yapınca ne çıktığını göstersin diye
+burada duruyor. Oyunda çalmaz, web yayınına ve uygulamaya girmez (bkz. scripts/build-web.mjs).
+
+© 2026 JosephUz. Tüm hakları saklıdır.

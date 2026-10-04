@@ -2,9 +2,9 @@ import { gosteriAcik } from './gosteri.js';
 
 /**
  * Oyun içi müzik: üç parça, üç sahne, çapraz geçiş.
- *  - **sakin** (`Boşlukta`): giriş ekranı, lobi, mola ve maç sonu karnesi — tek parça, kendi kendine döner.
- *  - **mac** (`Hızlı Aksiyon`): maç sürerken ana tema.
- *  - **doruk** (`Son Plaka Düşüyor` ↔ `Hızlı Aksiyon`): son plaka evresi — iç halka düştü, doğuş kapandı
+ *  - **sakin** (`Son Işık`): giriş ekranı, lobi, mola ve maç sonu karnesi — tek parça, kendi kendine döner.
+ *  - **mac** (`Sıfır Yerçekimi`): maç sürerken ana tema.
+ *  - **doruk** (`Yörünge` ↔ `Sıfır Yerçekimi`): son plaka evresi — iç halka düştü, doğuş kapandı
  *    (bkz. world.js `respawnOpen`); parça bitince ana temaya, o da bitince yeniden gerilime döner, araya
  *    sessizlik girmez.
  *
@@ -23,9 +23,9 @@ import { gosteriAcik } from './gosteri.js';
  * bir sonraki APK'ya kendiliğinden girer (bkz. scripts/build-web.mjs). Bu görevde APK üretilmez.
  */
 const SAHNELER = {
-  sakin: ['son-2-boslukta'],
-  mac: ['son-1-hizli-aksiyon'],
-  doruk: ['son-3-son-plaka', 'son-1-hizli-aksiyon'],
+  sakin: ['son-6-son-isik'],
+  mac: ['son-5-sifir-yercekimi'],
+  doruk: ['son-4-yorunge', 'son-5-sifir-yercekimi'],
 };
 /** Çapraz geçiş süresi (sn): sahne değişiminde ve parça bitmeden önce. */
 const GECIS = 1.8;

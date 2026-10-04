@@ -15,7 +15,7 @@ import { sahneSec } from '../src/muzik.js';
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const oku = ad => readFile(path.join(root, ad), 'utf8');
 /** Parça adı → sahnesi; LISANS.txt ve src/muzik.js bu üçünü de tanımalı. */
-const PARCALAR = ['son-1-hizli-aksiyon', 'son-2-boslukta', 'son-3-son-plaka'];
+const PARCALAR = ['son-5-sifir-yercekimi', 'son-6-son-isik', 'son-4-yorunge'];
 /** Dünya taslağı: doğuş açıksa dış / iç halka ayakta, kapalıysa **son plaka** evresi (bkz. world.js). */
 const dunya = (respawnOpen, ek = {}) => ({ respawnOpen, winner: null, ...ek });
 
@@ -164,7 +164,7 @@ test('basmada play() reddedilirse bırakmada yeniden denenir ve müzik başlar',
     await bekle(20);
     assert.equal(oge.paused, false, 'ikinci denemede çalmaya başlar');
     assert.equal(k.muzik.durum().caliyor, true);
-    assert.equal(k.muzik.durum().parca, 'son-2-boslukta', 'menüde sakin parça çalar');
+    assert.equal(k.muzik.durum().parca, 'son-6-son-isik', 'menüde sakin parça çalar');
   } finally { k.geriAl(); }
 });
 
@@ -257,7 +257,7 @@ test('sekme gizlenince geçişteki parçalar da durur; dönünce yalnız doğru 
     await bekle(500);
     assert.equal(mac.paused, false, 'dönünce sahnenin parçası kaldığı yerden sürer');
     assert.equal(sakin.paused, true, 'eski parça sessiz kalır');
-    assert.equal(k.muzik.durum().parca, 'son-1-hizli-aksiyon');
+    assert.equal(k.muzik.durum().parca, 'son-5-sifir-yercekimi');
   } finally { k.geriAl(); }
 });
 
@@ -327,7 +327,7 @@ test('sunucu müziği gerçekten veriyor: içerik türü, önbellek ve Range (20
     try { await fetch(adres + '/health'); break; } catch { await new Promise(r => setTimeout(r, 100)); }
   }
 
-  const tam = await fetch(adres + '/muzik/son-2-boslukta.mp3');
+  const tam = await fetch(adres + '/muzik/son-6-son-isik.mp3');
   assert.equal(tam.status, 200);
   assert.equal(tam.headers.get('content-type'), 'audio/mpeg', 'mp3 içerik türü');
   assert.equal(tam.headers.get('accept-ranges'), 'bytes', 'Range desteklendiği ilan edilmeli');
@@ -336,7 +336,7 @@ test('sunucu müziği gerçekten veriyor: içerik türü, önbellek ve Range (20
   assert.ok(govde.length > 500_000, 'dosyanın tamamı geliyor');
 
   // Chrome inmemiş bir noktaya sarmak için Range ister: karşılığı 206 ve tam o dilim olmalı.
-  const dilim = await fetch(adres + '/muzik/son-2-boslukta.mp3', { headers: { Range: 'bytes=100-199' } });
+  const dilim = await fetch(adres + '/muzik/son-6-son-isik.mp3', { headers: { Range: 'bytes=100-199' } });
   assert.equal(dilim.status, 206, 'Range isteğine 206 dönmeli');
   assert.equal(dilim.headers.get('content-range'), `bytes 100-199/${govde.length}`);
   const parca = Buffer.from(await dilim.arrayBuffer());
@@ -344,7 +344,7 @@ test('sunucu müziği gerçekten veriyor: içerik türü, önbellek ve Range (20
   assert.deepEqual(parca, govde.subarray(100, 200), 'dönen dilim dosyanın o bölümü olmalı');
 
   // Anlaşılmayan Range: tam dosya, 200.
-  const bozuk = await fetch(adres + '/muzik/son-2-boslukta.mp3', { headers: { Range: 'satir=1-2' } });
+  const bozuk = await fetch(adres + '/muzik/son-6-son-isik.mp3', { headers: { Range: 'satir=1-2' } });
   assert.equal(bozuk.status, 200, 'anlaşılmayan Range tam dosyaya düşer');
 
   // muzik/ dışındaki dosyalara yol açılmadı.

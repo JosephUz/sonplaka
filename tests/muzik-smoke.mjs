@@ -1,6 +1,6 @@
 // Oyun içi müzik dumanı testi (bkz. src/muzik.js). Denetlenenler: ilk tıklamadan önce hiç çalmaz, tıklayınca menüde
-// sakin parça (`son-2-boslukta`) çalar ve ilerler, maç başlayınca ana temaya (`son-1-hizli-aksiyon`), son plaka
-// evresinde (doğuş kapanınca) gerilim parçasına (`son-3-son-plaka`) geçer ve parça bitince ana temaya devreder;
+// sakin parça (`son-6-son-isik`) çalar ve ilerler, maç başlayınca ana temaya (`son-5-sifir-yercekimi`), son plaka
+// evresinde (doğuş kapanınca) gerilim parçasına (`son-4-yorunge`) geçer ve parça bitince ana temaya devreder;
 // "Müzik: kapalı" ayarı sayfa yenilenince korunur, efekt sesi düğmesi müziği etkilemez ve `?gosteri=1`'de hiç ses
 // öğesi kurulmaz.
 // Tarayıcı sesi `--mute-audio` ile kısılır: ölçüm `audio.currentTime` / `paused` üzerinden yapılır.
@@ -47,10 +47,10 @@ try {
   await page.locator('#sp-home h1').click();
   await page.waitForFunction(() => {
     const a = [...document.querySelectorAll('audio')].find(x => !x.paused);
-    return a && a.dataset.parca === 'son-2-boslukta' && a.currentTime > 0.2;
+    return a && a.dataset.parca === 'son-6-son-isik' && a.currentTime > 0.2;
   }, null, { timeout: 15000 });
   const menu = await calan();
-  assert.equal(menu.parca, 'son-2-boslukta', 'menüde sakin parça çalar');
+  assert.equal(menu.parca, 'son-6-son-isik', 'menüde sakin parça çalar');
   assert.equal(menu.loop, true, 'tek parçalı sahne kendi kendine döner');
   const t0 = menu.currentTime;
   await page.waitForTimeout(1200);
@@ -64,16 +64,16 @@ try {
   await page.waitForFunction(() => window.__sonPlaka.state().started, null, { timeout: 20000 });
   await page.waitForFunction(() => {
     const a = [...document.querySelectorAll('audio')].find(x => !x.paused && x.volume > 0.3);
-    return a && a.dataset.parca === 'son-1-hizli-aksiyon' && a.currentTime > 0.2;
+    return a && a.dataset.parca === 'son-5-sifir-yercekimi' && a.currentTime > 0.2;
   }, null, { timeout: 15000 });
   const mac = await calan();
-  assert.equal(mac.parca, 'son-1-hizli-aksiyon', 'maç başlayınca ana temaya geçilir');
+  assert.equal(mac.parca, 'son-5-sifir-yercekimi', 'maç başlayınca ana temaya geçilir');
   assert.equal((await durum()).sahne, 'mac', 'müzik sahnesi: maç');
   await page.waitForFunction(() => {
-    const s = [...document.querySelectorAll('audio')].find(x => x.dataset.parca === 'son-2-boslukta');
+    const s = [...document.querySelectorAll('audio')].find(x => x.dataset.parca === 'son-6-son-isik');
     return s && (s.paused || s.volume === 0);
   }, null, { timeout: 10000 });
-  const sakin = (await sesler()).find(s => s.parca === 'son-2-boslukta');
+  const sakin = (await sesler()).find(s => s.parca === 'son-6-son-isik');
   assert.ok(sakin.paused, 'sakin parça maçta susar');
   olcum.mac = { parca: mac.parca, currentTime: +mac.currentTime.toFixed(2), volume: +mac.volume.toFixed(3), sakinDurdu: sakin.paused };
 
@@ -83,10 +83,10 @@ try {
   await page.evaluate(() => { const w = window.__sonPlaka.world(); w.state = 'countdown'; w.t = 999; w.respawnOpen = false; });
   await page.waitForFunction(() => {
     const a = [...document.querySelectorAll('audio')].find(x => !x.paused && x.volume > 0.3);
-    return a && a.dataset.parca === 'son-3-son-plaka' && a.currentTime > 0.2;
+    return a && a.dataset.parca === 'son-4-yorunge' && a.currentTime > 0.2;
   }, null, { timeout: 15000 });
   const doruk = await calan();
-  assert.equal(doruk.parca, 'son-3-son-plaka', 'son plakada gerilim parçasına geçilir');
+  assert.equal(doruk.parca, 'son-4-yorunge', 'son plakada gerilim parçasına geçilir');
   assert.equal((await durum()).sahne, 'doruk', 'müzik sahnesi: doruk');
   assert.equal(doruk.loop, false, 'iki parçalı sahnede döngü yok: sırayla çalınır');
   assert.equal(await page.evaluate(() => window.__sonPlaka.world().winner), null, 'ölçüm sırasında maç sürüyor');
@@ -94,16 +94,16 @@ try {
 
   // 4b) Parça bitmeden öbürü üstüne açılır: gerilim ↔ ana tema sırayla gider, araya sessizlik girmez.
   await page.evaluate(() => {
-    const a = [...document.querySelectorAll('audio')].find(x => x.dataset.parca === 'son-3-son-plaka');
+    const a = [...document.querySelectorAll('audio')].find(x => x.dataset.parca === 'son-4-yorunge');
     a.currentTime = Math.max(0, a.duration - 2.4);
   });
   await page.waitForFunction(() => {
     const el = ad => [...document.querySelectorAll('audio')].find(x => x.dataset.parca === ad);
-    const yeni = el('son-1-hizli-aksiyon'), eski = el('son-3-son-plaka');
+    const yeni = el('son-5-sifir-yercekimi'), eski = el('son-4-yorunge');
     return yeni && !yeni.paused && yeni.currentTime > 0.1 && (eski.paused || eski.volume === 0);
   }, null, { timeout: 20000 });
   const devir = await calan();
-  assert.equal(devir.parca, 'son-1-hizli-aksiyon', 'gerilim parçası bitince ana tema devralır');
+  assert.equal(devir.parca, 'son-5-sifir-yercekimi', 'gerilim parçası bitince ana tema devralır');
   olcum.devir = { parca: devir.parca, currentTime: +devir.currentTime.toFixed(2) };
 
   // 5) Mola: Esc sakin parçaya döner. Efekt sesi düğmesi müziği etkilemez: ikisi bağımsızdır.
@@ -114,7 +114,7 @@ try {
   // Çapraz geçiş bitene kadar bekle: ortasında iki parça da yarım seslidir.
   await page.waitForFunction(() => {
     const a = [...document.querySelectorAll('audio')].find(x => !x.paused && x.volume > 0.3);
-    return a && a.dataset.parca === 'son-2-boslukta';
+    return a && a.dataset.parca === 'son-6-son-isik';
   }, null, { timeout: 15000 });
   assert.equal((await durum()).sahne, 'sakin', 'molada sakin parça çalar');
   olcum.mola = { parca: (await calan()).parca, sahne: 'sakin' };
@@ -126,7 +126,7 @@ try {
   assert.ok(await page.locator('#sp-help').isVisible(), 'mola menüsündeki Kontroller yardımı açar');
   assert.equal((await durum()).sahne, 'sakin', 'moladan açılan yardımda maç müziği başlamaz');
   const yardimda = await calan();
-  assert.equal(yardimda.parca, 'son-2-boslukta', 'yardım perdesinde sakin parça sürer');
+  assert.equal(yardimda.parca, 'son-6-son-isik', 'yardım perdesinde sakin parça sürer');
   olcum.yardimMolada = { parca: yardimda.parca, sahne: 'sakin' };
   await page.locator('#sp-help-close').click();
   await page.waitForTimeout(400);
@@ -166,7 +166,7 @@ try {
   assert.equal(await page.evaluate(() => localStorage.getItem('sp.muzik')), 'on', 'ayar geri açılabilir');
   await page.waitForFunction(() => {
     const a = [...document.querySelectorAll('audio')].find(x => !x.paused && x.volume > 0.2);
-    return a && a.dataset.parca === 'son-2-boslukta';
+    return a && a.dataset.parca === 'son-6-son-isik';
   }, null, { timeout: 15000 });
 
   // 7) Gösteri kipi: video betiği müziğini kendi ekler, oyun hiç ses öğesi kurmaz.

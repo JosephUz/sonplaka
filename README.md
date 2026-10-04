@@ -49,9 +49,9 @@ parça), yollar görelidir (Capacitor'da da çalışır, sonraki APK'ya kendili�
 
 | Sahne | Parça | Nerede |
 | --- | --- | --- |
-| sakin | `son-2-boslukta` · *Boşlukta* | Giriş ekranı, lobi, mola, maç sonu karnesi |
-| mac | `son-1-hizli-aksiyon` · *Hızlı Aksiyon* | Maç sürerken (doğuş açık) |
-| doruk | `son-3-son-plaka` · *Son Plaka Düşüyor* ↔ *Hızlı Aksiyon* | Son plaka evresi: iç halka düştü, doğuş kapandı (`respawnOpen` false); parça bitince sırayla |
+| sakin | `son-6-son-isik` · *Boşlukta* | Giriş ekranı, lobi, mola, maç sonu karnesi |
+| mac | `son-5-sifir-yercekimi` · *Hızlı Aksiyon* | Maç sürerken (doğuş açık) |
+| doruk | `son-4-yorunge` · *Son Plaka Düşüyor* ↔ *Hızlı Aksiyon* | Son plaka evresi: iç halka düştü, doğuş kapandı (`respawnOpen` false); parça bitince sırayla |
 
 Müzik ses düzeyi efektlerin altındadır (varsayılan %35). Açık / kapalı ve düzey tarayıcıda saklanır (`sp.muzik`,
 `sp.muzik.ses`); efekt sesinden (`sp.sound`) **bağımsızdır**. Müzik ilk kullanıcı dokunuşundan sonra başlar, sekme

@@ -1,10 +1,10 @@
 © 2026 JosephUz. Tüm hakları saklıdır. Beste JosephUz; enstrüman örnekleri VSCO 2 Community Edition (CC0).
 
-Son Plaka oyun içi müzikleri (128 kbps mp3, -14 LUFS):
+Son Plaka oyun içi müzikleri (sakin / dinlendirici / odaklandırıcı; 128 kbps mp3, -16 LUFS):
 
-  son-2-boslukta.mp3       "Boşlukta"            sakin    · ana menü, lobi, mola, maç sonu karnesi
-  son-1-hizli-aksiyon.mp3  "Hızlı Aksiyon"       ana tema · maç sürerken
-  son-3-son-plaka.mp3      "Son Plaka Düşüyor"   gerilim  · son plaka evresi, doğuş kapalı (ana temayla sırayla)
+  son-6-son-isik.mp3        "Son Işık"         · menü, lobi, sonuç
+  son-5-sifir-yercekimi.mp3 "Sıfır Yerçekimi"  · maç
+  son-4-yorunge.mp3         "Yörünge"          · son plaka evresi (Sıfır Yerçekimi ile sırayla)
 
 Besteler JosephUz'a aittir ve yalnızca JosephUz oyunlarında / içeriklerinde kullanılır.
 Seslendirmede kullanılan enstrüman örnekleri: VSCO 2 Community Edition (Versilian Studios, CC0-1.0).
