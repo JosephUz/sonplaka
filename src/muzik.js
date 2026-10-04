@@ -1,7 +1,7 @@
 import { gosteriAcik } from './gosteri.js';
 
 /**
- * Oyun içi müzik: üç parça, üç sahne, çapraz geçiş.
+ * Oyun içi müzik: üç sahne, çapraz geçiş. **Şu an parça yok** (4 Ekim 2026, bkz. SAHNELER); aşağıdaki adlar eski düzendir.
  *  - **sakin** (`Son Işık`): giriş ekranı, lobi, mola ve maç sonu karnesi — tek parça, kendi kendine döner.
  *  - **mac** (`Sıfır Yerçekimi`): maç sürerken ana tema.
  *  - **doruk** (`Yörünge` ↔ `Sıfır Yerçekimi`): son plaka evresi — iç halka düştü, doğuş kapandı
@@ -22,11 +22,20 @@ import { gosteriAcik } from './gosteri.js';
  * Dosya yolları **görelidir** (`muzik/...`): aynı dosyalar Capacitor'ın `https://localhost/` kökünde de çalışır,
  * bir sonraki APK'ya kendiliğinden girer (bkz. scripts/build-web.mjs). Bu görevde APK üretilmez.
  */
+/**
+ * Sahne -> parça listesi. **Şu an hepsi boş** (Yusuf 4 Ekim 2026: "diğer oyunlardaki müzikleri şimdilik kaldıralım"):
+ * sakin sürümler (Son Işık, Sıfır Yerçekimi, Yörünge) birbirine çok benzer ve temasız bulundu, muzik/archive/ altına
+ * alındı (bkz. muzik/archive/NOT.txt). Müzik sonra yeniden yapılacak. Liste boşken hiçbir dosya istenmez, hiçbir şey
+ * çalmaz, Müzik düğmeleri gizlenir (`parcaVar` / `MUZIK_VAR`). Parça eklenince her şey kendiliğinden geri gelir.
+ * Eski düzen: sakin ['son-6-son-isik'], mac ['son-5-sifir-yercekimi'], doruk ['son-4-yorunge', 'son-5-sifir-yercekimi'].
+ */
 const SAHNELER = {
-  sakin: ['son-6-son-isik'],
-  mac: ['son-5-sifir-yercekimi'],
-  doruk: ['son-4-yorunge', 'son-5-sifir-yercekimi'],
+  sakin: [],
+  mac: [],
+  doruk: [],
 };
+/** Çalınacak en az bir parça var mı? Yoksa Müzik düğmeleri gizlenir, müzik testlerinin parça bölümleri atlanır. */
+export const MUZIK_VAR = Object.values(SAHNELER).some(liste => liste.length > 0);
 /** Çapraz geçiş süresi (sn): sahne değişiminde ve parça bitmeden önce. */
 const GECIS = 1.8;
 const VARSAYILAN_SES = 0.35;
@@ -290,6 +299,8 @@ export function createMuzik(root) {
 
   return {
     kapali,
+    /** En az bir parça tanımlı mı (bkz. MUZIK_VAR)? false ise Müzik düğmeleri gizlenir, hiçbir dosya istenmez. */
+    parcaVar: MUZIK_VAR,
     /** Sahneyi değiştirir ('sakin' | 'mac' | 'doruk' | null). Aynı sahne yeniden verilirse hiçbir şey olmaz. */
     sahne(ad) {
       if (kapali || ad === sahneAdi) return;

@@ -43,11 +43,18 @@ inmişse (iOS çubuk geri gelirken, klavye) `--vv-top`. Ayrıntı ve sınırlar 
 
 ## Müzik ve standart araç çubuğu
 
-Oyun içi müzik `muzik/` altındaki üç parçadır (kendi bestemiz; 128 kbps, ~2 MB, lisans notu `muzik/LISANS.txt`).
+**Şu an oyunda müzik yok** (4 Ekim 2026, Yusuf: "diğer oyunlardaki müzikleri şimdilik kaldıralım"). Sakin sürümler
+birbirine çok benzer ve temasız bulundu; bütün parçalar `muzik/archive/` altında saklanıyor (silinmedi, bkz.
+`muzik/archive/NOT.txt`), yayına ve uygulamaya girmez. `src/muzik.js` içindeki `SAHNELER` listeleri boş: hiçbir dosya
+istenmez, hiçbir şey çalmaz, Müzik düğmeleri (üst çubuk ve mola menüsü) gizlenir (`MUZIK_VAR` / `muzik.parcaVar`).
+Müzik testlerinin parça gerektiren bölümleri "müzik yok: atlandı" diye atlanır. Yeni parçalar `muzik/` altına konup
+`SAHNELER`'e yazılınca düğmeler ve testler kendiliğinden geri gelir. Aşağısı eski (ve yeniden kurulacak) düzendir.
+
+Oyun içi müzik `muzik/` altındaki parçalardır (kendi bestemiz; 128 kbps, ~2 MB, lisans notu `muzik/LISANS.txt`).
 Sahneyi `src/muzik.js` seçer, geçişler 1,8 saniye çapraz süzülmedir; dosyalar gerektiğinde iner (menüde yalnız sakin
 parça), yollar görelidir (Capacitor'da da çalışır, sonraki APK'ya kendiliğinden girer).
 
-| Sahne | Parça | Nerede |
+| Sahne | Parça (eski düzen, şu an arşivde) | Nerede |
 | --- | --- | --- |
 | sakin | `son-6-son-isik` · *Boşlukta* | Giriş ekranı, lobi, mola, maç sonu karnesi |
 | mac | `son-5-sifir-yercekimi` · *Hızlı Aksiyon* | Maç sürerken (doğuş açık) |
@@ -154,6 +161,6 @@ odaları `server/`, oyun kodu `src/` altındadır. three.js npm paketinden `/ven
 | `src/net/` | Protokol, durum paketi, istemci |
 | `src/view/` | Sahne, arena görünümü, oyuncular, diskler, efektler, kamera |
 | `src/ui.js`, `src/input.js`, `src/touch.js`, `src/lobby.js` | Arayüz, klavye / fare, dokunmatik, lobi |
-| `src/muzik.js`, `muzik/` | Oyun içi müzik: üç parça, sahne seçimi, çapraz geçiş; parçalar ve lisans notu |
+| `src/muzik.js`, `muzik/` | Oyun içi müzik: sahne seçimi, çapraz geçiş (şu an parça yok; eskiler `muzik/archive/`) ve lisans notu |
 | `tests/` | Kural testleri, oda testleri, tarayıcı dumanı |
 | `tests/muzik.test.mjs`, `tests/muzik-smoke.mjs` | Müzik ve standart araç çubuğu testleri (tarayıcısız kural testi; tarayıcıda ölçüm) |

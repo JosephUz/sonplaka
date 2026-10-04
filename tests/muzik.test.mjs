@@ -6,16 +6,25 @@
 // (← josephuz.com · Ses · Müzik · Kontroller F1). Tarayıcı ölçümleri tests/muzik-smoke.mjs dosyasındadır.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { readFile, stat } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { sahneSec } from '../src/muzik.js';
+import { MUZIK_VAR, sahneSec } from '../src/muzik.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const oku = ad => readFile(path.join(root, ad), 'utf8');
-/** Parça adı → sahnesi; LISANS.txt ve src/muzik.js bu üçünü de tanımalı. */
-const PARCALAR = ['son-5-sifir-yercekimi', 'son-6-son-isik', 'son-4-yorunge'];
+/**
+ * Oyundaki parçalar; LISANS.txt ve src/muzik.js bunları tanımalı. 4 Ekim 2026'dan beri oyunda müzik yok (SAHNELER boş,
+ * eski parçalar muzik/archive/ altında): `MUZIK_VAR` false iken parça dosyası / çalma ölçen bölümler atlanır, silinmez.
+ * Müzik geri gelince yeni parça adları buraya yazılır.
+ */
+const PARCALAR = MUZIK_VAR ? ['son-5-sifir-yercekimi', 'son-6-son-isik', 'son-4-yorunge'] : [];
+/** Parça gerektiren test: müzik yokken "müzik yok: atlandı" diye atlanır. */
+const parcaTesti = MUZIK_VAR ? test : (ad, fn) => {
+  console.log(`müzik yok: atlandı (${ad})`);
+  return test(ad, { skip: 'müzik yok: atlandı' }, fn);
+};
 /** Dünya taslağı: doğuş açıksa dış / iç halka ayakta, kapalıysa **son plaka** evresi (bkz. world.js). */
 const dunya = (respawnOpen, ek = {}) => ({ respawnOpen, winner: null, ...ek });
 
@@ -145,7 +154,7 @@ test('ilk dokunuş bırakma olaylarında da yakalanır (iOS Safari sesi touchend
  * (`touchend`) izin verir. Yalnız dinleyici adlarına bakan test bunu kaçırıyordu; burada reddedilen deneme ve
  * ardından gelen başarılı deneme sayılıyor.
  */
-test('basmada play() reddedilirse bırakmada yeniden denenir ve müzik başlar', async () => {
+parcaTesti('basmada play() reddedilirse bırakmada yeniden denenir ve müzik başlar', async () => {
   const k = await muzikKur({}, { playRed: 1 });
   try {
     k.muzik.sahne('sakin');
@@ -173,7 +182,7 @@ test('basmada play() reddedilirse bırakmada yeniden denenir ve müzik başlar',
  * ederse müzik %35 yerine tam seste çalar, sürgü hiçbir şey yapmaz ve çapraz geçişte iki parça birden bağırır.
  * Düzeltme: düzeyin uygulanıp uygulanmadığı ölçülür, uygulanmıyorsa Web Audio kazancına geçilir.
  */
-test('iOS: <audio>.volume yutuluyorsa ses düzeyi Web Audio kazancıyla verilir', async () => {
+parcaTesti('iOS: <audio>.volume yutuluyorsa ses düzeyi Web Audio kazancıyla verilir', async () => {
   const k = await muzikKur({}, { iosVolume: true });
   try {
     k.muzik.sahne('sakin');
@@ -199,7 +208,7 @@ test('iOS: <audio>.volume yutuluyorsa ses düzeyi Web Audio kazancıyla verilir'
  * bağlam ancak bir dokunuşun içinden geri gelir. Eskiden dinleyici `dokunuldu` true olduğu için hemen dönüyordu,
  * yani dönüşten sonraki hiçbir dokunuş bağlamı sürdürmüyordu — öğe "çalıyor" görünürken ses çıkmıyordu.
  */
-test('iOS: arka plandan dönünce bağlam ve çalma sonraki dokunuşta onarılır', async () => {
+parcaTesti('iOS: arka plandan dönünce bağlam ve çalma sonraki dokunuşta onarılır', async () => {
   const k = await muzikKur({}, { iosVolume: true });
   try {
     k.muzik.sahne('sakin');
@@ -226,7 +235,7 @@ test('iOS: arka plandan dönünce bağlam ve çalma sonraki dokunuşta onarılı
  * Sekme çapraz geçişin ortasında gizlenirse susması gereken eski parça arka planda çalmayı sürdürüyordu: yalnız
  * `aktif` duraklatılıyor, süzülme sayacı da arka planda yavaşladığı için geçiş on saniyelerce asılı kalıyordu.
  */
-test('sekme gizlenince geçişteki parçalar da durur; dönünce yalnız doğru parça sürer', async () => {
+parcaTesti('sekme gizlenince geçişteki parçalar da durur; dönünce yalnız doğru parça sürer', async () => {
   const k = await muzikKur();
   try {
     k.muzik.sahne('sakin');
@@ -261,7 +270,7 @@ test('sekme gizlenince geçişteki parçalar da durur; dönünce yalnız doğru 
   } finally { k.geriAl(); }
 });
 
-test('masaüstü / Android: volume çalışıyorsa Web Audio hiç kurulmaz', async () => {
+parcaTesti('masaüstü / Android: volume çalışıyorsa Web Audio hiç kurulmaz', async () => {
   const k = await muzikKur();
   try {
     k.muzik.sahne('sakin');
@@ -277,7 +286,7 @@ test('masaüstü / Android: volume çalışıyorsa Web Audio hiç kurulmaz', asy
  * Sürgü dibe çekilince sessizlik **duraklatmayla** sağlanır: düzeyi hiç uygulayamayan tarayıcıda (ne `volume`
  * ne Web Audio) kısmak işe yaramazdı. Parça kaldığı yerde bekler, sürgü kalkınca oradan sürer.
  */
-test('ses düzeyi sıfır parçayı duraklatır, kaldığı yerde bekletir; sıfırdan çıkınca oradan sürer', async () => {
+parcaTesti('ses düzeyi sıfır parçayı duraklatır, kaldığı yerde bekletir; sıfırdan çıkınca oradan sürer', async () => {
   const k = await muzikKur();
   try {
     k.muzik.sahne('sakin');
@@ -301,7 +310,7 @@ test('ses düzeyi sıfır parçayı duraklatır, kaldığı yerde bekletir; sıf
   } finally { k.geriAl(); }
 });
 
-test('parçalar yerinde: 128 kbps, dosya başı 3 MB altı, lisans notu yanında', async () => {
+parcaTesti('parçalar yerinde: 128 kbps, dosya başı 3 MB altı, lisans notu yanında', async () => {
   for (const ad of PARCALAR) {
     const bilgi = await stat(path.join(root, 'muzik', ad + '.mp3'));
     assert.ok(bilgi.size > 500_000, `${ad}.mp3 eksik ya da bozuk (${bilgi.size} bayt)`);
@@ -327,6 +336,9 @@ test('sunucu müziği gerçekten veriyor: içerik türü, önbellek ve Range (20
     try { await fetch(adres + '/health'); break; } catch { await new Promise(r => setTimeout(r, 100)); }
   }
 
+  // Müzik yokken (MUZIK_VAR false) parça dosyası bölümü atlanır; muzik/ servisinin dışa yol açmadığı yine ölçülür.
+  if (!MUZIK_VAR) console.log('müzik yok: atlandı (sunucu parça dosyası / Range ölçümü)');
+  else {
   const tam = await fetch(adres + '/muzik/son-6-son-isik.mp3');
   assert.equal(tam.status, 200);
   assert.equal(tam.headers.get('content-type'), 'audio/mpeg', 'mp3 içerik türü');
@@ -346,6 +358,7 @@ test('sunucu müziği gerçekten veriyor: içerik türü, önbellek ve Range (20
   // Anlaşılmayan Range: tam dosya, 200.
   const bozuk = await fetch(adres + '/muzik/son-6-son-isik.mp3', { headers: { Range: 'satir=1-2' } });
   assert.equal(bozuk.status, 200, 'anlaşılmayan Range tam dosyaya düşer');
+  }
 
   // muzik/ dışındaki dosyalara yol açılmadı.
   assert.equal((await fetch(adres + '/muzik/yok.mp3')).status, 404);
@@ -366,6 +379,32 @@ test('müzik dist/ derlemesine de giriyor', async () => {
     assert.equal(derlenen.size, kaynak.size, `dist/muzik/${ad}.mp3 kaynaktan farklı`);
   }
   await stat(path.join(root, 'dist', 'muzik', 'LISANS.txt')); // yoksa atar
+  // Arşiv yayına girmez; müzik yokken dist/muzik/ yalnız lisans notunu taşır (boş müzik klasörü derlemeyi bozmaz).
+  const derlenenler = await readdir(path.join(root, 'dist', 'muzik'));
+  assert.ok(!derlenenler.includes('archive'), 'muzik/archive/ dist/ derlemesine girmemeli');
+  if (!MUZIK_VAR) {
+    console.log('müzik yok: atlandı (dist/ parça dosyası karşılaştırması)');
+    assert.deepEqual(derlenenler.filter(ad => ad.endsWith('.mp3')), [], 'müzik yokken dist/muzik/ altında mp3 olmamalı');
+  }
+});
+
+/** Müzik yokken (SAHNELER boş): dokunuşta hiçbir <audio> kurulmaz, hiçbir dosya istenmez, hiçbir şey çalmaz. */
+test('parça yoksa hiçbir şey indirilmez ve çalmaz; parcaVar MUZIK_VAR ile aynı', async () => {
+  const k = await muzikKur();
+  try {
+    assert.equal(k.muzik.parcaVar, MUZIK_VAR, 'createMuzik().parcaVar, MUZIK_VAR ile aynı olmalı');
+    if (MUZIK_VAR) return;
+    for (const sahne of ['sakin', 'mac', 'doruk']) {
+      k.muzik.sahne(sahne);
+      for (const ev of ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown']) k.olay(ev);
+    }
+    k.gizle(true); k.gizle(false);
+    k.muzik.ac(false); k.muzik.ac(true);
+    await bekle(100);
+    assert.equal(k.ogeler.length, 0, 'parça yokken hiçbir <audio> kurulmaz (dosya istenmez)');
+    assert.equal(k.muzik.durum().caliyor, false);
+    assert.equal(k.muzik.durum().parca, null);
+  } finally { k.geriAl(); }
 });
 
 /**

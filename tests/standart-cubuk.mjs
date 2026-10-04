@@ -17,8 +17,13 @@ import { mkdir } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { MUZIK_VAR } from '../src/muzik.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
+// Parça yokken (src/muzik.js `MUZIK_VAR` false; 4 Ekim 2026'dan beri müzik şimdilik kaldırıldı) Müzik düğmeleri gizlidir:
+// standart dörtlü üçe iner, mola menüsünde de Müzik satırı yoktur. Parça eklenince düğmeler ve bu beklenti kendiliğinden döner.
+if (!MUZIK_VAR) console.log('müzik yok: Müzik düğmeleri gizli bekleniyor');
+const STANDART = ['sp-site', 'sp-sound', ...(MUZIK_VAR ? ['sp-muzik'] : []), 'sp-help-open'];
 /** Dar yatay telefon (iPhone SE / 8, yatay): üst çubuğun en sıkıştığı ölçü. Çubuk burada yer bulursa her yerde bulur. */
 const DAR = { width: 667, height: 375 };
 const GENIS = { width: 844, height: 390 };
@@ -149,7 +154,7 @@ try {
     olcum.push(satirOlcum);
     console.log(JSON.stringify(satirOlcum));
 
-    assert.deepEqual(sira.slice(0, 4), ['sp-site', 'sp-sound', 'sp-muzik', 'sp-help-open'],
+    assert.deepEqual(sira.slice(0, STANDART.length), STANDART,
       `${ad}: standart dörtlü bu sırayla başta olmalı (okunan: ${sira.join(', ')})`);
     assert.ok(cubuk.left >= 0 && cubuk.right <= ekran.width, `${ad}: üst çubuk ekrandan taşıyor (${cubuk.left}..${cubuk.right})`);
     assert.ok(cubuk.top >= 0 && cubuk.bottom <= ekran.height, `${ad}: üst çubuk ekranın dışında (${cubuk.top}..${cubuk.bottom})`);
@@ -192,7 +197,7 @@ try {
     .filter(n => getComputedStyle(n).display !== 'none' && !n.hidden).map(n => n.id || n.textContent.trim()));
   await page.screenshot({ path: 'artifacts/standart-cubuk-dar-duraklatma.png' });
   console.log(JSON.stringify({ molaKart, molaSon, molaDugmeler }));
-  assert.deepEqual(molaDugmeler, ['sp-resume', 'sp-pause-help', 'sp-pause-sound', 'sp-pause-muzik', 'sp-restart', 'sp-menu', "josephuz.com'a dön"],
+  assert.deepEqual(molaDugmeler, ['sp-resume', 'sp-pause-help', 'sp-pause-sound', ...(MUZIK_VAR ? ['sp-pause-muzik'] : []), 'sp-restart', 'sp-menu', "josephuz.com'a dön"],
     'duraklatma menüsünün sırası standart olmalı');
   assert.ok(molaSon.bottom <= DAR.height, `duraklatma menüsünün son düğmesi ekrandan taşıyor (${molaSon.bottom} > ${DAR.height})`);
   assert.ok(molaKart.bottom <= DAR.height, 'duraklatma kartı ekrandan taşıyor');

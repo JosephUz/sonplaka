@@ -151,9 +151,10 @@ export async function start(root) {
    */
   const muzik = createMuzik(root);
   const muzikYaz = () => ui.setMuzik(muzik.acik);
-  // Düğmeler yalnız gösteri kipinde gizlenir. Otomatik tarayıcıda (`muzik.kapali`, bkz. muzik.js) da dururlar:
-  // standart çubuk her zaman aynı görünür, ayar yine saklanır, yalnız çalacak parça yoktur.
-  ui.setMuzikVar(!gosteri);
+  // Düğmeler gösteri kipinde ve **çalınacak parça yokken** (`muzik.parcaVar`, bkz. muzik.js SAHNELER) gizlenir.
+  // 4 Ekim 2026: müzik şimdilik kaldırıldı, düğmeler gizli; parça eklenince kendiliğinden geri gelirler.
+  // Otomatik tarayıcıda (`muzik.kapali`) parça varsa dururlar: standart çubuk aynı görünür, ayar yine saklanır.
+  ui.setMuzikVar(!gosteri && muzik.parcaVar);
   const toggleMuzik = () => { muzik.ac(); muzikYaz(); };
   ui.button('muzik', toggleMuzik); ui.button('pause-muzik', toggleMuzik);
   muzikYaz();

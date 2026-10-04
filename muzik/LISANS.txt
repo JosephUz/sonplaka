@@ -1,10 +1,7 @@
 © 2026 JosephUz. Tüm hakları saklıdır. Beste JosephUz; enstrüman örnekleri VSCO 2 Community Edition (CC0).
 
-Son Plaka oyun içi müzikleri (sakin / dinlendirici / odaklandırıcı; 128 kbps mp3, -16 LUFS):
-
-  son-6-son-isik.mp3        "Son Işık"         · menü, lobi, sonuç
-  son-5-sifir-yercekimi.mp3 "Sıfır Yerçekimi"  · maç
-  son-4-yorunge.mp3         "Yörünge"          · son plaka evresi (Sıfır Yerçekimi ile sırayla)
+Son Plaka: şu an oyunda müzik yok (4 Ekim 2026). Eski parçalar muzik/archive/ altında durur (bkz. muzik/archive/NOT.txt);
+oyunda çalmaz, web yayınına ve uygulamaya girmez. Yeni parçalar eklenince burada listelenir.
 
 Besteler JosephUz'a aittir ve yalnızca JosephUz oyunlarında / içeriklerinde kullanılır.
 Seslendirmede kullanılan enstrüman örnekleri: VSCO 2 Community Edition (Versilian Studios, CC0-1.0).

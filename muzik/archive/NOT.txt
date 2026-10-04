@@ -4,4 +4,8 @@ Yusuf 4 Ekim: müzik videolarını izlerken bu parçalar çok gürültülü bulu
 odaklandırıcı sürümler geldi (bir üst klasör). Bunlar silinmedi: yanlış yapınca ne çıktığını göstersin diye
 burada duruyor. Oyunda çalmaz, web yayınına ve uygulamaya girmez (bkz. scripts/build-web.mjs).
 
+İkinci arşiv (4 Ekim 2026): son-4-yorunge, son-5-sifir-yercekimi ve son-6-son-isik (sakin sürümler) de buraya
+alındı. Yusuf bunları birbirine çok benzer ve oyunun temasına uymayan parçalar olarak buldu; müzik daha sonra
+yeniden yapılacak. O zamana kadar oyunda müzik yok (src/muzik.js SAHNELER boş, Müzik düğmeleri gizli).
+
 © 2026 JosephUz. Tüm hakları saklıdır.
