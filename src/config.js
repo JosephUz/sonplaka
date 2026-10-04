@@ -155,6 +155,16 @@ export const SERVER = 'sonplaka-sunucu.josephuz.com';
  *   çevirir), `disk` çevredeki her disk, `savrulma` / `ucus` / `sarj` oyuncunun hâli, `dusme` düşmekte olan oyuncunun
  *   (kısa tutulan) puanı.
  */
+/**
+ * **Otopilot** (yalnız web, `?otopilot=1`; bkz. src/otopilot.js): içerik videoları için gerçek bir maç, ama senin
+ * oyuncunu da bot oynar. Gösteriden farkı maçın **normal** kurallar, zorluk, hız ve bot ayarlarıyla koşmasıdır;
+ * burada yalnız maç sonrası bekleme ayarlanır.
+ */
+export const OTOPILOT = {
+  /** Maç bitince yeni maç kurulana kadar beklenen saniye (karne ekranı hiç açılmaz). */
+  yenidenBasla: 2,
+};
+
 export const GOSTERI = {
   kip: 5, zorluk: 'hard', hiz: 1.5, geriSayim: 0.5, yenidenBasla: 1.5, yayilma: 3.2, enFazlaAdim: 12, can: 12,
   bot: { think: 0.18, thinkJitter: 0.12, range: 7, close: 3, strafe: 0.8, edge: 1.2, fireEvery: 0.45, fireJitter: 0.4, aimError: 0.06, heavyChance: 0.2, dodgeChance: 0.35, crossChance: 0.7, stay: 1.5, spawnWait: 0 },
