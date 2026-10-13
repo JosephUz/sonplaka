@@ -41,6 +41,9 @@ export function createView(container, { mobile = false } = {}) {
   const hand = new T.Mesh(new T.CylinderGeometry(0.07, 0.07, 0.016, 24), new T.MeshStandardMaterial({ color: '#39c2cf', emissive: '#39c2cf', emissiveIntensity: 0.7, roughness: 0.35 }));
   hand.position.set(0.38, -0.26, -0.9); hand.rotation.set(1.25, 0, 0.35); cam.camera.add(hand); scene.add(cam.camera);
   let time = 0;
+  // Gösteri sahnelerinin zoomu (bkz. src/gosteri-ibo.js): doluyken görüş açısını sahne yazar ve kamera ona
+  // **anında** oturur — sahne geçişlerini kendisi yumuşatır, araya oyunun yumuşatması girmemeli.
+  let sahneFov = null;
 
   // Sahne pencereyi değil **kabı** doldurur: telefonda oyun kökü tarayıcı çubuklarının bıraktığı görünür alana
   // kilitlenir (bkz. src/gorunur-alan.js), bu yüzden innerWidth/innerHeight'tan küçük olabilir. visualViewport
@@ -71,6 +74,8 @@ export function createView(container, { mobile = false } = {}) {
       }
     },
     face: (yaw, pitch) => cam.face(yaw, pitch),
+    /** Gösteri sahnesinin görüş açısı (zoom). null: oyunun kendi açısı (CAMERA.fov, koşarken hafif genişler). */
+    setFov: f => { sahneFov = f; },
     look: (dx, dy) => cam.look(dx, dy),
     movement: (x, z) => cam.movement(x, z),
     project: (x, y, z) => cam.project(x, y, z),
@@ -90,9 +95,10 @@ export function createView(container, { mobile = false } = {}) {
       discs.sync(w.discs, time);
       effects.update(dt);
       const me = w.players[w.me];
-      // Hızlı koşuda görüş açısı hafif genişler.
-      const fov = CAMERA.fov + (me.sprint && !me.out ? 7 : 0);
-      if (Math.abs(cam.camera.fov - fov) > 0.05) { cam.camera.fov += (fov - cam.camera.fov) * Math.min(1, dt * 6); cam.camera.updateProjectionMatrix(); }
+      // Hızlı koşuda görüş açısı hafif genişler (gösteri sahnesi zoom yazdıysa o kazanır ve anında oturur).
+      const fov = sahneFov != null ? sahneFov : CAMERA.fov + (me.sprint && !me.out ? 7 : 0);
+      const k = sahneFov != null ? 1 : Math.min(1, dt * 6);
+      if (Math.abs(cam.camera.fov - fov) > 0.05) { cam.camera.fov += (fov - cam.camera.fov) * k; cam.camera.updateProjectionMatrix(); }
       hand.visible = fps && playing && !me.out && me.discs > 0;
       if (hand.visible) {
         const k = 1 + (me.charge / DISC.heavyCharge) * 0.6;

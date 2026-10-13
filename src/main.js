@@ -1,6 +1,7 @@
 import { createAudio } from './audio.js';
 import { CAMERA, DIFFICULTIES, DIFFICULTY_LABEL, DISC, MATCH, MODES, PICKUP, TEAMS, modeLabel, playersFor } from './config.js';
 import { createGosteri, gosteriAcik } from './gosteri.js';
+import { createIboGosteri, iboGosteriAcik } from './gosteri-ibo.js';
 import { createOtopilot, otopilotAcik } from './otopilot.js';
 import { gorunurAlanaKilitle } from './gorunur-alan.js';
 import { createInput } from './input.js';
@@ -72,18 +73,25 @@ export async function start(root) {
   for (const i of modeInputs) i.onchange = () => setMode(Number(i.value));
   for (const i of diffInputs) i.onchange = () => setDiff(i.value);
   let online = false;
-  // Gösteri kipi (?gosteri=1, yalnız web): botlar oynar, arayüz ve girdi yok (bkz. gosteri.js).
-  const gosteri = gosteriAcik() ? createGosteri({ view }) : null;
+  /**
+   * Gösteri kipleri (yalnız web, arayüz ve girdi yok):
+   *  - `?gosteri=ibo` (bkz. gosteri-ibo.js): komik short için sahnelenmiş tek düşüş, serbest kamera, altyazılı.
+   *  - `?gosteri=1` ve kalanı (bkz. gosteri.js): botların kendi kendine oynadığı maç.
+   * İkisi de aynı perdeleri gizler ve aynı yolu kullanır; `sahne` hangisi açıksa odur.
+   */
+  const ibo = iboGosteriAcik() ? createIboGosteri({ view, root }) : null;
+  const gosteri = !ibo && gosteriAcik() ? createGosteri({ view }) : null;
+  const sahne = ibo || gosteri;
   /**
    * Otopilot (?otopilot=1, bkz. otopilot.js): gösteri değil **gerçek maç**; senin oyuncunu da bot oynar, kamera ve
    * arayüz normal oyundaki gibi kalır. Gösteriyle birlikte açılmaz (gösteri önceliklidir).
    */
-  const otopilot = gosteri || !otopilotAcik() ? null : createOtopilot();
+  const otopilot = sahne || !otopilotAcik() ? null : createOtopilot();
   let w = createWorld(), screen = 'home', started = false, acc = 0, uiClock = 0, helpReturn = 'home', pausedAt = 0, last = performance.now();
   view.setWorld(w);
   faceCenter();
 
-  const active = () => started && !screen && !gosteri;
+  const active = () => started && !screen && !sahne;
   input = createInput(view.canvas, {
     testMode,
     touch: touch && root,
@@ -154,13 +162,13 @@ export async function start(root) {
   // Düğmeler gösteri kipinde ve **çalınacak parça yokken** (`muzik.parcaVar`, bkz. muzik.js SAHNELER) gizlenir.
   // 4 Ekim 2026: müzik şimdilik kaldırıldı, düğmeler gizli; parça eklenince kendiliğinden geri gelirler.
   // Otomatik tarayıcıda (`muzik.kapali`) parça varsa dururlar: standart çubuk aynı görünür, ayar yine saklanır.
-  ui.setMuzikVar(!gosteri && muzik.parcaVar);
+  ui.setMuzikVar(!sahne && muzik.parcaVar);
   const toggleMuzik = () => { muzik.ac(); muzikYaz(); };
   ui.button('muzik', toggleMuzik); ui.button('pause-muzik', toggleMuzik);
   muzikYaz();
 
   // ---------- Çevrim içi ----------
-  const net = onlineEnabled() && !gosteri && !otopilot ? createNetClient({
+  const net = onlineEnabled() && !sahne && !otopilot ? createNetClient({
     onWelcome() {
       lobby.setServer(true);
       if (pending) { const go = pending; pending = null; go(); return; }
@@ -308,7 +316,9 @@ export async function start(root) {
     // yerde (giriş, lobi, mola, karne) sakin parça. Aynı sahne yeniden verilince hiçbir şey olmaz, bu yüzden her
     // kareden sorulur: ekran geçişlerini tek tek kancalamaya gerek kalmaz. Gösteride `muzik.kapali`: çağrı boşa düşer.
     muzik.sahne(sahneSec(started, screen, w, helpReturn));
-    // Gösteri: girdi ve arayüz yok; botlar oynar, kamera en hareketli kavgayı omuz üstünden izler (bkz. gosteri.js).
+    // Gösteri: girdi ve arayüz yok. `?gosteri=ibo` sahnelenmiş düşüşü serbest kamerayla oynatır (gosteri-ibo.js),
+    // `?gosteri=1` botların maçını omuz üstünden izler (gosteri.js).
+    if (ibo) { w = ibo.guncelle(dt); view.render(w, dt, false, ibo.odak(), false); return; }
     if (gosteri) { w = gosteri.guncelle(dt); view.render(w, dt, true, gosteri.odak(dt), false); return; }
     if (online && started) {
       const move = active() ? input.move(view) : null;
@@ -337,16 +347,19 @@ export async function start(root) {
     if (uiClock <= 0) { uiClock = 0.08; refresh(); }
   }
 
-  if (gosteri) {
-    // Menü ve lobi atlanır, arayüz gizlenir (bkz. style.css `.gosteri`), kamera omuz üstüne alınır, maç hemen başlar.
-    // Kamera doğrudan görünüme verilir: `setCamera` tercihi `localStorage`'a (`sp.cam`) yazar; gösteri kipi oyuncunun
-    // kendi kamera tercihine dokunmamalı (aynı tarayıcıda normal oyun eskisi gibi açılsın).
+  if (sahne) {
+    // Menü ve lobi atlanır, arayüz gizlenir (bkz. style.css `.gosteri`), sahne hemen başlar. Kamera doğrudan
+    // görünüme verilir: `setCamera` tercihi `localStorage`'a (`sp.cam`) yazar; gösteri kipleri oyuncunun kendi
+    // kamera tercihine dokunmamalı (aynı tarayıcıda normal oyun eskisi gibi açılsın).
     root.classList.add('gosteri');
-    view.setCamera('shoulder');
+    view.setCamera(ibo ? 'fps' : 'shoulder');
     screen = null; started = true; ui.show(null);
     const ad = root.querySelector('#sp-gosteri'); if (ad) ad.hidden = false;
-    w = gosteri.basla();
-    window.__sonPlaka = { world: () => w, view: () => view, net: () => null, gosteri: () => gosteri, muzik: () => muzik.durum(), state: () => ({ screen, started, online }) };
+    w = sahne.basla();
+    window.__sonPlaka = { world: () => w, view: () => view, net: () => null, gosteri: () => sahne, muzik: () => muzik.durum(), state: () => ({ screen, started, online }) };
+    // Çekim betiği (ajanlar/icerik/short-uret.mjs) sahnenin saniyesini ve kabul ölçütlerini buradan okur;
+    // `olcum()` her karede yerinde güncellenen tek nesnedir.
+    if (ibo) window.__gosteri = ibo.olcum();
   }
   // Otopilot: menü ve lobi atlanır, kamera omuz üstüne alınır, maç hemen başlar. Arayüz **gizlenmez** (bu bir
   // gösteri değil, oynanan maç); yalnız tuşlara basan sen değilsin (bkz. otopilot.js).
@@ -368,7 +381,7 @@ export async function start(root) {
 
   refresh();
   requestAnimationFrame(frame);
-  if (!testMode && !net && !gosteri && !otopilot) heartbeat();
+  if (!testMode && !net && !sahne && !otopilot) heartbeat();
 }
 
 /** Dokunmatikte kısa titreşim: atış, isabet, düşme, çökme. */

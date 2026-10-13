@@ -9,6 +9,7 @@
     "test": "node --test tests/*.test.mjs",
     "test:browser": "node tests/browser-smoke.mjs",
     "test:gosteri": "node tests/gosteri-smoke.mjs",
+    "test:gosteri-ibo": "node tests/gosteri-ibo-smoke.mjs",
     "test:mobil": "node tests/mobil-ust-alan.mjs",
     "test:muzik": "node tests/muzik-smoke.mjs",
     "build:web": "node scripts/build-web.mjs",

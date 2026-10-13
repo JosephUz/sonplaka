@@ -165,6 +165,44 @@ export const OTOPILOT = {
   yenidenBasla: 2,
 };
 
+/**
+ * **"İbo" gösteri sahnesi** (yalnız web, `?gosteri=ibo`; bkz. src/gosteri-ibo.js): komik short için sahnelenmiş
+ * tek bir düşüş. Bir maç değildir: saniyeleri bir ses kaydına kilitlidir, kamera serbesttir, ekranda altyazı durur.
+ * Uzunluklar arena birimi, süreler saniye; konumlar merkez ile 1 numaralı iç halka plakasını birleştiren köşegen
+ * eksen üstünde `r` (merkeze uzaklık) ve `yan` (eksenin sağına kayma) ile verilir.
+ * - `tohum` dünyanın tohumu (sahne rastgelelik kullanmaz, yalnız createWorld istiyor), `derinlik` İbo'yu yakalayan
+ *   alttaki plakanın yüksekliği — bu sahnenin tek sahneleme hamlesi: merkez plaka ayakta kalır, yalnız aşağıdadır.
+ * - `ibo`: `baslangic` ilk durduğu uzaklık, `rampaBasi` rampanın gerisinde beklediği uzaklık (rampaya basmaz),
+ *   `carpmaR` çarpmanın beklenen uzaklığı (tekrar kamerası için yedek), `sersem` sersem yürüyüşün girdi büyüklüğü,
+ *   `sersemR` / `sersemYan` o yürüyüşün hedefi ve yalpası.
+ * - `cokmeHizi` çöken plakanın ilk (aşağı) hızı: sıfırdan hızlansa üstündeki oyuncuyla birkaç kare birlikte iner.
+ * - `savrulma` çöken plakanın İbo'ya verdiği atış: `hiz` yatay, `kalk` ilk yukarı atış (plakanın üstünden kurtulup
+ *   boşluğa çıkması için şart — yoksa çöken plakaya hemen geri iner), `temizR` plakanın kenarını geçtiği uzaklık ve
+ *   `dalis` orada verilen aşağı hız (çöken plakanın altından kayması). `sekme` çarpmanın onu havaya sektirmesi,
+ *   `ikinciSavrulma` ikinci çöküşteki atış. Hepsi oyunun kendi `knock`undan geçer.
+ * - Canlı düşüşte ağır çekim **yoktur**: sahne sesin saniyelerine kilitli (18,5 çöküş → 20,36 "yürüyor lan"),
+ *   düşüşü yavaşlatmak ya düşüşü sığlaştırır ya da sekmeyi o saniyenin ötesine iter. Ağır çekim tekrarlardadır.
+ * - `kayit` tekrar için kaydedilen aralık; `tekrar` iki tekrar açısı (`bas`/`bit` çarpma anına göre kayıttan
+ *   oynatılan aralık, `kamera` çarpma noktasına göre kameranın yeri, `fov` görüş açısı).
+ * - `kamera`: `takip` bakışın İbo'ya oturma hızı (1/sn), `titresim` elde çekim nefesi, `sarsinma` çöküş/çarpma
+ *   sarsıntısının büyüklüğü, `sarsinmaSonum` sönme hızı (1/sn).
+ */
+export const GOSTERI_IBO = {
+  tohum: 2266,
+  derinlik: -14.7,
+  ibo: { baslangic: 26, rampaBasi: 20.6, carpmaR: 4.7, sersem: 0.24, sersemR: 4.6, sersemYan: 2.2 },
+  cokmeHizi: -6,
+  savrulma: { hiz: 15.2, kalk: 4.5, temizR: 16.5, dalis: -10 },
+  sekme: { hiz: 2.5, kalk: 8 },
+  ikinciSavrulma: { hiz: 9, dikey: 5 },
+  kayit: { bas: 18.3, bit: 21.6 },
+  kamera: { takip: 7, titresim: 0.012, sarsinma: 0.055, sarsinmaSonum: 6 },
+  tekrar: {
+    bir: { bas: -0.3, bit: 0.5, fov: 50, kamera: { r: 11, yan: 7, y: 7 } },
+    iki: { bas: -0.08, bit: 0.9, fov: 48, kamera: { r: -3, yan: -7, y: 0.8 } },
+  },
+};
+
 export const GOSTERI = {
   kip: 5, zorluk: 'hard', hiz: 1.5, geriSayim: 0.5, yenidenBasla: 1.5, yayilma: 3.2, enFazlaAdim: 12, can: 12,
   bot: { think: 0.18, thinkJitter: 0.12, range: 7, close: 3, strafe: 0.8, edge: 1.2, fireEvery: 0.45, fireJitter: 0.4, aimError: 0.06, heavyChance: 0.2, dodgeChance: 0.35, crossChance: 0.7, stay: 1.5, spawnWait: 0 },
