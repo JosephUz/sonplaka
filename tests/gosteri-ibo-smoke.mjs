@@ -72,7 +72,7 @@ try {
     await kadar(bas + 0.2);
     assert.ok(await yazi.isVisible(), `${bas} sn: altyazı kutusu açık`);
     assert.equal((await yazi.textContent()).trim(), metin, `${bas} sn: doğru cümle`);
-    const tekrarda = bas + 0.2 >= ISARET.tekrar1 && bas + 0.2 < ISARET.canli;
+    const tekrarda = bas + 0.2 >= ISARET.tekrar1 && bas + 0.2 < ISARET.canli - 0.2;
     assert.equal(await tekrar.isVisible(), tekrarda, `${bas} sn: TEKRAR rozeti ${tekrarda ? 'görünür' : 'gizli'}`);
     if (tekrarda && !tekrarKaresi) { tekrarKaresi = true; await page.screenshot({ path: 'artifacts/gosteri-ibo-tekrar.png' }); }
   }
@@ -83,7 +83,7 @@ try {
   // 4) Çekim betiğinin okuduğu ölçümler (kabul ölçütleri burada birimle denetlenir: tests/gosteri-ibo.test.mjs).
   const g = await oku(() => ({ ...window.__gosteri, altyazi: window.__gosteri.altyazi.length }));
   assert.equal(g.altyazi, ALTYAZI.length, 'bütün altyazılar gösterildi');
-  assert.ok(g.bitti && g.carpmaAt > 0 && g.tekrarAcisi === 2 && g.yuruyor2036 && g.rampaKullanimi === 0,
+  assert.ok(g.bitti && g.carpmaAt > 0 && g.tekrarAcisi === 3 && g.yuruyor2036 && g.rampaKullanimi === 0,
     'sahne ölçümleri yerinde: ' + JSON.stringify(g));
 
   // 5) Ne ağ ne sunucu sinyali.

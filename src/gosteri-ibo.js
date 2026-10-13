@@ -19,12 +19,13 @@ import { createWorld, step } from './world.js';
  *    İbo önce sağa sola bakıp yol arar, sonra rampaya yürür ve kenarında tedirgin adımlarla bekler.
  *  - **18,5** İbo'nun altındaki plaka çöker (oyunun kendi `phase` düşüşü) ve İbo boşluğa savrulur. Düşüş
  *    tamamen oyunun fiziğidir: yerçekimi, savrulma takla atması, plaka zemini, çarpma.
- *  - **19,3** Aşağıdaki plakaya çakılır; çarpma anında kısa bir ağır çekim olur (GOSTERI_IBO.agir) ve çarpma
- *    İbo'yu havaya sektirir (oyunun kendi `knock`u). **~20,2** yere basar, sersem sersem yürümeye başlar.
+ *  - **~19,55** Aşağıdaki plakaya çakılır ve çarpma onu havaya sektirir (oyunun kendi `knock`u). **~20,2** yere
+ *    basar, sersem sersem yürümeye başlar.
  *  - **22,4-27,4** Kamera uzaktaki minicik İbo'ya zoom yapar; İbo durup yukarı bakar.
- *  - **27,8-33,6** **Spor tekrarı**: çarpışma, kaydedilmiş karelerden iki ayrı kameradan ağır çekimde yeniden
- *    oynatılır (köşede "TEKRAR" yazısı). Canlı dünya o sırada dondurulur, tekrar bitince aynen geri yüklenir.
- *  - **34** İbo'nun durduğu plaka titrer, **36,84** o da düşer: İbo ikinci kez boşluğa.
+ *  - **27,8-34,75** **Spor tekrarı**: aynı çarpışma, kaydedilmiş karelerden **üç ayrı kameradan** ağır çekimde
+ *    yeniden oynatılır (köşede "TEKRAR" yazısı; bkz. TEKRARLAR). Canlı dünya bu sırada dondurulur. Üçüncü açı
+ *    sekmeyi yakından gösterir ve sekmenin en yüksek noktası kahkahanın tepesine (33,40) denk getirilmiştir.
+ *    Sahne burada biter; kalan 3 sn kurgudaki josephuz.com kapanışıdır.
  *
  * Arayüzün gizlenmesi, girdinin okunmaması, müziğin hiç kurulmaması ve sunucuya bağlanılmaması `?gosteri=1` ile
  * ortaktır (bkz. main.js, muzik.js, style.css `.gosteri`). `?gosteri=1` ve normal oyun bu dosyadan hiç etkilenmez;
@@ -56,11 +57,13 @@ export const ISARET = {
   dogrul: 24.38,      // "Bir şey oldu mu?" → durur, yukarı bakar
   tekrar1: 27.80,     // 1. tekrar açısı ("Baya çok kötü çarptı bak." 28,08)
   tekrar2: 30.00,     // 2. tekrar açısı (altyazısız: İbo çarpınca havaya sekiyor)
-  // Sahne tekrarın ikinci açısında biter. Yusuf 13 Ekim'de sesin 31,8'de kesilmesini istedi (sonrasında küfür
-  // var), bu yüzden "Oğlum yükselmiş ha", "Allah Allah Allah" ve ikinci düşüş sahnesi kaldırıldı; kalan 3 sn
-  // kurgudaki SON PLAKA · josephuz.com kapanışıdır (bkz. ajanlar/icerik/short-uret.mjs `videoSn`).
-  canli: 31.80,       // tekrar bölümünün sonu = oyun görüntüsünün sonu
-  bitis: 31.80,       // oyun görüntüsünün sonu (kalanı kurgudaki josephuz.com kapanışı)
+  tekrar3: 31.90,     // 3. tekrar açısı: yakından sekme ("Oğlum yükselmiş ha." + kahkaha)
+  sekmeTepesi: 33.40, // kahkahanın tepesi: sekmenin en yüksek noktası tam buraya denk getirilir
+  // Sahne tekrarın üçüncü açısında biter. Ses "Oğlum" sonrasındaki konuşmadan önce (34,75) kesildi — devamında
+  // Yusuf'un çıkarılmasını istediği kısım var. Kalan 3 sn kurgudaki SON PLAKA · josephuz.com kapanışıdır
+  // (bkz. ajanlar/icerik/short-uret.mjs `videoSn`).
+  canli: 34.75,       // tekrar bölümünün sonu = oyun görüntüsünün sonu
+  bitis: 34.75,       // oyun görüntüsünün sonu (kalanı kurgudaki josephuz.com kapanışı)
 };
 
 /** Altyazılar: her cümle konuşulduğu saniyede çıkar, sustuğunda kalkar (meme usulü, ekranın ortasına yakın). */
@@ -76,6 +79,23 @@ export const ALTYAZI = [
   [24.38, 25.95, 'Bir şey oldu mu?'],
   [26.14, 27.45, 'Bir şey oldu mu?'],
   [28.08, 29.90, 'Baya çok kötü çarptı bak.'],
+  [31.90, 33.00, 'Oğlum yükselmiş ha.'],
+  // Kahkaha: yazıya dökülmez, yalnız gülen yüz durur (Yusuf 13 Ekim).
+  [33.05, 34.40, '😂'],
+];
+
+/**
+ * Spor tekrarının bölümleri: her biri bir kamera açısı (bkz. GOSTERI_IBO.tekrar) ve kayıttan o açıda oynatılacak
+ * aralık. Üçü de **aynı** çarpışmayı gösterir, farklı yerden ve farklı yavaşlıkta.
+ *  1. 27,80-30,00 — çarpışmanın kendisi, yukarıdan ("Baya çok kötü çarptı bak.").
+ *  2. 30,00-31,90 — alçak açıdan sekme (altyazısız).
+ *  3. 31,90-34,75 — yakından sekme: "Oğlum yükselmiş ha." ve kahkaha. Sekmenin en yüksek noktası kahkahanın
+ *     tepesine (ISARET.sekmeTepesi) denk gelsin diye `uc.bit` buna göre seçildi, bkz. config.
+ */
+const TEKRARLAR = [
+  { no: 1, bas: ISARET.tekrar1, bit: ISARET.tekrar2, ayar: G.tekrar.bir },
+  { no: 2, bas: ISARET.tekrar2, bit: ISARET.tekrar3, ayar: G.tekrar.iki },
+  { no: 3, bas: ISARET.tekrar3, bit: ISARET.canli, ayar: G.tekrar.uc },
 ];
 
 /**
@@ -377,14 +397,15 @@ export function createIboGosteri({ view, root = null }) {
     w.plates.forEach((s, j) => { s.phase = a.plakalar[j].phase; s.y = ara(a.plakalar[j].y, b.plakalar[j].y); s.vy = a.plakalar[j].vy; });
   }
 
-  /** Tekrar bölümü: iki açı, ikisi de çarpışma anının ağır çekimi. Canlı dünya bu sırada dondurulmuştur. */
+  /** `t` anındaki tekrar bölümü (bkz. TEKRARLAR); tekrar başlamadıysa ilki. */
+  const bolum = () => TEKRARLAR.reduce((en, b) => (t >= b.bas ? b : en), TEKRARLAR[0]);
+
+  /** Tekrar bölümü: üç açı, üçü de çarpışma anının ağır çekimi. Canlı dünya bu sırada dondurulmuştur. */
   function tekrar() {
     if (!tekrarAcik) dondur();
-    const ikinci = t >= ISARET.tekrar2;
-    const A = ikinci ? G.tekrar.iki : G.tekrar.bir;
-    const bas = ikinci ? ISARET.tekrar2 : ISARET.tekrar1, bit = ikinci ? ISARET.canli : ISARET.tekrar2;
-    const k = clamp((t - bas) / (bit - bas), 0, 1);
-    olcum.tekrarAcisi = Math.max(olcum.tekrarAcisi, ikinci ? 2 : 1);
+    const b = bolum(), A = b.ayar;
+    const k = clamp((t - b.bas) / (b.bit - b.bas), 0, 1);
+    olcum.tekrarAcisi = Math.max(olcum.tekrarAcisi, b.no);
     oynat((carpmaAt ?? ISARET.carpma) + A.bas + (A.bit - A.bas) * k);
   }
 
@@ -393,13 +414,13 @@ export function createIboGosteri({ view, root = null }) {
   // ---------------------------------------------------------------------------------------------------------
 
   /**
-   * Kamera: tekrar bölümünde çarpışmanın yanında sabit iki açı, geri kalanda KAMERA anahtar kareleri.
+   * Kamera: tekrar bölümünde çarpışmanın yanında sabit üç açı, geri kalanda KAMERA anahtar kareleri.
    * Düşüşten sonra bakış İbo'ya kilitlidir (`takip`), konumu yine anahtar kareler verir.
    */
   function kamera(dt) {
     const p = w.players[0];
     if (t >= ISARET.tekrar1 && t < ISARET.canli) {
-      const A = t >= ISARET.tekrar2 ? G.tekrar.iki : G.tekrar.bir;
+      const A = bolum().ayar;
       const m = carpmaNokta || { ...yerde(G.ibo.carpmaR), y: G.derinlik };
       const yer = yerde(A.kamera.r, A.kamera.yan);
       goz.x = m.x + yer.x; goz.z = m.z + yer.z; goz.y = m.y + A.kamera.y - CAMERA.eye;
@@ -459,7 +480,8 @@ export function createIboGosteri({ view, root = null }) {
       if (i >= 0) olcum.altyazi.push({ i, t, metin: ALTYAZI[i][2] });
       if (yaziEl) { yaziEl.textContent = i >= 0 ? ALTYAZI[i][2] : ''; yaziEl.hidden = i < 0; }
     }
-    if (tekrarEl) tekrarEl.hidden = !(t >= ISARET.tekrar1 && t < ISARET.canli);
+    // Rozet son karelerde kalkar: çekimin son karesi donarak kapanışa uzanıyor, rozet orada asılı kalmasın.
+    if (tekrarEl) tekrarEl.hidden = !(t >= ISARET.tekrar1 && t < ISARET.canli - 0.2);
   }
 
   return { basla, guncelle, odak: () => goz, dunya: () => w, olcum: () => olcum, saniye: () => t };

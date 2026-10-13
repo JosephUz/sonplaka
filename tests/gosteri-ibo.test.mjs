@@ -8,11 +8,11 @@ import { ALTYAZI, ISARET, createIboGosteri } from '../src/gosteri-ibo.js';
 import { GOSTERI_IBO } from '../src/config.js';
 
 /**
- * Sesin süresi: calisma/icerik/muzik/short/kaynak/son-plaka-meme-kesik.mp3. Yusuf 13 Ekim'de kaydın 31,8'de
- * kesilmesini istedi (sonrasında küfür var), bu yüzden kesilmiş dosya kullanılıyor. Oyun görüntüsü burada biter;
+ * Sesin süresi: calisma/icerik/muzik/short/kaynak/son-plaka-meme-kahkaha.mp3. Kayıt, "Oğlum yükselmiş ha" ve
+ * ardından gelen kahkahayı içerir, sonraki konuşmadan önce (34,75) kesilmiştir. Oyun görüntüsü burada biter;
  * videonun kalan 3 saniyesi kurgudaki SON PLAKA · josephuz.com kapanışıdır.
  */
-const SES = 31.80;
+const SES = 34.75;
 const KARE = 1 / 30;
 
 /** Sahneyi baştan sona koşturur; her karede İbo'nun durumunu toplar. */
@@ -66,21 +66,29 @@ test('3 · "yürüyor" (20,36 sn) anında İbo aşağıda yürüyor görünür',
   assert.ok(Math.hypot(b.x - a.x, b.z - a.z) > 1, 'çarpmadan sonra yürüyerek yol alır');
 });
 
-test('4 · iki tekrar açısı var ve çarpma havaya sekmeyle biter', () => {
-  assert.equal(o.olcum.tekrarAcisi, 2, 'iki tekrar açısı oynatılır');
+test('4 · üç tekrar açısı var ve çarpma havaya sekmeyle biter', () => {
+  assert.equal(o.olcum.tekrarAcisi, 3, 'üç tekrar açısı oynatılır');
   assert.ok(o.olcum.sekme > 0.8, `çarpma İbo'yu havaya sektirir (${o.olcum.sekme.toFixed(2)} birim)`);
-  // Tekrar canlı dünyayı bozmaz: tekrardan dönünce İbo hâlâ aşağıdaki plakada ayaktadır.
-  const sonra = kare(ISARET.canli + 0.3);
-  assert.ok(sonra.ground && !sonra.out && sonra.plaka === 0, 'tekrardan sonra canlı sahne yerli yerinde');
+  assert.ok(ISARET.tekrar1 < ISARET.tekrar2 && ISARET.tekrar2 < ISARET.tekrar3 && ISARET.tekrar3 < ISARET.canli,
+    'üç açı da sırayla ve sahnenin içinde');
+  // İkinci açı altyazısızdır: ondan sonraki altyazılar üçüncü açıya ("Oğlum yükselmiş ha" + kahkaha) aittir.
+  assert.ok(ALTYAZI.every(([bas]) => bas < ISARET.tekrar2 || bas >= ISARET.tekrar3),
+    'ikinci tekrar açısı altyazısızdır');
 });
 
-test('5 · sahne tekrarın ikinci açısında biter, ikinci düşüş yoktur', () => {
-  // Ses 31,8'de kesildiği için (sonrasında küfür var) "Oğlum yükselmiş ha", "Allah Allah Allah" ve ikinci
-  // düşüş sahnesi kaldırıldı: son altyazı "Baya çok kötü çarptı bak." ve sahne tekrarın içinde biter.
-  assert.equal(ALTYAZI.at(-1)[2], 'Baya çok kötü çarptı bak.', 'son altyazı birinci tekrarınki');
-  assert.ok(ALTYAZI.every(([bas]) => bas < ISARET.tekrar2), 'ikinci tekrar açısı altyazısızdır');
-  assert.equal(ISARET.bitis, ISARET.canli, 'oyun görüntüsü tekrar bölümünün sonunda biter');
-  assert.ok(ISARET.tekrar2 > ISARET.tekrar1 && ISARET.tekrar2 < ISARET.bitis, 'iki açı da sahnenin içinde');
+test('5 · kahkahanın tepesinde İbo sekmenin en yüksek noktasında', () => {
+  // Kahkaha ~33,4'te doruğa çıkıyor; üçüncü tekrar açısının kayıt penceresi, sekmenin tepesi tam o kareye
+  // düşecek şekilde seçildi (bkz. config GOSTERI_IBO.tekrar.uc).
+  const tepe = kare(ISARET.sekmeTepesi);
+  const once = kare(ISARET.sekmeTepesi - 0.45), sonra = kare(ISARET.sekmeTepesi + 0.45);
+  assert.ok(!tepe.out && !tepe.ground, 'kahkahanın tepesinde İbo havada');
+  assert.ok(tepe.y > once.y && tepe.y > sonra.y,
+    `sekmenin en yüksek noktası kahkahanın tepesinde (${once.y.toFixed(2)} → ${tepe.y.toFixed(2)} → ${sonra.y.toFixed(2)})`);
+  assert.ok(tepe.y - GOSTERI_IBO.derinlik > 1, `plakadan en az 1 birim yukarıda (${(tepe.y - GOSTERI_IBO.derinlik).toFixed(2)})`);
+  // Kahkaha altyazısı yazıya dökülmez.
+  assert.equal(ALTYAZI.at(-1)[2], '😂', 'son altyazı kahkaha simgesi');
+  assert.equal(ALTYAZI.at(-2)[2], 'Oğlum yükselmiş ha.', 'ondan önceki "Oğlum yükselmiş ha."');
+  assert.ok(ALTYAZI.at(-1)[1] < ISARET.bitis - 0.2, 'son altyazı kapanıştan önce kalkar');
 });
 
 test('6 · süre sesle aynı ve sahne oyunun kurallarından sapmaz', () => {
