@@ -178,8 +178,8 @@ export const OTOPILOT = {
  * - `cokmeHizi` çöken plakanın ilk (aşağı) hızı: sıfırdan hızlansa üstündeki oyuncuyla birkaç kare birlikte iner.
  * - `savrulma` çöken plakanın İbo'ya verdiği atış: `hiz` yatay, `kalk` ilk yukarı atış (plakanın üstünden kurtulup
  *   boşluğa çıkması için şart — yoksa çöken plakaya hemen geri iner), `temizR` plakanın kenarını geçtiği uzaklık ve
- *   `dalis` orada verilen aşağı hız (çöken plakanın altından kayması). `sekme` çarpmanın onu havaya sektirmesi,
- *   `ikinciSavrulma` ikinci çöküşteki atış. Hepsi oyunun kendi `knock`undan geçer.
+ *   `dalis` orada verilen aşağı hız (çöken plakanın altından kayması). `sekme` çarpmanın onu havaya sektirmesi.
+ *   Hepsi oyunun kendi `knock`undan geçer.
  * - Canlı düşüşte ağır çekim **yoktur**: sahne sesin saniyelerine kilitli (18,5 çöküş → 20,36 "yürüyor lan"),
  *   düşüşü yavaşlatmak ya düşüşü sığlaştırır ya da sekmeyi o saniyenin ötesine iter. Ağır çekim tekrarlardadır.
  * - `kayit` tekrar için kaydedilen aralık; `tekrar` iki tekrar açısı (`bas`/`bit` çarpma anına göre kayıttan
@@ -194,7 +194,6 @@ export const GOSTERI_IBO = {
   cokmeHizi: -6,
   savrulma: { hiz: 15.2, kalk: 4.5, temizR: 16.5, dalis: -10 },
   sekme: { hiz: 2.5, kalk: 8 },
-  ikinciSavrulma: { hiz: 9, dikey: 5 },
   kayit: { bas: 18.3, bit: 21.6 },
   kamera: { takip: 9, titresim: 0.012, sarsinma: 0.055, sarsinmaSonum: 6 },
   tekrar: {

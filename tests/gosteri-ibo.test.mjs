@@ -7,8 +7,12 @@ import test from 'node:test';
 import { ALTYAZI, ISARET, createIboGosteri } from '../src/gosteri-ibo.js';
 import { GOSTERI_IBO } from '../src/config.js';
 
-/** Sesin süresi: calisma/icerik/muzik/short/kaynak/son-plaka-meme.mp3 (video tam bu kadar sürer). */
-const SES = 38.77;
+/**
+ * Sesin süresi: calisma/icerik/muzik/short/kaynak/son-plaka-meme-kesik.mp3. Yusuf 13 Ekim'de kaydın 31,8'de
+ * kesilmesini istedi (sonrasında küfür var), bu yüzden kesilmiş dosya kullanılıyor. Oyun görüntüsü burada biter;
+ * videonun kalan 3 saniyesi kurgudaki SON PLAKA · josephuz.com kapanışıdır.
+ */
+const SES = 31.80;
 const KARE = 1 / 30;
 
 /** Sahneyi baştan sona koşturur; her karede İbo'nun durumunu toplar. */
@@ -70,15 +74,13 @@ test('4 · iki tekrar açısı var ve çarpma havaya sekmeyle biter', () => {
   assert.ok(sonra.ground && !sonra.out && sonra.plaka === 0, 'tekrardan sonra canlı sahne yerli yerinde');
 });
 
-test('5 · ikinci düşüş "Allah Allah Allah" (36,84 sn) anında olur', () => {
-  assert.ok(Math.abs(o.olcum.ikinciDususAt - ISARET.ikinciDusus) <= KARE + 1e-6,
-    `ikinci plaka 36,84'te çöker (${o.olcum.ikinciDususAt})`);
-  const once = kare(ISARET.ikinciDusus - 0.2), sonra = kare(ISARET.ikinciDusus + 0.8);
-  assert.ok(once.ground, 'çöküşten hemen önce plakanın üstünde durur');
-  assert.ok(!sonra.ground && !sonra.out, 'çöküşten sonra boşluğa düşer');
-  // Oyun görüntüsü bitene kadar kadrajdadır: düşerken yok olup kapanışı boş bırakmaz.
-  const son = kare(ISARET.bitis);
-  assert.ok(!son.out, 'oyun görüntüsünün sonunda hâlâ düşmektedir');
+test('5 · sahne tekrarın ikinci açısında biter, ikinci düşüş yoktur', () => {
+  // Ses 31,8'de kesildiği için (sonrasında küfür var) "Oğlum yükselmiş ha", "Allah Allah Allah" ve ikinci
+  // düşüş sahnesi kaldırıldı: son altyazı "Baya çok kötü çarptı bak." ve sahne tekrarın içinde biter.
+  assert.equal(ALTYAZI.at(-1)[2], 'Baya çok kötü çarptı bak.', 'son altyazı birinci tekrarınki');
+  assert.ok(ALTYAZI.every(([bas]) => bas < ISARET.tekrar2), 'ikinci tekrar açısı altyazısızdır');
+  assert.equal(ISARET.bitis, ISARET.canli, 'oyun görüntüsü tekrar bölümünün sonunda biter');
+  assert.ok(ISARET.tekrar2 > ISARET.tekrar1 && ISARET.tekrar2 < ISARET.bitis, 'iki açı da sahnenin içinde');
 });
 
 test('6 · süre sesle aynı ve sahne oyunun kurallarından sapmaz', () => {

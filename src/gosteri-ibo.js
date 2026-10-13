@@ -55,11 +55,12 @@ export const ISARET = {
   zoom: 22.44,        // "La İbo!" → uzaktaki İbo'ya zoom
   dogrul: 24.38,      // "Bir şey oldu mu?" → durur, yukarı bakar
   tekrar1: 27.80,     // 1. tekrar açısı ("Baya çok kötü çarptı bak." 28,08)
-  tekrar2: 31.30,     // 2. tekrar açısı ("Oğlum yükselmiş ha." 31,90)
-  canli: 33.60,       // canlı görüntüye dönüş
-  titreme: 34.00,     // İbo'nun durduğu plaka titremeye başlar
-  ikinciDusus: 36.84, // "Allah Allah Allah." → o plaka da düşer
-  bitis: 37.90,       // oyun görüntüsünün sonu (kalanı kurgudaki josephuz.com kapanışı)
+  tekrar2: 30.00,     // 2. tekrar açısı (altyazısız: İbo çarpınca havaya sekiyor)
+  // Sahne tekrarın ikinci açısında biter. Yusuf 13 Ekim'de sesin 31,8'de kesilmesini istedi (sonrasında küfür
+  // var), bu yüzden "Oğlum yükselmiş ha", "Allah Allah Allah" ve ikinci düşüş sahnesi kaldırıldı; kalan 3 sn
+  // kurgudaki SON PLAKA · josephuz.com kapanışıdır (bkz. ajanlar/icerik/short-uret.mjs `videoSn`).
+  canli: 31.80,       // tekrar bölümünün sonu = oyun görüntüsünün sonu
+  bitis: 31.80,       // oyun görüntüsünün sonu (kalanı kurgudaki josephuz.com kapanışı)
 };
 
 /** Altyazılar: her cümle konuşulduğu saniyede çıkar, sustuğunda kalkar (meme usulü, ekranın ortasına yakın). */
@@ -75,8 +76,6 @@ export const ALTYAZI = [
   [24.38, 25.95, 'Bir şey oldu mu?'],
   [26.14, 27.45, 'Bir şey oldu mu?'],
   [28.08, 29.90, 'Baya çok kötü çarptı bak.'],
-  [31.90, 33.10, 'Oğlum yükselmiş ha.'],
-  [36.84, 37.80, 'Allah Allah Allah.'],
 ];
 
 /**
@@ -125,12 +124,8 @@ const KAMERA = [
   { t: 22.40, r: 21.0, yan: 4.5, y: 2.00, fov: 72, takip: true },
   // 22,5-27,4 — "La İbo!": zoom; İbo durup yukarı bakar.
   { t: 23.60, r: 21.0, yan: 4.5, y: 1.95, fov: 27, takip: true },
+  // Son anahtar kare burada: 27,80'den sonrası tekrar bölümüdür, kamerayı `G.tekrar` açıları sürer (bkz. kamera()).
   { t: 27.80, r: 21.0, yan: 4.5, y: 1.90, fov: 26, takip: true },
-  // 33,6-36,8 — canlı görüntüye dönüş: kadraj açılır, plaka titrer, sonra düşer.
-  { t: 33.60, r: 21.0, yan: 4.5, y: 1.90, fov: 34, takip: true },
-  { t: 34.60, r: 21.0, yan: 4.5, y: 1.95, fov: 46, takip: true },
-  { t: 36.84, r: 21.0, yan: 4.5, y: 2.00, fov: 48, takip: true },
-  { t: 37.95, r: 21.0, yan: 4.5, y: 1.80, fov: 54, takip: true },
 ];
 
 export function createIboGosteri({ view, root = null }) {
@@ -146,7 +141,7 @@ export function createIboGosteri({ view, root = null }) {
 
   function bosOlcum() {
     return { saniye: 0, dususAt: null, carpmaAt: null, carpmaHiz: 0, carpmaDerin: 0, sekme: 0,
-      yuruyor2036: false, tekrarAcisi: 0, ikinciDususAt: null, rampaKullanimi: 0, altyazi: [], bitti: false };
+      yuruyor2036: false, tekrarAcisi: 0, rampaKullanimi: 0, altyazi: [], bitti: false };
   }
 
   /** Sahneyi kurar: beş koltuklu dünya, yalnız İbo ayakta, alttaki plaka aşağıda, hiçbir takvim işlemez. */
@@ -241,16 +236,6 @@ export function createIboGosteri({ view, root = null }) {
       // Çöken plaka İbo'yu merkeze doğru savurur: yatay hız onu aşağıdaki plakanın üstüne taşıyacak kadardır,
       // `kalk` ise onu plakanın üstünden kurtarır (yoksa oyunun inişi onu çöken plakaya hemen geri yapıştırır).
       savur(G.savrulma.hiz, Math.PI / 4 + Math.PI, G.savrulma.kalk);
-      sars = G.kamera.sarsinma;
-    }
-    if (olcum.ikinciDususAt === null && t >= ISARET.titreme && w.plates[ALT_PLAKA].phase === 0) {
-      w.plates[ALT_PLAKA].phase = 1; // titreme (bkz. view/arena.js: plaka sarsılır)
-      w.events.push({ type: 'tremble', ring: 0 });
-    }
-    if (olcum.ikinciDususAt === null && t >= ISARET.ikinciDusus) {
-      olcum.ikinciDususAt = t;
-      cok(ALT_PLAKA);
-      savur(G.ikinciSavrulma.hiz, Math.PI / 4, G.ikinciSavrulma.dikey);
       sars = G.kamera.sarsinma;
     }
   }
