@@ -200,11 +200,13 @@ export const GOSTERI_IBO = {
     bir: { bas: -0.3, bit: 0.5, fov: 50, kamera: { r: 11, yan: 7, y: 7 } },
     iki: { bas: -0.08, bit: 0.9, fov: 48, kamera: { r: -3, yan: -7, y: 0.8 } },
     /**
-     * 3. açı (31,90-34,75) yakından sekme. `bit` serbest seçilmedi: sekmenin en yüksek noktası çarpmadan
-     * `sekme.kalk / JUMP.gravity` = 8/24 ≈ 0,333 sn sonradır ve bu an kahkahanın tepesine
-     * (ISARET.sekmeTepesi = 33,40; bölümün %52,6'sı) düşmeli → bas + (bit − bas)·0,526 = 0,333.
+     * 3. açı (31,90-34,75) yakından sekme. İki ucu da serbest seçilmedi: `bas` çarpmanın hemen öncesidir
+     * (plaka baştan sona kadrajda kalsın, yükseliş ona göre okunsun), `bit` ise ikinci inişten hemen sonrasıdır.
+     * Arada sekmenin en yüksek noktası — çarpmadan `sekme.kalk / JUMP.gravity` = 8/24 ≈ 0,333 sn sonra —
+     * kahkahanın tepesine (ISARET.sekmeTepesi = 33,40; bölümün %52,6'sı) düşer:
+     * bas + (bit − bas)·0,526 = 0,333. Kayıt 0,728 sn'yi 2,85 sn'ye yayar, yani 0,26 kat ağır çekim.
      */
-    uc: { bas: -0.2, bit: 0.813, fov: 46, kamera: { r: 7, yan: -5, y: 2 } },
+    uc: { bas: -0.05, bit: 0.678, fov: 46, kamera: { r: 7, yan: -5, y: 2 } },
   },
 };
 
