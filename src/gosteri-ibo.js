@@ -76,7 +76,7 @@ export const ALTYAZI = [
   [26.14, 27.45, 'Bir şey oldu mu?'],
   [28.08, 29.90, 'Baya çok kötü çarptı bak.'],
   [31.90, 33.10, 'Oğlum yükselmiş ha.'],
-  [36.84, 37.90, 'Allah Allah Allah.'],
+  [36.84, 37.80, 'Allah Allah Allah.'],
 ];
 
 /**
@@ -111,9 +111,10 @@ const KAMERA = [
   { t: 9.35, r: 21.0, yan: 4.5, y: 2.50, yaw: -1.326, pitch: -0.36, fov: 66 },
   { t: 11.10, r: 21.0, yan: 4.5, y: 2.50, yaw: -1.70, pitch: -0.52, fov: 70 },
   { t: 12.10, r: 21.0, yan: 4.5, y: 2.50, yaw: -2.10, pitch: -0.66, fov: 74 },
-  // 12,6-13,4 — "Oraya in.": kamera İbo'ya döner (hızlı çevirme), oradan sonra bakış ona kilitli.
-  { t: 12.70, r: 21.0, yan: 4.5, y: 2.50, yaw: -0.55, pitch: -0.26, fov: 70 },
-  { t: 13.20, r: 21.0, yan: 4.5, y: 2.50, fov: 70, takip: true },
+  // 12,2-13,4 — "Oraya in.": kamera İbo'ya döner (hızlı çevirme), oradan sonra bakış ona kilitli. Çevirme kısadır:
+  // aradaki her kare boş plaka görüntüsüdür, uzasa kadraj bir saniye boşa akar.
+  { t: 12.45, r: 21.0, yan: 4.5, y: 2.50, yaw: -1.40, pitch: -0.42, fov: 72 },
+  { t: 12.80, r: 21.0, yan: 4.5, y: 2.50, fov: 70, takip: true },
   // 16,1-18,5 — "Bak düşme sakın": İbo rampanın kenarında tedirgin, kamera yakın.
   { t: 16.00, r: 21.0, yan: 4.5, y: 2.50, fov: 64, takip: true },
   { t: 18.40, r: 21.0, yan: 4.5, y: 2.45, fov: 62, takip: true },

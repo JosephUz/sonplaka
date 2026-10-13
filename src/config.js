@@ -196,7 +196,7 @@ export const GOSTERI_IBO = {
   sekme: { hiz: 2.5, kalk: 8 },
   ikinciSavrulma: { hiz: 9, dikey: 5 },
   kayit: { bas: 18.3, bit: 21.6 },
-  kamera: { takip: 7, titresim: 0.012, sarsinma: 0.055, sarsinmaSonum: 6 },
+  kamera: { takip: 9, titresim: 0.012, sarsinma: 0.055, sarsinmaSonum: 6 },
   tekrar: {
     bir: { bas: -0.3, bit: 0.5, fov: 50, kamera: { r: 11, yan: 7, y: 7 } },
     iki: { bas: -0.08, bit: 0.9, fov: 48, kamera: { r: -3, yan: -7, y: 0.8 } },
