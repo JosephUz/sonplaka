@@ -343,3 +343,20 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 #son-plaka.gosteri #sp-freeze,#son-plaka.gosteri #sp-touch,#son-plaka.gosteri #sp-rotate,#son-plaka.gosteri #sp-labels{display:none!important}
 #son-plaka #sp-gosteri{position:absolute;left:24px;bottom:20px;z-index:6;font:800 12px/1 system-ui,sans-serif;letter-spacing:4px;
   color:#e8eefcbb;text-shadow:0 2px 8px #000a;pointer-events:none}
+
+/* "İbo" gösteri sahnesinin (?gosteri=ibo; bkz. src/gosteri-ibo.js) meme usulü altyazısı: ekranın ortasına yakın,
+   yarı saydam koyu ve yuvarlak köşeli kutuda kalın beyaz yazı — öbür shortlardaki ile aynı kalıp. Yeri bilerek
+   seçilidir: kadraj dikeydir (1080x1920) ve İbo kadrajın üst yarısında durur, bu yüzden yazı dikeyde %72'de
+   (İbo'nun ve plakaların üstüne binmeyen bant) ve yanlardan iyice içeride (en çok %78 genişlik) durur. Saydamlığı
+   ve geçişi yoktur: çekim sahte saatle kare kare ilerler (ajanlar/icerik/short-uret.mjs), CSS geçişi karelere
+   oturmazdı. Yalnız bu sahnede açılır. */
+#son-plaka #sp-gosteri-yazi{position:absolute;left:50%;top:72%;transform:translate(-50%,-50%);z-index:7;
+  max-width:78%;padding:14px 30px;border-radius:26px;text-align:center;pointer-events:none;
+  background:#070c16d9;border:2px solid #ffffff26;box-shadow:0 14px 40px #000a;
+  font:900 clamp(20px,3.6vw,46px)/1.22 Segoe UI,Arial,sans-serif;color:#fff;text-shadow:0 3px 14px #000c}
+/* Spor tekrarı rozeti: sol üst köşede, kırmızı nokta ve "TEKRAR". */
+#son-plaka #sp-gosteri-tekrar{position:absolute;left:5%;top:7%;z-index:7;pointer-events:none;
+  display:flex;align-items:center;gap:.5em;padding:10px 22px;border-radius:999px;
+  background:#070c16cc;border:2px solid #ff5a4a8c;
+  font:900 clamp(13px,2.1vw,26px)/1 Segoe UI,Arial,sans-serif;letter-spacing:.22em;color:#ffdede}
+#son-plaka #sp-gosteri-tekrar::before{content:"";width:.62em;height:.62em;border-radius:50%;background:#ff4b38;box-shadow:0 0 14px #ff4b38}
