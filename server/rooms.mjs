@@ -11,6 +11,12 @@ import { C2S, EDGES, NET, S2C, roomCode } from '../src/net/protocol.js';
  * aynı takımdaysa co-op: rakipler bot), yönetici (kuran) oyuncuları koltuktan koltuğa taşır (dolu koltuğa taşırsa ikisi
  * yer değiştirir). Boş koltukları botlar doldurur. Maç sürerken de odaya katılınabilir.
  *
+ * Açık odalar: oda kurulurken özel seçilmedikçe herkese açıktır ve giriş ekranındaki listede görünür (kodsuz katılım);
+ * özel oda listede ve hızlı katılımda yoktur, yalnız kod / linkle girilir. Listeyi isteyen (`list`) ve odada olmayan
+ * bağlantılar izleyicidir: liste değişince (en çok 250 ms'de bir, yalnız içerik farklıysa) onlara yeniden yollanır.
+ * Hızlı katıl: oyuncu lobide bekleyen, boş koltuğu olan açık odalardan en uygununa (önce aynı kip, sonra en kalabalık)
+ * oturur; yoksa onun seçimiyle yeni açık oda kurulur ve yöneticisi o olur.
+ *
  * Sunucu otoriterdir: her oda kendi dünyasını saniyede 60 adım koşturur (world.js, tarayıcıdakiyle aynı kurallar),
  * saniyede 30 durum paketi ve biriken olayları yayar. Hesap yok: bağlantı `token` ile tanınır, kopan oyuncu aynı
  * token'la koltuğuna geri döner; kopukken koltuğunu bot oynar. Oda bağlı kimse kalmayınca kapanır.
@@ -35,7 +41,7 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
   onlineTimer.unref?.();
 
   function lobbyMsg(room) {
-    return { t: S2C.LOBBY, code: room.code, hostId: room.hostId, state: room.state, settings: { ...room.settings },
+    return { t: S2C.LOBBY, code: room.code, hostId: room.hostId, state: room.state, settings: { ...room.settings }, private: room.private,
       seats: room.seats.map(c => (c ? { id: c.id, nick: c.nick, online: Boolean(c.ws) } : null)) };
   }
   const members = room => room.seats.filter(Boolean);
@@ -60,6 +66,36 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
     room.seats = Array(playersFor(teamSize)).fill(null);
     for (const c of people) room.seats[freeSeat(room)] = c;
     return true;
+  }
+
+  // ---------- Açık odalar listesi ----------
+  /** Listede görünen oda: açık, bağlı en az bir insan, boş koltuk var. Lobide bekleyenler önce, sonra kalabalık olan. */
+  const listable = r => !r.private && members(r).some(c => c.ws) && freeSeat(r) >= 0;
+  function roomList() {
+    const list = [...rooms.values()].filter(listable)
+      .sort((a, b) => (a.state === 'lobby' ? 0 : 1) - (b.state === 'lobby' ? 0 : 1) || members(b).length - members(a).length)
+      .slice(0, NET.listMax)
+      .map(r => ({ code: r.code, host: (members(r).find(c => c.id === r.hostId) || members(r)[0]).nick, teamSize: r.settings.teamSize,
+        difficulty: r.settings.difficulty, humans: members(r).length, seats: r.seats.length, state: r.state }));
+    return { t: S2C.ROOMS, rooms: list };
+  }
+  let listSent = '', listTimer = null;
+  /** Oda kuruldu / değişti / kapandı: izleyicilere kısa gecikmeyle (art arda değişiklikler tek paket) yolla. */
+  function roomsChanged() {
+    if (listTimer) return;
+    listTimer = setTimeout(() => {
+      listTimer = null;
+      const msg = JSON.stringify(roomList());
+      if (msg === listSent) return;
+      listSent = msg;
+      for (const c of conns) if (c.watch && !c.room && c.ws && c.ws.readyState === 1) c.ws.send(msg);
+    }, 250);
+    listTimer.unref?.();
+  }
+  /** Hızlı katılım adayı: lobide bekleyen açık oda; önce oyuncunun seçtiği kip, sonra en kalabalık. */
+  function quickPick(teamSize) {
+    return [...rooms.values()].filter(r => r.state === 'lobby' && listable(r))
+      .sort((a, b) => (b.settings.teamSize === teamSize) - (a.settings.teamSize === teamSize) || members(b).length - members(a).length)[0] || null;
   }
 
   function seat(room, conn, slot) {
@@ -89,7 +125,7 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
     broadcastLobby(room);
   }
   function closeRoom(room, why) {
-    stopRoom(room); rooms.delete(room.code); log(`oda kapandı ${room.code} (${why})`);
+    stopRoom(room); rooms.delete(room.code); log(`oda kapandı ${room.code} (${why})`); roomsChanged();
     for (const c of members(room)) c.room = null;
   }
   function closeIfEmpty(room) {
@@ -159,7 +195,7 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
     flush(room);
     broadcast(room, { t: S2C.END, score: w.score, winner: w.winner, stats: w.players.map(p => p.stats), names: w.players.map(p => p.name) });
     stopRoom(room);
-    room.state = 'lobby'; room.world = null;
+    room.state = 'lobby'; room.world = null; roomsChanged();
     log(`bitti ${room.code}: ${w.score.join('-')}${w.winner < 0 ? ' (berabere)' : ''}`);
     broadcastLobby(room);
   }
@@ -176,10 +212,22 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
     }
   }
 
+  function createRoom(conn, msg) {
+    if (conn.room) leaveRoom(conn);
+    let code = roomCode(); while (rooms.has(code)) code = roomCode();
+    const settings = sanitize(msg);
+    const r = { code, hostId: conn.id, settings, private: msg.private === true, seats: Array(playersFor(settings.teamSize)).fill(null), state: 'lobby', world: null, timer: null, events: [] };
+    r.seats[0] = conn;
+    rooms.set(code, r); conn.room = r;
+    broadcastLobby(r); log(`oda kuruldu ${code} (${conn.nick}, kip ${settings.teamSize}, bot ${settings.difficulty}${r.private ? ', özel' : ''})`);
+  }
+
   function onMessage(conn, data) {
     let msg; try { msg = JSON.parse(data.toString()); } catch { return; }
     if (!msg || typeof msg.t !== 'string') return;
     const room = conn.room;
+    // Girdi ve ping dışındaki mesajlar odaları değiştirebilir; liste yalnız içeriği farklıysa gider.
+    if (msg.t !== C2S.INPUT && msg.t !== C2S.PING) roomsChanged();
     switch (msg.t) {
       case C2S.HELLO: {
         conn.nick = String(msg.nick || '').trim().slice(0, 16) || `Oyuncu-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -201,14 +249,16 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
         send(conn, { t: S2C.ONLINE, n: online() });
         return;
       }
-      case C2S.CREATE: {
+      case C2S.CREATE: { createRoom(conn, msg); return; }
+      case C2S.LIST: { conn.watch = true; send(conn, roomList()); return; }
+      case C2S.QUICK: {
         if (room) leaveRoom(conn);
-        let code = roomCode(); while (rooms.has(code)) code = roomCode();
-        const settings = sanitize(msg);
-        const r = { code, hostId: conn.id, settings, seats: Array(playersFor(settings.teamSize)).fill(null), state: 'lobby', world: null, timer: null, events: [] };
-        r.seats[0] = conn;
-        rooms.set(code, r); conn.room = r;
-        broadcastLobby(r); log(`oda kuruldu ${code} (${conn.nick}, kip ${settings.teamSize}, bot ${settings.difficulty})`);
+        const r = quickPick(sanitize(msg).teamSize);
+        if (!r) { createRoom(conn, { ...msg, private: false }); log(`hızlı katıl: uygun oda yok, ${conn.nick} kurdu`); return; }
+        conn.input = blankInput();
+        seat(r, conn, freeSeat(r)); conn.room = r;
+        broadcastLobby(r);
+        log(`hızlı katıldı ${conn.nick} -> ${r.code}`);
         return;
       }
       case C2S.SETTINGS: {
@@ -271,7 +321,7 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
       conns.add(conn); broadcastOnline();
       ws.on('message', data => { try { onMessage(conn, data); } catch (err) { log('mesaj hatası', err); } });
       ws.on('close', () => {
-        conns.delete(conn); conn.ws = null; broadcastOnline();
+        conns.delete(conn); conn.ws = null; broadcastOnline(); roomsChanged();
         const r = conn.room; if (!r) return;
         if (r.world) { syncHumans(r); broadcastLobby(r); log(`koptu ${conn.nick} (${r.code})`); closeIfEmpty(r); }
         else leaveRoom(conn);
@@ -281,6 +331,6 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
     rooms,
     online: broadcastOnline,
     stats() { let inRoom = 0; for (const c of conns) if (c.room) inRoom++; return { rooms: rooms.size, online: online(), inRoom }; },
-    close() { clearInterval(onlineTimer); for (const r of rooms.values()) stopRoom(r); },
+    close() { clearInterval(onlineTimer); clearTimeout(listTimer); for (const r of rooms.values()) stopRoom(r); },
   };
 }

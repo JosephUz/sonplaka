@@ -10,7 +10,7 @@ import { applySnapshot } from './snapshot.js';
  * Kendi oyuncun beklemesin diye yerel girdiden üretilen yumuşak bir öne kayma eklenir. Diskler kimlikle eşlenip ara
  * değerlenir. Girdi saniyede 30 kez, basışlar anında gider.
  *
- * hooks: onWelcome, onLobby, onError, onStart(msg, first), onEvents(list), onEnd(msg, world), onOnline(n), onDisconnect.
+ * hooks: onWelcome, onLobby, onError, onStart(msg, first), onEvents(list), onEnd(msg, world), onOnline(n), onRooms(list), onDisconnect.
  */
 export function createNetClient(hooks) {
   let ws = null, connected = false, wantReconnect = false, curNick = '';
@@ -63,6 +63,7 @@ export function createNetClient(hooks) {
       }
       case S2C.PONG: rtt = Math.max(0.01, (performance.now() - msg.at) / 1000); client.rtt = rtt; break;
       case S2C.ONLINE: client.online = msg.n; hooks.onOnline?.(msg.n); break;
+      case S2C.ROOMS: hooks.onRooms?.(Array.isArray(msg.rooms) ? msg.rooms : []); break;
       default: break;
     }
   }
@@ -138,6 +139,8 @@ export function createNetClient(hooks) {
     hello(nick) { curNick = nick; send({ t: C2S.HELLO, nick, token: store('sp.token') }); },
     create(settings) { send({ t: C2S.CREATE, ...settings }); },
     join(code) { send({ t: C2S.JOIN, code }); },
+    list() { send({ t: C2S.LIST }); },
+    quick(settings) { send({ t: C2S.QUICK, ...settings }); },
     seat(slot) { send({ t: C2S.SEAT, slot }); },
     move(id, slot) { send({ t: C2S.MOVE, id, slot }); },
     settings(settings) { send({ t: C2S.SETTINGS, ...settings }); },

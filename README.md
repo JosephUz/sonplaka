@@ -137,7 +137,11 @@ kaydırarak bakış, sağ altta **AT** (basılı tut: ağır), **LEVYE**, **ZIPL
 
 ## Çok oyunculu
 
-Giriş ekranında ad yazılır, kip seçilir, **Oda kur** ya da **Odaya katıl** (kod ya da `?oda=KOD` linki). Lobide
+Giriş ekranında ad yazılır, kip seçilir, **Oda kur** ya da **Odaya katıl** (kod ya da `?oda=KOD` linki). Kod
+bilmeden de oynanır: **Açık odalar** listesi boş koltuklu herkese açık odaları (yönetici, kip, n/m oyuncu, lobide ya da
+maçta) gösterir, **KATIL** ile kodsuz girilir; **Hızlı katıl** lobide bekleyen uygun açık odaya (önce aynı kip, sonra
+kalabalık olan) oturtur, yoksa seçili kiple yeni açık oda kurar. **Özel oda** işaretlenerek kurulan oda listede ve
+hızlı katılımda çıkmaz, yalnız kod / linkle girilir. Liste odada değilken sunucudan değiştikçe gelir. Lobide
 koltuklar kipe göre dizilir (herkes tek: 5 tekil koltuk; 2v2 … 5v5: iki takım sütunu); yönetici kipi lobide de
 değiştirir, koltuklar yeniden dizilir. Herkes boş koltuğa oturur: bütün insanlar aynı takımdaysa **co-op** (rakipler
 bot), karşı takımdaki boş koltuğa geçen olursa **PvP**. Yönetici oyuncuları taşır. Maçı sunucu koşturur (`server/rooms.mjs`,

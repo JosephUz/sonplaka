@@ -1,19 +1,20 @@
 import { DIFFICULTIES, DIFFICULTY_LABEL, MODES, TEAMS, modeLabel, teamsFor } from './config.js';
 
 /**
- * Çok oyunculu ekranlar: giriş ekranındaki oda düğmeleri (ad, Oda kur, Odaya katıl + kod, çevrim içi sayısı) ve lobi
+ * Çok oyunculu ekranlar: giriş ekranındaki oda düğmeleri (ad, Hızlı katıl, Oda kur + Özel oda, Odaya katıl + kod, çevrim
+ * içi sayısı, açık odalar listesi: boş koltuklu herkese açık odalar, satıra basınca kodsuz katılınır) ve lobi
  * (oda kodu, link, kip ve bot zorluğu seçimi, takım sütunları ve koltuklar). Kip (herkes tek, 2v2 … 5v5) ve bot zorluğu
  * oda kurulurken giriş ekranındaki seçimle gelir, lobide yalnız yönetici değiştirir; koltuklar kipe göre dizilir. Herkes boş (bot) koltuğa
  * tıklayıp oturur: karşı takımdaki boş koltuğa geçince PvP, bütün insanlar aynı takımdaysa co-op (rakipler bot).
  * Yönetici oyuncuları taşır: sürükleyip bir koltuğa bırakır ya da oyuncuya, sonra koltuğa tıklar; dolu koltukta ikisi
  * yer değiştirir. Sunucuya bağlanılamadıkça (kapalı ya da config.js → ONLINE ile kapatılmış) oda düğmeleri "Yakında"
- * yazar ve basılmaz.
+ * yazar ve basılmaz, açık odalar listesi gizlenir.
  */
 export function createLobby(root, app) {
   const $ = id => root.querySelector('#sp-' + id);
   const el = {
-    nick: $('nick'), create: $('create'), join: $('join'), joinRow: $('joinrow'), code: $('code'), joinGo: $('join-go'),
-    online: $('online'), status: $('home-status'),
+    nick: $('nick'), quick: $('quick'), create: $('create'), priv: $('private'), join: $('join'), joinRow: $('joinrow'), code: $('code'), joinGo: $('join-go'),
+    online: $('online'), status: $('home-status'), rooms: $('rooms'), roomsList: $('rooms-list'), roomsCount: $('rooms-count'),
     lobbyCode: $('lobby-code'), title: $('lobby-title'), mode: $('lobby-mode'), diff: $('lobby-diff'), teams: $('lobby-teams'), hint: $('lobby-hint'),
     lobbyStatus: $('lobby-status'), start: $('lobby-start'),
   };
@@ -21,10 +22,12 @@ export function createLobby(root, app) {
   const defaultNick = () => `Oyuncu-${Math.floor(1000 + Math.random() * 9000)}`;
   el.nick.value = store('sp.nick') || defaultNick();
   const nick = () => { const v = el.nick.value.trim().slice(0, 16) || defaultNick(); el.nick.value = v; store('sp.nick', v); return v; };
-  let lobby = null, picked = null;
+  let lobby = null, picked = null, serverUp = false;
 
   function setServer(up) {
-    for (const b of [el.create, el.join, el.joinGo]) {
+    serverUp = up;
+    el.priv.disabled = !up; el.rooms.hidden = !up;
+    for (const b of [el.quick, el.create, el.join, el.joinGo]) {
       b.disabled = !up; b.classList.toggle('soon', !up); b.title = up ? '' : 'Çok oyunculu yakında';
       const tag = b.querySelector('.soon-tag');
       if (b === el.joinGo) continue;
@@ -34,7 +37,8 @@ export function createLobby(root, app) {
   }
   setServer(false);
 
-  el.create.onclick = () => { el.status.textContent = 'Oda kuruluyor…'; app.create(nick(), app.settingsChoice()); };
+  el.quick.onclick = () => { el.status.textContent = 'Oda aranıyor…'; app.quick(nick(), app.settingsChoice()); };
+  el.create.onclick = () => { el.status.textContent = 'Oda kuruluyor…'; app.create(nick(), { ...app.settingsChoice(), private: el.priv.checked }); };
   el.join.onclick = () => { el.joinRow.hidden = !el.joinRow.hidden; if (!el.joinRow.hidden) el.code.focus(); };
   const joinGo = () => {
     const code = el.code.value.trim().toUpperCase();
@@ -60,12 +64,26 @@ export function createLobby(root, app) {
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+  /** Açık odalar: her satırda yöneticinin adı, kip ve bot zorluğu, insan / koltuk, durum ve KATIL; kod gösterilmez. */
+  function setRooms(list) {
+    el.roomsCount.textContent = list.length ? String(list.length) : '';
+    if (!list.length) { el.roomsList.innerHTML = '<div class="rooms-empty">Şu an açık oda yok. Hızlı katıl yeni bir oda kurar.</div>'; return; }
+    el.roomsList.innerHTML = list.map(r => {
+      const playing = r.state === 'playing';
+      return `<button class="room${playing ? ' playing' : ''}" data-code="${esc(r.code)}" title="${playing ? 'Maç sürüyor: boş koltuğa oturup oyuna girersin' : 'Lobide, yöneticinin başlatması bekleniyor'}">`
+        + `<span><b>${esc(r.host)}</b><small>${modeLabel(r.teamSize)} · ${r.humans}/${r.seats} oyuncu · bot ${(DIFFICULTY_LABEL[r.difficulty] || '').toLocaleLowerCase('tr')}</small></span>`
+        + `<span class="room-go"><i>${playing ? 'MAÇTA' : 'LOBİDE'}</i><em>KATIL →</em></span></button>`;
+    }).join('');
+    for (const b of el.roomsList.querySelectorAll('.room')) b.onclick = () => { if (!serverUp) return; el.status.textContent = 'Bağlanıyor…'; app.join(nick(), b.dataset.code); };
+  }
+  setRooms([]);
+
   function render(next) {
     lobby = next; if (!lobby) return;
     const me = app.id(), host = lobby.hostId === me, mine = lobby.seats.findIndex(s => s && s.id === me);
     const n = lobby.settings?.teamSize || 5, teams = teamsFor(n), diff = lobby.settings?.difficulty || 'normal';
     el.lobbyCode.textContent = lobby.code;
-    el.title.textContent = `ODA · ${modeLabel(n)} · BOT ${DIFFICULTY_LABEL[diff] || diff}`;
+    el.title.textContent = `ODA · ${modeLabel(n)} · BOT ${DIFFICULTY_LABEL[diff] || diff}${lobby.private ? ' · ÖZEL (yalnız kodla)' : ''}`;
     el.mode.value = String(n); el.mode.disabled = !host || lobby.state === 'playing';
     el.diff.value = diff; el.diff.disabled = !host || lobby.state === 'playing';
     if (picked != null && !lobby.seats.some(s => s && s.id === picked)) picked = null;
@@ -105,7 +123,7 @@ export function createLobby(root, app) {
   }
 
   return {
-    nick, setServer, render,
+    nick, setServer, render, setRooms,
     setOnline(n) { el.online.textContent = n > 0 ? `● ${n} çevrim içi` : ''; el.online.title = 'Oyunu şu an açık tutan sekme sayısı'; },
     status(text) { el.status.textContent = text; el.lobbyStatus.textContent = text; },
     urlCode() {

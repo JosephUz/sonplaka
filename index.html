@@ -58,12 +58,15 @@
         <div class="home-meta"><span id="sp-home-meta-1">5v5 · SEN + 09 BOT</span><span>SÜRE BİTİNCE SON PLAKADA KALAN KAZANIR</span></div>
         <div class="home-online">
           <label class="nick"><span>ADIN</span><input id="sp-nick" maxlength="16" autocomplete="off" spellcheck="false" aria-label="Oyuncu adı"></label>
+          <button id="sp-quick" class="quick">HIZLI KATIL <span>→</span></button>
           <div class="online-row">
             <button id="sp-create">ODA KUR</button>
             <button id="sp-join">ODAYA KATIL</button>
           </div>
+          <label class="private-row"><input type="checkbox" id="sp-private"><span><b>Özel oda</b> listede çıkmaz, yalnız kodla girilir</span></label>
           <div id="sp-joinrow" class="join-row" hidden><input id="sp-code" placeholder="ODA KODU" maxlength="8" autocomplete="off" spellcheck="false" aria-label="Oda kodu"><button id="sp-join-go">Katıl</button></div>
           <div class="home-status"><span id="sp-online"></span><span id="sp-home-status" role="status"></span></div>
+          <div id="sp-rooms" class="rooms" hidden><b class="rooms-head">AÇIK ODALAR <small id="sp-rooms-count"></small></b><div id="sp-rooms-list" class="rooms-list"></div></div>
         </div>
         <div class="rule-cards">
           <div><b>01 / DİSK</b><span>Vurulan savrulur; can yok, düşen 4 saniyede geri gelir.</span></div>
@@ -147,7 +150,7 @@
           <dt>V</dt><dd>Kamera: birinci şahıs ↔ omuz üstü.</dd>
           <dt>Esc</dt><dd>Fareyi bırakır ve oyunu durdurur.</dd>
         </dl>
-        <p>Diskler görünmez sınırdan seker (3 kez): arkadan vur. Plakalarda siper yok: sürekli hareket et. Çok oyunculu: giriş ekranında kipi seç, oda kur, kodu ya da linki paylaş; herkes boş koltuğa oturur, boş kalanları botlar oynar.</p>
+        <p>Diskler görünmez sınırdan seker (3 kez): arkadan vur. Plakalarda siper yok: sürekli hareket et. Çok oyunculu: giriş ekranında kipi seç, açık odalardan birine katıl, hızlı katıl ya da oda kurup kodu / linki paylaş (özel oda listede görünmez); herkes boş koltuğa oturur, boş kalanları botlar oynar.</p>
         <button id="sp-help-close" class="primary">ANLADIM</button>
       </div>
     </section>

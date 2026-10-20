@@ -36,8 +36,10 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 #son-plaka .header-actions button,#son-plaka .header-actions a.btn{background:#111827e8;font-size:11px}
 
 /* Giriş ekranı. */
-#son-plaka .home{position:absolute;inset:0;background:linear-gradient(90deg,#0b0f1afc 0%,#0b0f1aef 28%,#0b0f1a77 52%,transparent 74%);display:flex;align-items:center}
-#son-plaka .home-content{width:560px;margin-left:7vw;padding-top:calc(60px + var(--sp-top))}
+/* Giriş ekranı pencereye sığmazsa (alçak pencere, uzun açık odalar listesi) kendi içinde kayar; `safe` ortalama
+   taşan içeriğin üstünü üst çubuğun altında kesmez. */
+#son-plaka .home{position:absolute;inset:0;background:linear-gradient(90deg,#0b0f1afc 0%,#0b0f1aef 28%,#0b0f1a77 52%,transparent 74%);display:flex;align-items:safe center;overflow-y:auto;overscroll-behavior:contain}
+#son-plaka .home-content{width:560px;margin-left:7vw;padding-top:calc(96px + var(--sp-top));padding-bottom:24px}
 #son-plaka .home h1{font-size:clamp(40px,4.4vw,72px);letter-spacing:-3px;line-height:1.05;margin:25px 0;color:#eef3ff;font-weight:900}
 #son-plaka .home h1 span{color:#f5c26b}
 #son-plaka .home p{font-size:16px;line-height:1.8;color:#b7c6df;margin:24px 0 32px}
@@ -296,6 +298,36 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 #son-plaka .join-row input{background:#111827d9;border:1px solid #cfe3ff2a;border-radius:8px;padding:10px 12px;text-transform:uppercase;letter-spacing:2px;color:#e8eefc}
 #son-plaka .home-status{display:flex;gap:12px;min-height:14px;font-size:10px;letter-spacing:.5px;color:#9fb3d1}
 #son-plaka #sp-online{color:#8fe3a4;font-weight:700}
+/* Hızlı katıl, Özel oda seçimi ve açık odalar listesi. Geniş ekranda liste ve Hızlı katıl ad kutusuyla oda
+   düğmelerinin sağında ikinci sütundur (giriş ekranı uzamasın); dar ve kısa ekranda alta dizilir. */
+#son-plaka .home-online .quick{display:flex;align-items:center;justify-content:space-between;font-weight:800;letter-spacing:1px;padding:12px 16px;background:#f5c26b1a;border-color:#f5c26b8c;color:#f5ce8c;position:relative}
+#son-plaka .home-online .quick:hover{background:#f5c26b30}
+#son-plaka .home-online .quick.soon{opacity:.55;cursor:default;transform:none}
+#son-plaka .private-row{display:flex;align-items:center;gap:8px;font-size:10px;line-height:1.3;color:#9fb3d1;cursor:pointer}
+#son-plaka .private-row b{color:#e8eefc;font-weight:800;letter-spacing:.5px;margin-right:3px}
+#son-plaka .home-online .private-row input{flex:none;width:15px;height:15px;margin:0;padding:0;accent-color:#f5c26b;cursor:pointer}
+#son-plaka .private-row:has(input:disabled){opacity:.5;cursor:default}
+#son-plaka .rooms{display:grid;gap:6px;align-content:start;min-width:0}
+#son-plaka .rooms-head{font-size:9px;font-weight:800;letter-spacing:1.5px;color:#9fb3d1}
+#son-plaka .rooms-head small{color:#f5c26b;margin-left:4px;font-size:9px}
+#son-plaka .rooms-list{display:grid;gap:6px;max-height:188px;overflow-y:auto;overscroll-behavior:contain}
+#son-plaka .room{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;padding:8px 12px;background:#111827d9;min-width:0}
+#son-plaka .room span{display:grid;gap:2px;min-width:0}
+#son-plaka .room b{font-weight:800;font-size:12px;color:#e8eefc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#son-plaka .room small{font-size:10px;line-height:1.35;color:#9fb3d1}
+#son-plaka .room em{font-style:normal;font-weight:800;font-size:10px;letter-spacing:1px;color:#f5c26b;white-space:nowrap}
+#son-plaka .room .room-go{justify-items:end;flex:none}
+#son-plaka .room i{font-style:normal;font-size:8px;font-weight:800;letter-spacing:1px;color:#9fb3d1}
+#son-plaka .room.playing i{color:#8fe3a4}
+#son-plaka .room:hover{border-color:#f5c26b66}
+#son-plaka .rooms-empty{font-size:11px;line-height:1.5;color:#9fb3d1;padding:9px 12px;border:1px dashed #cfe3ff2a;border-radius:8px}
+@media(min-width:1101px) and (min-height:561px){
+#son-plaka .home-online{width:100%;grid-template-columns:280px minmax(0,1fr);column-gap:16px;align-items:start}
+#son-plaka .home-online>*{grid-column:1}
+#son-plaka .home-online>.quick{grid-column:2;grid-row:1}
+#son-plaka .home-online>.rooms{grid-column:2;grid-row:2/span 5}
+#son-plaka .rooms-list{max-height:150px}
+}
 #son-plaka .home .rule-cards{margin-top:30px}
 
 /* Lobi. */
@@ -327,7 +359,9 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 #son-plaka .home-online{margin-top:10px;width:min(440px,70vw);grid-template-columns:1fr 1fr;gap:6px}
 #son-plaka .home-online .nick input{padding:7px 0;font-size:12px}
 #son-plaka .online-row button{padding:8px 10px;font-size:10px}
-#son-plaka .join-row,#son-plaka .home-status{grid-column:1/-1}
+#son-plaka .join-row,#son-plaka .home-status,#son-plaka .rooms{grid-column:1/-1}
+#son-plaka .home-online .quick{padding:8px 12px;font-size:10px}
+#son-plaka .rooms-list{max-height:none}
 #son-plaka .home .rule-cards{display:none}
 #son-plaka .lobby-card{padding:16px}
 #son-plaka .lobby-head h2{font-size:24px;margin:4px 0}

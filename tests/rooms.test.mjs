@@ -128,3 +128,78 @@ test('bağlı kimse kalmayınca oda kapanır', async () => {
   assert.equal(rooms.rooms.size, 0);
   rooms.close();
 });
+
+test('açık oda listede görünür, özel oda görünmez; özel odaya kodla yine girilir', () => {
+  const { rooms, join } = setup();
+  const a = join('Ali'), b = join('Ayşe'), c = join('Can');
+  a.say({ t: 'create', teamSize: 3 });
+  b.say({ t: 'create', teamSize: 2, private: true });
+  c.say({ t: 'list' });
+  const list = c.last(S2C.ROOMS).rooms;
+  assert.equal(list.length, 1);
+  assert.deepEqual(list[0], { code: a.last(S2C.LOBBY).code, host: 'Ali', teamSize: 3, difficulty: 'normal', humans: 1, seats: 6, state: 'lobby' });
+  assert.equal(a.last(S2C.LOBBY).private, false); assert.equal(b.last(S2C.LOBBY).private, true);
+  c.say({ t: 'join', code: b.last(S2C.LOBBY).code });
+  assert.equal(c.last(S2C.LOBBY).seats[2].nick, 'Can');
+  rooms.close();
+});
+
+test('hızlı katıl: ikinci oyuncu ilkinin bekleyen odasına oturur; aynı kip ve kalabalık oda önce', () => {
+  const { rooms, join } = setup();
+  const a = join('Ali'), b = join('Ayşe'), c = join('Can'), d = join('Deniz');
+  a.say({ t: 'quick', teamSize: 2 });
+  const code = a.last(S2C.LOBBY).code;
+  assert.equal(rooms.rooms.size, 1); assert.equal(a.last(S2C.LOBBY).hostId, a.last(S2C.WELCOME).id, 'oda yoksa hızlı katılan kurar ve yönetir');
+  assert.equal(a.last(S2C.LOBBY).private, false);
+  b.say({ t: 'quick', teamSize: 2 });
+  assert.equal(b.last(S2C.LOBBY).code, code);
+  assert.equal(b.last(S2C.LOBBY).seats[2].nick, 'Ayşe');
+  // Başka kipte bir oda daha: aynı kip seçen oraya, olmayan kip seçen kalabalık odaya gider.
+  c.say({ t: 'create', teamSize: 4 });
+  d.say({ t: 'quick', teamSize: 4 });
+  assert.equal(d.last(S2C.LOBBY).code, c.last(S2C.LOBBY).code);
+  const e = join('Ece'); e.say({ t: 'quick', teamSize: 5 });
+  assert.equal(e.last(S2C.LOBBY).code, code, 'eşit kalabalıkta kip tutmazsa ilk uygun oda');
+  assert.equal(rooms.rooms.size, 2);
+  rooms.close();
+});
+
+test('hızlı katıl: dolu, başlamış ve özel odalar önerilmez; uygun oda yoksa yeni açık oda kurulur', () => {
+  const { rooms, join } = setup();
+  const a = join('Ali'), b = join('Ayşe'), c = join('Can'), d = join('Deniz'), e = join('Ece');
+  a.say({ t: 'create', teamSize: 1, private: true });
+  b.say({ t: 'create', teamSize: 2 }); c.say({ t: 'join', code: b.last(S2C.LOBBY).code }); b.say({ t: 'start' });
+  // Dolu oda: herkes tek beş koltuk, beşi de dolu.
+  const full = [join('F1'), join('F2'), join('F3'), join('F4'), join('F5')];
+  full[0].say({ t: 'create', teamSize: 1 });
+  for (const f of full.slice(1)) f.say({ t: 'join', code: full[0].last(S2C.LOBBY).code });
+  assert.equal(full[4].last(S2C.LOBBY).seats.filter(Boolean).length, 5);
+  e.say({ t: 'list' });
+  assert.deepEqual(e.last(S2C.ROOMS).rooms.map(r => [r.code, r.state]), [[b.last(S2C.LOBBY).code, 'playing']], 'listede yalnız boş koltuklu açık maç');
+  d.say({ t: 'quick', teamSize: 1 });
+  const mine = d.last(S2C.LOBBY);
+  assert.ok(![a, b, full[0]].some(x => x.last(S2C.LOBBY).code === mine.code), 'uygun olmayan odaya kondu');
+  assert.equal(mine.seats.filter(Boolean).length, 1); assert.equal(mine.settings.teamSize, 1); assert.equal(mine.private, false);
+  assert.equal(rooms.rooms.size, 4);
+  rooms.close();
+});
+
+test('liste izleyiciye değişince kendiliğinden gelir; boşalan oda listeden düşer', async () => {
+  const { rooms, join } = setup();
+  const a = join('Ali'), w = join('İzleyen');
+  w.say({ t: 'list' });
+  assert.equal(w.last(S2C.ROOMS).rooms.length, 0);
+  a.say({ t: 'create' });
+  await wait(300);
+  assert.equal(w.last(S2C.ROOMS).rooms.length, 1);
+  const sent = w.got.filter(m => m.t === S2C.ROOMS).length;
+  a.say({ t: 'ping', at: 1 });
+  await wait(300);
+  assert.equal(w.got.filter(m => m.t === S2C.ROOMS).length, sent, 'değişiklik yokken liste yeniden gitmemeli');
+  a.say({ t: 'leave' });
+  await wait(300);
+  assert.equal(w.last(S2C.ROOMS).rooms.length, 0);
+  assert.equal(rooms.rooms.size, 0);
+  assert.equal(a.got.filter(m => m.t === S2C.ROOMS).length, 0, 'listeyi istemeyene liste gitmez');
+  rooms.close();
+});

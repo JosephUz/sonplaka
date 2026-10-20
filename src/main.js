@@ -171,6 +171,7 @@ export async function start(root) {
   const net = onlineEnabled() && !sahne && !otopilot ? createNetClient({
     onWelcome() {
       lobby.setServer(true);
+      net.list(); // açık odalar: bundan sonra odada değilken liste değiştikçe sunucu kendisi yollar
       if (pending) { const go = pending; pending = null; go(); return; }
       const code = inviteCode || (!net.world && net.rememberedRoom());
       inviteCode = null;
@@ -200,6 +201,7 @@ export async function start(root) {
       show('results');
     },
     onOnline: n => lobby.setOnline(n),
+    onRooms: list => lobby.setRooms(list),
     onDisconnect(was) {
       lobby.setServer(false);
       if (was && online && started) ui.message('BAĞLANTI KOPTU · YENİDEN BAĞLANIYOR', 3);
@@ -210,6 +212,7 @@ export async function start(root) {
     id: () => net?.id,
     settingsChoice,
     create(nick, settings) { withHello(nick, () => net.create(settings)); },
+    quick(nick, settings) { withHello(nick, () => net.quick(settings)); },
     join(nick, code) { withHello(nick, () => net.join(code)); },
     seat: slot => net.seat(slot),
     move: (id, slot) => net.move(id, slot),
@@ -225,7 +228,7 @@ export async function start(root) {
     if (screen !== 'lobby') show('lobby');
   }
   function leaveRoom() {
-    net?.leave();
+    net?.leave(); net?.list();
     online = false; started = false; w = createWorld(); faceCenter();
     lobby.status('');
     show('home');
