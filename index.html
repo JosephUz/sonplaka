@@ -41,6 +41,8 @@
         <div class="eyebrow"><i></i> HERKES TEK – 5v5 DİSK ARENASI · DARALAN BOŞLUK</div>
         <h1>Plakalar düşer.<br><span>Sen kalırsın.</span></h1>
         <p>Diskle rakibi kenardan aşağı at, plakalar teker teker boşluğa düşerken<br>rampalarla içeri kaç. Son plakada doğuş kapanır: süre bitince orada ayakta kalan kazanır.</p>
+        <!-- Oda standardı (josephuz/docs/oda-standardi.md): ADIN → tek başına → ÇEVRİM İÇİ → AÇIK ODALAR. -->
+        <label class="nick home-nick"><span>ADIN</span><input id="sp-nick" maxlength="16" autocomplete="off" spellcheck="false" aria-label="Oyuncu adı"></label>
         <div class="mode-row" role="radiogroup" aria-label="Kaça kaç">
           <label><input type="radio" name="sp-mode" value="1">HERKES TEK</label>
           <label><input type="radio" name="sp-mode" value="2">2v2</label>
@@ -54,18 +56,17 @@
           <label><input type="radio" name="sp-diff" value="normal" checked>NORMAL</label>
           <label><input type="radio" name="sp-diff" value="hard">ZOR</label>
         </div>
-        <button id="sp-start" class="primary">ARENAYA GİR <span>↗</span></button>
+        <button id="sp-start" class="primary">TEK BAŞINA <span>↗</span></button>
         <div class="home-meta"><span id="sp-home-meta-1">5v5 · SEN + 09 BOT</span><span>SÜRE BİTİNCE SON PLAKADA KALAN KAZANIR</span></div>
         <div class="home-online">
-          <label class="nick"><span>ADIN</span><input id="sp-nick" maxlength="16" autocomplete="off" spellcheck="false" aria-label="Oyuncu adı"></label>
+          <div class="online-head"><b>ÇEVRİM İÇİ</b><span id="sp-online"></span></div>
           <button id="sp-quick" class="quick">HIZLI KATIL <span>→</span></button>
           <div class="online-row">
             <button id="sp-create">ODA KUR</button>
             <button id="sp-join">ODAYA KATIL</button>
           </div>
-          <label class="private-row"><input type="checkbox" id="sp-private"><span><b>Özel oda</b> listede çıkmaz, yalnız kodla girilir</span></label>
-          <div id="sp-joinrow" class="join-row" hidden><input id="sp-code" placeholder="ODA KODU" maxlength="8" autocomplete="off" spellcheck="false" aria-label="Oda kodu"><button id="sp-join-go">Katıl</button></div>
-          <div class="home-status"><span id="sp-online"></span><span id="sp-home-status" role="status"></span></div>
+          <div id="sp-joinrow" class="join-row" hidden><input id="sp-code" placeholder="ODA KODU" maxlength="6" autocomplete="off" spellcheck="false" aria-label="Oda kodu"><button id="sp-join-go">KATIL</button></div>
+          <div class="home-status"><span id="sp-home-status" role="status"></span></div>
           <div id="sp-rooms" class="rooms" hidden><b class="rooms-head">AÇIK ODALAR <small id="sp-rooms-count"></small></b><div id="sp-rooms-list" class="rooms-list"></div></div>
         </div>
         <div class="rule-cards">
@@ -144,13 +145,13 @@
           <dt>Daralma</dt><dd>40. saniyede dış halka (8 plaka) düşer, 80. saniyede iç halka. Sonra merkez plaka 130. saniyeye kadar yarıçap 5,5'e küçülür ve orada durur; merkez hiç düşmez, 145. saniyede süre biter. Düşmeden 5 saniye önce plaka titrer: içeri kaç.</dd>
           <dt>Güç diskleri</dt><dd>Merkezde ve iç halkada doğar: <b>üçlü</b> (3 atış yelpaze) ve <b>dondurucu</b> (3 atış, vurulan 2 saniye donar; donmuşu levyeyle it).</dd>
           <dt>Düşme hakkı</dt><dd>Herkesin <b>5 düşme hakkı</b> var: beşinci düşüşte doğuş açık olsa da elenirsin. Yeni doğan 2 saniye korunur (disk ve levye işlemez, botlar hedef almaz); ilk atışın korumayı bitirir. Botlar da doğduktan hemen sonra atmaz.</dd>
-          <dt>Bot zorluğu</dt><dd>Giriş ekranında <b>Kolay / Normal / Zor</b>; odada yönetici seçer. Zor botlar hızlı tepki verir ve isabetli atar; Normal ve Kolay daha seyrek ve sapmalı atar, diskten daha az kaçar.</dd>
+          <dt>Bot zorluğu</dt><dd>Giriş ekranında <b>Kolay / Normal / Zor</b>; odada kuran seçer. Zor botlar hızlı tepki verir ve isabetli atar; Normal ve Kolay daha seyrek ve sapmalı atar, diskten daha az kaçar.</dd>
           <dt>Son plaka</dt><dd>Dış ve iç halka ayaktayken düşme hakkı sınırsız: 4 saniye sonra ayakta bir plakada doğarsın. İç halka düşünce yalnız merkez kalır ve <b>doğuş kapanır</b>: rakip takımın kimsesi kalmayınca ayakta kalan takım hemen kazanır. <b>145. saniyede süre bitince son plakada kalan kazanır</b>: ayakta oyuncusu en çok olan takım, eşitse en çok düşüren; herkes tek kipinde merkezde kalan tek kişi.</dd>
-          <dt>Kipler</dt><dd><b>Herkes tek</b> (5 kişi, herkes herkese), <b>2v2</b>, <b>3v3</b>, <b>4v4</b>, <b>5v5</b>; boş yerleri botlar doldurur. Odada da aynı kipler: yönetici seçer. İnsanlar aynı takımdaysa co-op (rakipler bot), karşı takımdaki boş koltuğa geçince PvP.</dd>
+          <dt>Kipler</dt><dd><b>Herkes tek</b> (5 kişi, herkes herkese), <b>2v2</b>, <b>3v3</b>, <b>4v4</b>, <b>5v5</b>; boş yerleri botlar doldurur. Odada da aynı kipler: kuran seçer. İnsanlar aynı takımdaysa co-op (rakipler bot), karşı takımdaki boş koltuğa geçince PvP.</dd>
           <dt>V</dt><dd>Kamera: birinci şahıs ↔ omuz üstü.</dd>
           <dt>Esc</dt><dd>Fareyi bırakır ve oyunu durdurur.</dd>
         </dl>
-        <p>Diskler görünmez sınırdan seker (3 kez): arkadan vur. Plakalarda siper yok: sürekli hareket et. Çok oyunculu: giriş ekranında kipi seç, açık odalardan birine katıl, hızlı katıl ya da oda kurup kodu / linki paylaş (özel oda listede görünmez); herkes boş koltuğa oturur, boş kalanları botlar oynar.</p>
+        <p>Diskler görünmez sınırdan seker (3 kez): arkadan vur. Plakalarda siper yok: sürekli hareket et. Çok oyunculu: giriş ekranında kipi seç, AÇIK ODALAR listesinden birine katıl, HIZLI KATIL ya da ODA KUR ile kurup kodu / linki paylaş (odayı bekleme odasında özel yaparsan listede görünmez); herkes boş koltuğa oturur, boş kalanları botlar oynar.</p>
         <button id="sp-help-close" class="primary">ANLADIM</button>
       </div>
     </section>
@@ -159,7 +160,8 @@
       <div class="card lobby-card">
         <span class="eyebrow" id="sp-lobby-title">ODA</span>
         <div class="lobby-head"><h2 id="sp-lobby-code">----</h2><button id="sp-lobby-copy">Linki kopyala</button></div>
-        <div class="lobby-settings"><label class="lobby-mode">KAÇA KAÇ <select id="sp-lobby-mode" aria-label="Kip"></select></label><label class="lobby-mode">BOT <select id="sp-lobby-diff" aria-label="Bot zorluğu"></select></label></div>
+        <p id="sp-lobby-vis" class="lobby-vis">AÇIK ODA · listede görünür</p>
+        <div class="lobby-settings"><label class="lobby-mode">KAÇA KAÇ <select id="sp-lobby-mode" aria-label="Kip"></select></label><label class="lobby-mode">BOT <select id="sp-lobby-diff" aria-label="Bot zorluğu"></select></label><label class="lobby-mode">ODA <select id="sp-lobby-private" aria-label="Oda görünürlüğü"><option value="0">Herkese açık</option><option value="1">Özel</option></select></label></div>
         <p id="sp-lobby-hint"></p>
         <div class="lobby-teams" id="sp-lobby-teams"></div>
         <p id="sp-lobby-status" class="lobby-status" role="status"></p>

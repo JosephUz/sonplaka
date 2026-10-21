@@ -103,7 +103,7 @@ sürgüsü) · `Yeniden başlat` (çevrimdışı) · `Ana menü` / çevrim için
 - **Düşme hakkı ve koruma**: herkesin **5 düşme hakkı** var (`LIFE.lives`); beşinci düşüşte doğuş açık olsa da elenir,
   hakkı biten sayılmaz (bir takımın herkesinin hakkı biterse maç biter). Yeni doğan 2 sn korunur (`LIFE.shield`):
   disk ve levye işlemez, botlar hedef almaz; ilk atış ya da levye korumayı bitirir. Botlar doğduktan sonra bir süre atmaz.
-- **Bot zorluğu** (giriş ekranında Kolay / Normal / Zor, odada yönetici seçer; `BOT_LEVELS`): Zor = hızlı tepki, isabetli
+- **Bot zorluğu** (giriş ekranında Kolay / Normal / Zor, odada kuran seçer; `BOT_LEVELS`): Zor = hızlı tepki, isabetli
   nişan; Normal ve Kolay daha seyrek plan yapar, daha seyrek ve sapmalı atar, diskten daha az kaçar, doğunca daha uzun bekler.
 - **Doğuş ve kazanan**: dış ve iç halka ayaktayken düşen 4 sn sonra ayakta bir plakada doğar (kendi dış plakası;
   düştüyse iç halka). İç halka düşünce yalnız merkez kalır ve doğuş kapanır: rakip takımların kimsesi kalmayınca
@@ -137,17 +137,25 @@ kaydırarak bakış, sağ altta **AT** (basılı tut: ağır), **LEVYE**, **ZIPL
 
 ## Çok oyunculu
 
-Giriş ekranında ad yazılır, kip seçilir, **Oda kur** ya da **Odaya katıl** (kod ya da `?oda=KOD` linki). Kod
-bilmeden de oynanır: **Açık odalar** listesi boş koltuklu herkese açık odaları (yönetici, kip, n/m oyuncu, lobide ya da
-maçta) gösterir, **KATIL** ile kodsuz girilir; **Hızlı katıl** lobide bekleyen uygun açık odaya (önce aynı kip, sonra
-kalabalık olan) oturtur, yoksa seçili kiple yeni açık oda kurar. **Özel oda** işaretlenerek kurulan oda listede ve
-hızlı katılımda çıkmaz, yalnız kod / linkle girilir. Liste odada değilken sunucudan değiştikçe gelir. Lobide
-koltuklar kipe göre dizilir (herkes tek: 5 tekil koltuk; 2v2 … 5v5: iki takım sütunu); yönetici kipi lobide de
-değiştirir, koltuklar yeniden dizilir. Herkes boş koltuğa oturur: bütün insanlar aynı takımdaysa **co-op** (rakipler
-bot), karşı takımdaki boş koltuğa geçen olursa **PvP**. Yönetici oyuncuları taşır. Maçı sunucu koşturur (`server/rooms.mjs`,
+Oda akışı bütün josephuz oyunlarında aynıdır (`josephuz/docs/oda-standardi.md`). Giriş ekranı sırası: **ADIN**, tek
+başına seçimleri (kip, bot zorluğu) ve **TEK BAŞINA ↗**, sonra **ÇEVRİM İÇİ** (`● N çevrim içi`): **HIZLI KATIL →**,
+**ODA KUR**, **ODAYA KATIL** (kod kutusu + **KATIL**; `KPRT4` yazılırsa `KPRT-4` olur), durum satırı ve **AÇIK ODALAR**
+listesi (kuranın adı, `5v5 · Bot Normal · 2/10 oyuncu`, LOBİDE / MAÇTA, **KATIL →** ya da **DOLU**). Liste odada
+değilken sunucudan değiştikçe gelir. **ODA KUR** ana ekrandaki kip ve zorlukla hemen herkese açık oda kurar; **HIZLI
+KATIL** boş koltuklu açık odaya (önce lobidekiler, sonra insanı çok olan; maçtaki oda da olur) oturtur, yoksa aynı
+ayarlarla açık oda kurar. Davet linki `?oda=KOD` açılınca odaya kendiliğinden girilir; odadayken adres çubuğunda
+`?oda=KOD` durur, çıkınca silinir; sayfa yenilenirse aynı koltuğa dönülür.
+
+Bekleme odasında `ODA · <özet>`, kod, **Linki kopyala**, görünürlük (`AÇIK ODA · listede görünür` / `ÖZEL ODA · yalnız
+kodla`), takım sütunları (herkes tek: 5 tekil koltuk; 2v2 … 5v5: iki takım sütunu) ve `N insan · M bot` durur. Kuran
+**KAÇA KAÇ**, **BOT** ve **ODA: Herkese açık / Özel** ayarlarını değiştirir (özel oda listede ve hızlı katılımda çıkmaz),
+oyuncuları sürükleyip taşır ve **MAÇI BAŞLAT ↗** der; ötekiler `Kuranın başlatması bekleniyor` görür. Herkes boş
+koltuğa (`Bot · boş koltuk` → `Buraya otur`) oturur: bütün insanlar aynı takımdaysa **co-op** (rakipler bot), karşı
+takımdaki boş koltuğa geçen olursa **PvP**. Kuran çıkarsa kuranlık sıradaki insana geçer. Maç sürerken gelen doğrudan
+maça girer (bir botun koltuğunu alır); maçta Esc menüsünde **Odadan çık**, maç sonunda **LOBİYE DÖN**. Maçı sunucu koşturur (`server/rooms.mjs`,
 tarayıcıdakiyle aynı `src/world.js`), sayfa girdiyi (hareket, bakış, basışlar) yollar, gelen durumu ara değerle çizer ve
 kendi oyuncunu gecikmesiz göstermek için yerel girdiden kısa bir öne kayma ekler (`src/net/`). Kopan oyuncunun
-koltuğunu bot oynar, aynı sekmeyle geri dönünce yerine oturur. Sunucu kapalıysa oda düğmeleri **Yakında** olur.
+koltuğunu bot oynar, aynı sekmeyle geri dönünce yerine oturur. Sunucu kapalıysa oda düğmeleri **YAKINDA** olur, açık odalar gizlenir.
 Android uygulamasında çok oyunculu kapalıdır (`src/config.js` → `ONLINE`).
 
 ## Dosyalar

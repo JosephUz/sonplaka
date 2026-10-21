@@ -94,7 +94,7 @@ export const CREDIT = 4;
  *
  * Zorluk (`BOT_LEVELS`): **zor** = bu değerler (tepki hızlı, nişan isabetli); **normal** ve **kolay** daha seyrek plan
  * yapar, daha seyrek ve daha sapmalı atar, diskten daha az kaçar, doğduktan sonra daha uzun bekler. Tek başına oyunda
- * giriş ekranında, odada yönetici seçer (her iki takımın botları için).
+ * giriş ekranında, odada kuran seçer (her iki takımın botları için).
  */
 export const BOT = { think: 0.3, thinkJitter: 0.25, range: 11, close: 5, strafe: 1.1, edge: 2.2, fireRange: 30, fireEvery: 0.7, fireJitter: 0.9, aimError: 0.08, heavyChance: 0.12, dodgeChance: 0.5, crossChance: 0.25, stay: 4, spawnWait: 1.5, lead: 1 };
 export const BOT_LEVELS = {

@@ -34,7 +34,7 @@ Merkez plakada ve iç halka plakalarında doğar, alınınca 20 saniye sonra sı
 
 Her 0,3 saniyede plan: plakası titriyorsa içeri götüren zıplama plakasına kaçar; plakasında güç diski varsa alır; rakiple aynı plakadaysa mesafeyi koruyup yanlara kayarak atar ve yakınsa levye sallar; rakip başka plakadaysa menzildeyse çoğunlukla yerinde kalıp uzaktan atar, değilse zıplama plakalarıyla ona ya da merkeze gider (genişlik öncelikli yol; kapalı ve düşmüş plakalar yok). **Son plaka evresinde** (doğuş kapalı, süre bitince orada kalan kazanır) merkezde değilse oraya gider, merkezdeyse geri açılmaz: rakibin üstüne gidip kenara doğru iter. Levye diski beklemez, menzile giren rakibe her zaman sallanır. Yaklaşan diski görünce zıplayarak kaçınır. Ara sıra ağır disk hazırlar. Doğduktan sonra bir süre atmaz, korumalı rakibi hedef almaz.
 
-**Zorluk** (giriş ekranında Kolay / Normal / Zor; odada yönetici seçer, iki takımın botları için): Zor = yukarıdaki değerler (0,3 sn plan, 0,7 sn'de bir atış, küçük nişan sapması, diskten yarı yarıya kaçış, doğunca 1,5 sn bekleme). Normal 0,55 sn plan, 1,3 sn'de bir atış, daha büyük sapma, %30 kaçış, 2,5 sn bekleme. Kolay 0,9 sn plan, 2,2 sn'de bir atış, büyük sapma, %12 kaçış, 3,5 sn bekleme; hedefin hızını daha az önden alır.
+**Zorluk** (giriş ekranında Kolay / Normal / Zor; odada kuran seçer, iki takımın botları için): Zor = yukarıdaki değerler (0,3 sn plan, 0,7 sn'de bir atış, küçük nişan sapması, diskten yarı yarıya kaçış, doğunca 1,5 sn bekleme). Normal 0,55 sn plan, 1,3 sn'de bir atış, daha büyük sapma, %30 kaçış, 2,5 sn bekleme. Kolay 0,9 sn plan, 2,2 sn'de bir atış, büyük sapma, %12 kaçış, 3,5 sn bekleme; hedefin hızını daha az önden alır.
 
 ## Sonraki adımlar
 

@@ -7,9 +7,26 @@ import { mkdir } from 'node:fs/promises';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const url = process.env.GAME_URL || 'http://localhost:5187';
 await mkdir('artifacts', { recursive: true });
-const browser = await chromium.launch({ headless: true, args: process.env.SWIFTSHADER ? ['--use-gl=angle', '--use-angle=swiftshader'] : ['--use-gl=angle', '--use-angle=d3d11', '--ignore-gpu-blocklist'] });
+const browser = await chromium.launch({ headless: true, args: ['--mute-audio', ...(process.env.SWIFTSHADER ? ['--use-gl=angle', '--use-angle=swiftshader'] : ['--use-gl=angle', '--use-angle=d3d11', '--ignore-gpu-blocklist'])] });
+/**
+ * Sahte fare kilidi ve tam ekran: başsız Chromium oyunun requestPointerLock'unu Windows imlecine yansıtıp imleci
+ * hapsedebiliyor; her bağlamda gerçeği yerine bu çalışır. SAHTE_KILIT ortam değişkeni verilirse o dosya da yüklenir.
+ */
+const sahteKilit = () => {
+  let kilitli = null;
+  Object.defineProperty(Document.prototype, 'pointerLockElement', { get() { return kilitli; }, configurable: true });
+  Element.prototype.requestPointerLock = function () { kilitli = this; setTimeout(() => document.dispatchEvent(new Event('pointerlockchange')), 0); return Promise.resolve(); };
+  Document.prototype.exitPointerLock = function () { kilitli = null; setTimeout(() => document.dispatchEvent(new Event('pointerlockchange')), 0); };
+  Element.prototype.requestFullscreen = function () { return Promise.resolve(); };
+};
+async function newContext(opts = {}) {
+  const ctx = await browser.newContext({ viewport: { width: 1536, height: 960 }, ...opts });
+  await ctx.addInitScript(sahteKilit);
+  if (process.env.SAHTE_KILIT) await ctx.addInitScript({ path: process.env.SAHTE_KILIT });
+  return ctx;
+}
 try {
-  const page = await browser.newPage({ viewport: { width: 1536, height: 960 } }), errors = [];
+  const page = await (await newContext()).newPage(), errors = [];
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', e => { if (e.type() === 'error') errors.push(e.text()); });
   const game = fn => page.evaluate(fn);
@@ -117,6 +134,57 @@ try {
   assert.equal(await game(() => localStorage.getItem('sp.diff')), 'easy', 'zorluk hatırlanmadı');
   assert.equal(await game(() => window.__sonPlaka.world().players[0].lives), 5, 'düşme hakkı 5 olmalı');
   await page.screenshot({ path: 'artifacts/07-touch-ffa.png' });
+
+  // Çevrim içi oda akışı (oda standardı): ana ekran sırası, oda kur, tiresiz davet linki, bekleme odası yazıları,
+  // ODA ayarı, açık odalar satırı, ?oda adres çubuğu.
+  const pages = [];
+  for (let i = 0; i < 3; i++) {
+    const p = await (await newContext()).newPage();
+    p.on('pageerror', e => errors.push(e.message));
+    pages.push(p);
+  }
+  const [host, guest, seer] = pages;
+  await host.goto(url + '/?test=1');
+  const order = await host.evaluate(() => ['#sp-nick', '.mode-row', '#sp-start', '.online-head', '#sp-quick', '#sp-create', '#sp-join', '#sp-rooms']
+    .map(s => document.querySelector(s)).every((el, i, a) => !i || (a[i - 1].compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)));
+  assert.ok(order, 'ana ekran sırası standarda uymuyor');
+  assert.equal((await host.locator('#sp-start').textContent()).trim(), 'TEK BAŞINA ↗');
+  await host.waitForFunction(() => !document.querySelector('#sp-create').disabled, null, { timeout: 8000 });
+  await host.locator('#sp-create').click();
+  await host.locator('#sp-lobby').waitFor({ state: 'visible' });
+  const code = (await host.locator('#sp-lobby-code').textContent()).trim();
+  assert.match(code, /^[A-Z]{4}-[2-9]$/);
+  assert.match(await host.locator('#sp-lobby-title').textContent(), /^ODA · 5v5 · Bot Normal$/);
+  assert.equal(await host.locator('#sp-lobby-vis').textContent(), 'AÇIK ODA · listede görünür');
+  assert.equal((await host.locator('#sp-lobby-start').textContent()).trim(), 'MAÇI BAŞLAT ↗');
+  assert.equal(new URL(host.url()).searchParams.get('oda'), code, 'odadayken adres ?oda=KOD göstermeli');
+  await guest.goto(url + '/?test=1&oda=' + code.replace('-', '').toLowerCase());
+  await guest.locator('#sp-lobby').waitFor({ state: 'visible', timeout: 8000 });
+  assert.equal((await guest.locator('#sp-lobby-code').textContent()).trim(), code, 'tiresiz davet linkiyle odaya girilmeli');
+  assert.ok(await guest.locator('#sp-lobby-start').isDisabled());
+  assert.equal((await guest.locator('#sp-lobby-start').textContent()).trim(), 'Kuranın başlatması bekleniyor');
+  assert.ok(await guest.locator('#sp-lobby-private').isDisabled(), 'ayarlar yalnız kuranda açık');
+  assert.match(await guest.locator('#sp-lobby-teams').textContent(), /kuran/);
+  assert.match(await guest.locator('.seat.me').textContent(), /sen/);
+  assert.match(await guest.locator('.seat.free').first().textContent(), /Bot · boş koltuk/);
+  assert.match(await guest.locator('#sp-lobby-hint').textContent(), /^2 insan · 8 bot/);
+  await host.locator('#sp-lobby-private').selectOption('1');
+  await guest.waitForFunction(() => document.querySelector('#sp-lobby-vis').textContent === 'ÖZEL ODA · yalnız kodla', null, { timeout: 5000 });
+  await seer.goto(url + '/?test=1');
+  await seer.waitForFunction(() => !document.querySelector('#sp-rooms').hidden, null, { timeout: 8000 });
+  await seer.waitForTimeout(500);
+  assert.equal(await seer.locator(`.room[data-code="${code}"]`).count(), 0, 'özel oda listede çıkmamalı');
+  await host.locator('#sp-lobby-private').selectOption('0');
+  await seer.locator(`.room[data-code="${code}"]`).waitFor({ timeout: 5000 });
+  const row = await seer.locator(`.room[data-code="${code}"]`).textContent();
+  assert.ok(row.includes('5v5 · Bot Normal · 2/10 oyuncu') && row.includes('LOBİDE') && row.includes('KATIL →'), 'oda satırı: ' + row);
+  await host.screenshot({ path: 'artifacts/08-lobby.png' });
+  await seer.screenshot({ path: 'artifacts/09-rooms.png' });
+  await guest.locator('#sp-lobby-leave').click();
+  await guest.locator('#sp-home').waitFor({ state: 'visible' });
+  assert.equal(new URL(guest.url()).searchParams.get('oda'), null, 'odadan çıkınca ?oda silinmeli');
+  await host.locator('#sp-lobby-leave').click();
+  for (const p of pages) await p.context().close();
 
   assert.deepEqual(errors, [], 'tarayıcı hataları: ' + errors.join(' | '));
   console.log('Tarayıcı dumanı testi geçti; ekran görüntüleri artifacts/ içinde.');

@@ -173,18 +173,20 @@ export async function start(root) {
       lobby.setServer(true);
       net.list(); // açık odalar: bundan sonra odada değilken liste değiştikçe sunucu kendisi yollar
       if (pending) { const go = pending; pending = null; go(); return; }
-      const code = inviteCode || (!net.world && net.rememberedRoom());
+      const remembered = !net.world && net.rememberedRoom();
+      const code = inviteCode || remembered;
+      if (code && !net.lobby) { lobby.status(code === remembered ? 'Odaya geri bağlanıyor…' : 'Odaya bağlanıyor…'); net.join(code); }
       inviteCode = null;
-      if (code && !net.lobby) net.join(code);
     },
     onLobby(msg) {
       online = true;
+      lobby.setUrlCode(msg.code);
       if (screen === 'lobby') lobby.render(msg);
       else if (!started && screen !== 'results') showLobby(msg);
     },
     onError(msg) {
       lobby.status(msg);
-      if (msg === 'Böyle bir oda yok' && screen !== 'lobby') net.leave();
+      if (msg === 'Böyle bir oda yok' && screen !== 'lobby') { net.leave(); lobby.setUrlCode(null); }
     },
     onStart(msg, first) {
       if (!first) return;
@@ -230,7 +232,7 @@ export async function start(root) {
   function leaveRoom() {
     net?.leave(); net?.list();
     online = false; started = false; w = createWorld(); faceCenter();
-    lobby.status('');
+    lobby.status(''); lobby.setUrlCode(null);
     show('home');
   }
   if (net) {

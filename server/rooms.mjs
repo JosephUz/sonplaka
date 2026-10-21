@@ -2,20 +2,21 @@ import { randomBytes } from 'node:crypto';
 import { DIFFICULTIES, MATCH, MODES, playersFor, teamsFor } from '../src/config.js';
 import { createWorld, step } from '../src/world.js';
 import { encodeSnapshot } from '../src/net/snapshot.js';
-import { C2S, EDGES, NET, S2C, roomCode } from '../src/net/protocol.js';
+import { C2S, EDGES, NET, S2C, normalizeCode, roomCode } from '../src/net/protocol.js';
 
 /**
- * Odalar: kur / katıl / lobi / başlat / maç / bitiş (bitince oda lobiye döner, yönetici yeniden başlatabilir). Kip
- * (`settings.teamSize`: 1 herkes tek, 2-5 iki takım) kuranın seçimiyle başlar, yönetici lobide değiştirir; koltuk sayısı
- * kipe göredir (koltuk = takım × takım boyu + sıra). Herkes istediği boş koltuğa oturur (karşı takıma geçince PvP, hepsi
- * aynı takımdaysa co-op: rakipler bot), yönetici (kuran) oyuncuları koltuktan koltuğa taşır (dolu koltuğa taşırsa ikisi
- * yer değiştirir). Boş koltukları botlar doldurur. Maç sürerken de odaya katılınabilir.
+ * Odalar (josephuz oda standardı: josephuz/docs/oda-standardi.md): kur / katıl / lobi / başlat / maç / bitiş (bitince
+ * oda lobiye döner, kuran yeniden başlatır). Kip (`settings.teamSize`: 1 herkes tek, 2-5 iki takım) kuranın ana ekran
+ * seçimiyle başlar, kuran lobide değiştirir; koltuk sayısı kipe göredir (koltuk = takım × takım boyu + sıra). Herkes
+ * istediği boş koltuğa oturur (karşı takıma geçince PvP, hepsi aynı takımdaysa co-op: rakipler bot), kuran oyuncuları
+ * koltuktan koltuğa taşır (dolu koltuğa taşırsa ikisi yer değiştirir). Boş koltukları botlar doldurur. Maç sürerken de
+ * odaya katılınır (bir botun koltuğu devralınır). Kuran çıkarsa kuranlık sıradaki (bağlı) insana geçer.
  *
- * Açık odalar: oda kurulurken özel seçilmedikçe herkese açıktır ve giriş ekranındaki listede görünür (kodsuz katılım);
- * özel oda listede ve hızlı katılımda yoktur, yalnız kod / linkle girilir. Listeyi isteyen (`list`) ve odada olmayan
- * bağlantılar izleyicidir: liste değişince (en çok 250 ms'de bir, yalnız içerik farklıysa) onlara yeniden yollanır.
- * Hızlı katıl: oyuncu lobide bekleyen, boş koltuğu olan açık odalardan en uygununa (önce aynı kip, sonra en kalabalık)
- * oturur; yoksa onun seçimiyle yeni açık oda kurulur ve yöneticisi o olur.
+ * Açık odalar: oda herkese açık kurulur (`settings.private` false); kuran lobide özele çevirebilir. Özel oda listede ve
+ * hızlı katılımda yoktur, yalnız kod / linkle girilir. Listeyi isteyen (`list`) ve odada olmayan bağlantılar
+ * izleyicidir: liste değişince (en çok 250 ms'de bir, yalnız içerik farklıysa) onlara yeniden yollanır. Dolu açık oda
+ * da listede durur (istemci DOLU yazar). Hızlı katıl: boş koltuğu olan açık odalardan önce lobidekine, sonra insanı çok
+ * olana (eşitse aynı kipe) oturur, maçtaki oda da olur; yoksa onun seçimiyle yeni açık oda kurulur ve kuranı o olur.
  *
  * Sunucu otoriterdir: her oda kendi dünyasını saniyede 60 adım koşturur (world.js, tarayıcıdakiyle aynı kurallar),
  * saniyede 30 durum paketi ve biriken olayları yayar. Hesap yok: bağlantı `token` ile tanınır, kopan oyuncu aynı
@@ -41,7 +42,7 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
   onlineTimer.unref?.();
 
   function lobbyMsg(room) {
-    return { t: S2C.LOBBY, code: room.code, hostId: room.hostId, state: room.state, settings: { ...room.settings }, private: room.private,
+    return { t: S2C.LOBBY, code: room.code, hostId: room.hostId, state: room.state, settings: { ...room.settings }, private: room.settings.private,
       seats: room.seats.map(c => (c ? { id: c.id, nick: c.nick, online: Boolean(c.ws) } : null)) };
   }
   const members = room => room.seats.filter(Boolean);
@@ -69,14 +70,15 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
   }
 
   // ---------- Açık odalar listesi ----------
-  /** Listede görünen oda: açık, bağlı en az bir insan, boş koltuk var. Lobide bekleyenler önce, sonra kalabalık olan. */
-  const listable = r => !r.private && members(r).some(c => c.ws) && freeSeat(r) >= 0;
+  /** Listede görünen oda: herkese açık, bağlı en az bir insan (dolu da olur). Lobide bekleyenler önce, sonra kalabalık olan. */
+  const listable = r => !r.settings.private && members(r).some(c => c.ws);
+  const hostOf = r => members(r).find(c => c.id === r.hostId) || members(r)[0];
   function roomList() {
     const list = [...rooms.values()].filter(listable)
       .sort((a, b) => (a.state === 'lobby' ? 0 : 1) - (b.state === 'lobby' ? 0 : 1) || members(b).length - members(a).length)
       .slice(0, NET.listMax)
-      .map(r => ({ code: r.code, host: (members(r).find(c => c.id === r.hostId) || members(r)[0]).nick, teamSize: r.settings.teamSize,
-        difficulty: r.settings.difficulty, humans: members(r).length, seats: r.seats.length, state: r.state }));
+      .map(r => ({ code: r.code, host: hostOf(r).nick, teamSize: r.settings.teamSize,
+        difficulty: r.settings.difficulty, humans: members(r).length, seats: r.seats.length, state: r.state, full: freeSeat(r) < 0 }));
     return { t: S2C.ROOMS, rooms: list };
   }
   let listSent = '', listTimer = null;
@@ -92,11 +94,14 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
     }, 250);
     listTimer.unref?.();
   }
-  /** Hızlı katılım adayı: lobide bekleyen açık oda; önce oyuncunun seçtiği kip, sonra en kalabalık. */
+  /** Hızlı katılım adayı: boş koltuklu açık oda; önce lobidekiler, sonra insanı çok olan, eşitse oyuncunun seçtiği kip. */
   function quickPick(teamSize) {
-    return [...rooms.values()].filter(r => r.state === 'lobby' && listable(r))
-      .sort((a, b) => (b.settings.teamSize === teamSize) - (a.settings.teamSize === teamSize) || members(b).length - members(a).length)[0] || null;
+    return [...rooms.values()].filter(r => listable(r) && freeSeat(r) >= 0)
+      .sort((a, b) => (a.state === 'lobby' ? 0 : 1) - (b.state === 'lobby' ? 0 : 1) || members(b).length - members(a).length
+        || (b.settings.teamSize === teamSize) - (a.settings.teamSize === teamSize))[0] || null;
   }
+  /** Kuranlık: önce bağlı insana, yoksa odadaki ilk kişiye. */
+  const nextHost = room => (members(room).find(c => c.ws) || members(room)[0]).id;
 
   function seat(room, conn, slot) {
     const old = room.seats.indexOf(conn);
@@ -120,7 +125,7 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
     if (i >= 0) room.seats[i] = null;
     conn.room = null; conn.input = blankInput();
     if (!members(room).length) { closeRoom(room, 'boşaldı'); return; }
-    if (room.hostId === conn.id) room.hostId = members(room)[0].id;
+    if (room.hostId === conn.id) room.hostId = nextHost(room);
     if (room.world) roster(room);
     broadcastLobby(room);
   }
@@ -216,10 +221,11 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
     if (conn.room) leaveRoom(conn);
     let code = roomCode(); while (rooms.has(code)) code = roomCode();
     const settings = sanitize(msg);
-    const r = { code, hostId: conn.id, settings, private: msg.private === true, seats: Array(playersFor(settings.teamSize)).fill(null), state: 'lobby', world: null, timer: null, events: [] };
+    settings.private = msg.private === true;
+    const r = { code, hostId: conn.id, settings, seats: Array(playersFor(settings.teamSize)).fill(null), state: 'lobby', world: null, timer: null, events: [] };
     r.seats[0] = conn;
     rooms.set(code, r); conn.room = r;
-    broadcastLobby(r); log(`oda kuruldu ${code} (${conn.nick}, kip ${settings.teamSize}, bot ${settings.difficulty}${r.private ? ', özel' : ''})`);
+    broadcastLobby(r); log(`oda kuruldu ${code} (${conn.nick}, kip ${settings.teamSize}, bot ${settings.difficulty}${settings.private ? ', özel' : ''})`);
   }
 
   function onMessage(conn, data) {
@@ -258,6 +264,7 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
         conn.input = blankInput();
         seat(r, conn, freeSeat(r)); conn.room = r;
         broadcastLobby(r);
+        if (r.world) roster(r);
         log(`hızlı katıldı ${conn.nick} -> ${r.code}`);
         return;
       }
@@ -265,12 +272,13 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
         if (!room || room.hostId !== conn.id || room.state !== 'lobby') return;
         const { teamSize, difficulty } = sanitize(msg, room.settings);
         room.settings.difficulty = difficulty;
+        if (typeof msg.private === 'boolean') room.settings.private = msg.private;
         if (teamSize !== room.settings.teamSize && !relayout(room, teamSize)) return error(conn, `Bu kip için oda kalabalık: ${members(room).length} kişi, ${playersFor(teamSize)} koltuk`);
         broadcastLobby(room);
         return;
       }
       case C2S.JOIN: {
-        const code = String(msg.code || '').toUpperCase().trim();
+        const code = normalizeCode(msg.code);
         const r = rooms.get(code);
         if (!r) return error(conn, 'Böyle bir oda yok');
         if (r.seats.includes(conn)) { broadcastLobby(r); if (r.world) send(conn, startMsg(r, conn)); return; }
@@ -287,7 +295,7 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
       case C2S.SEAT: {
         const slot = Math.round(+msg.slot);
         if (!room || !(slot >= 0 && slot < room.seats.length)) return;
-        if (room.seats[slot]) return error(conn, 'Koltuk dolu: yönetici yerini değiştirebilir');
+        if (room.seats[slot]) return error(conn, 'Koltuk dolu: kuran yerini değiştirebilir');
         seat(room, conn, slot);
         broadcastLobby(room);
         if (room.world) roster(room);
@@ -323,7 +331,11 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
       ws.on('close', () => {
         conns.delete(conn); conn.ws = null; broadcastOnline(); roomsChanged();
         const r = conn.room; if (!r) return;
-        if (r.world) { syncHumans(r); broadcastLobby(r); log(`koptu ${conn.nick} (${r.code})`); closeIfEmpty(r); }
+        if (r.world) {
+          syncHumans(r);
+          if (r.hostId === conn.id) r.hostId = nextHost(r);
+          broadcastLobby(r); log(`koptu ${conn.nick} (${r.code})`); closeIfEmpty(r);
+        }
         else leaveRoom(conn);
       });
       ws.on('error', () => {});

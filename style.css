@@ -287,9 +287,9 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 
 /* Çok oyunculu: giriş ekranında ad, Oda kur / Odaya katıl, kod satırı, çevrim içi sayısı; sunucu yoksa "Yakında". */
 #son-plaka .home-online{margin-top:22px;width:280px;display:grid;gap:8px}
-#son-plaka .home-online .nick{display:flex;align-items:center;gap:10px;background:#111827d9;border:1px solid #cfe3ff2a;border-radius:8px;padding:0 12px}
-#son-plaka .home-online .nick span{font-size:9px;font-weight:800;letter-spacing:1.5px;color:#9fb3d1}
-#son-plaka .home-online input{flex:1;min-width:0;background:transparent;border:0;color:#e8eefc;font:700 13px inherit;font-family:inherit;padding:11px 0;outline:none;user-select:text}
+#son-plaka .nick{display:flex;align-items:center;gap:10px;background:#111827d9;border:1px solid #cfe3ff2a;border-radius:8px;padding:0 12px}
+#son-plaka .nick span{font-size:9px;font-weight:800;letter-spacing:1.5px;color:#9fb3d1}
+#son-plaka .nick input,#son-plaka .home-online input{flex:1;min-width:0;background:transparent;border:0;color:#e8eefc;font:700 13px inherit;font-family:inherit;padding:11px 0;outline:none;user-select:text}
 #son-plaka .online-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 #son-plaka .online-row button{position:relative;font-weight:800;letter-spacing:1px;white-space:nowrap;padding:12px 8px}
 #son-plaka .online-row button.soon,#son-plaka .join-row button.soon{opacity:.55;cursor:default;transform:none}
@@ -297,16 +297,15 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 #son-plaka .join-row{display:flex;gap:8px}
 #son-plaka .join-row input{background:#111827d9;border:1px solid #cfe3ff2a;border-radius:8px;padding:10px 12px;text-transform:uppercase;letter-spacing:2px;color:#e8eefc}
 #son-plaka .home-status{display:flex;gap:12px;min-height:14px;font-size:10px;letter-spacing:.5px;color:#9fb3d1}
-#son-plaka #sp-online{color:#8fe3a4;font-weight:700}
+#son-plaka .home-nick{width:280px;margin:0 0 14px}
+#son-plaka .online-head{display:flex;align-items:baseline;gap:10px;font-size:9px;letter-spacing:1.5px;color:#9fb3d1}
+#son-plaka .online-head b{font-weight:800;color:#e8eefc}
+#son-plaka #sp-online{color:#8fe3a4;font-weight:700;letter-spacing:.5px}
 /* Hızlı katıl, Özel oda seçimi ve açık odalar listesi. Geniş ekranda liste ve Hızlı katıl ad kutusuyla oda
    düğmelerinin sağında ikinci sütundur (giriş ekranı uzamasın); dar ve kısa ekranda alta dizilir. */
 #son-plaka .home-online .quick{display:flex;align-items:center;justify-content:space-between;font-weight:800;letter-spacing:1px;padding:12px 16px;background:#f5c26b1a;border-color:#f5c26b8c;color:#f5ce8c;position:relative}
 #son-plaka .home-online .quick:hover{background:#f5c26b30}
 #son-plaka .home-online .quick.soon{opacity:.55;cursor:default;transform:none}
-#son-plaka .private-row{display:flex;align-items:center;gap:8px;font-size:10px;line-height:1.3;color:#9fb3d1;cursor:pointer}
-#son-plaka .private-row b{color:#e8eefc;font-weight:800;letter-spacing:.5px;margin-right:3px}
-#son-plaka .home-online .private-row input{flex:none;width:15px;height:15px;margin:0;padding:0;accent-color:#f5c26b;cursor:pointer}
-#son-plaka .private-row:has(input:disabled){opacity:.5;cursor:default}
 #son-plaka .rooms{display:grid;gap:6px;align-content:start;min-width:0}
 #son-plaka .rooms-head{font-size:9px;font-weight:800;letter-spacing:1.5px;color:#9fb3d1}
 #son-plaka .rooms-head small{color:#f5c26b;margin-left:4px;font-size:9px}
@@ -320,12 +319,13 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 #son-plaka .room i{font-style:normal;font-size:8px;font-weight:800;letter-spacing:1px;color:#9fb3d1}
 #son-plaka .room.playing i{color:#8fe3a4}
 #son-plaka .room:hover{border-color:#f5c26b66}
+#son-plaka .room:disabled{opacity:.55;cursor:default}
+#son-plaka .room:disabled:hover{border-color:#cfe3ff2a}
 #son-plaka .rooms-empty{font-size:11px;line-height:1.5;color:#9fb3d1;padding:9px 12px;border:1px dashed #cfe3ff2a;border-radius:8px}
 @media(min-width:1101px) and (min-height:561px){
 #son-plaka .home-online{width:100%;grid-template-columns:280px minmax(0,1fr);column-gap:16px;align-items:start}
 #son-plaka .home-online>*{grid-column:1}
-#son-plaka .home-online>.quick{grid-column:2;grid-row:1}
-#son-plaka .home-online>.rooms{grid-column:2;grid-row:2/span 5}
+#son-plaka .home-online>.rooms{grid-column:2;grid-row:1/span 6}
 #son-plaka .rooms-list{max-height:150px}
 }
 #son-plaka .home .rule-cards{margin-top:30px}
@@ -348,7 +348,11 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 #son-plaka .lobby-team .seat.taken{border-left:3px solid var(--tc,#39c2cf)}
 #son-plaka .seat.taken span{font-weight:800;color:#e8eefc}
 #son-plaka .seat.me{background:#22314a}
-#son-plaka .seat.me span::after{content:" · sen";color:#f5c26b;font-weight:700}
+#son-plaka .seat .tag-me{color:#f5c26b;font-weight:700}
+#son-plaka .seat .sit{display:none;color:#f5c26b}
+#son-plaka .seat.free:hover .sit,#son-plaka.touch .seat.free .sit{display:inline}
+#son-plaka .lobby-vis{margin:0 0 6px;font-size:10px;font-weight:800;letter-spacing:1.5px;color:#9fb3d1}
+#son-plaka #sp-lobby-start:disabled{opacity:.6;cursor:default;font-size:13px}
 #son-plaka .seat.off{opacity:.55}
 #son-plaka .seat.picked,#son-plaka .seat.drop{outline:2px solid #f5c26b;outline-offset:1px}
 #son-plaka .seat.dragging{opacity:.4}
@@ -357,7 +361,9 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 #son-plaka .pause-note{font-size:11px;margin:14px 0 0}
 @media(max-height:560px){
 #son-plaka .home-online{margin-top:10px;width:min(440px,70vw);grid-template-columns:1fr 1fr;gap:6px}
-#son-plaka .home-online .nick input{padding:7px 0;font-size:12px}
+#son-plaka .nick input{padding:7px 0;font-size:12px}
+#son-plaka .home-nick{margin-bottom:8px}
+#son-plaka .online-head,#son-plaka .home-online .quick{grid-column:1/-1}
 #son-plaka .online-row button{padding:8px 10px;font-size:10px}
 #son-plaka .join-row,#son-plaka .home-status,#son-plaka .rooms{grid-column:1/-1}
 #son-plaka .home-online .quick{padding:8px 12px;font-size:10px}
