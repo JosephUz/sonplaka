@@ -44,7 +44,6 @@ export const LIFE = { lives: 5, shield: 2 };
  */
 export const MATCH = { teamSize: 5, ffaTeams: 5, difficulty: 'normal', seed: 61 };
 export const MODES = [1, 2, 3, 4, 5];
-export const modeLabel = n => (n === 1 ? 'HERKES TEK' : `${n}v${n}`);
 export const teamsFor = n => (n === 1 ? MATCH.ffaTeams : 2);
 export const playersFor = n => teamsFor(n) * n;
 
@@ -103,7 +102,6 @@ export const BOT_LEVELS = {
   easy: { think: 0.9, thinkJitter: 0.6, fireEvery: 2.2, fireJitter: 1.6, aimError: 0.3, heavyChance: 0.04, dodgeChance: 0.12, spawnWait: 3.5, lead: 0.3 },
 };
 export const DIFFICULTIES = ['easy', 'normal', 'hard'];
-export const DIFFICULTY_LABEL = { easy: 'KOLAY', normal: 'NORMAL', hard: 'ZOR' };
 export const botParams = difficulty => ({ ...BOT, ...(BOT_LEVELS[difficulty] || BOT_LEVELS.normal) });
 
 /**
@@ -120,8 +118,11 @@ export const CAMERA = { fov: 78, far: 260, eye: 1.55, back: 4.2, side: 0.7, heig
  */
 export const TOUCH = { stick: 60, dead: 0.14, look: 2.2, pixelRatio: 1.35, shadow: 1024 };
 
-/** Takım adları ve renkleri: iki takımlı kiplerde ilk ikisi, herkes tek kipinde beşi de kullanılır. */
-export const TEAMS = { names: ['MAVİ', 'TURUNCU', 'YEŞİL', 'MOR', 'PEMBE'], colors: ['#39c2cf', '#f5825b', '#7dff9a', '#c08bff', '#ff7ab8'] };
+/**
+ * Takım renkleri: iki takımlı kiplerde ilk ikisi, herkes tek kipinde beşi de kullanılır. Takım adları (MAVİ, TURUNCU,
+ * YEŞİL, MOR, PEMBE) ve kip / zorluk etiketleri dile bağlıdır: src/etiket.js ve src/diller/.
+ */
+export const TEAMS = { colors: ['#39c2cf', '#f5825b', '#7dff9a', '#c08bff', '#ff7ab8'] };
 
 /**
  * Çok oyunculu özellikler hangi platformda açık: tarayıcıda (web) açık; Android uygulamasında (app) kapalı, giriş

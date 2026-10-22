@@ -78,7 +78,7 @@ const sonuc = [];
 try {
   for (const senaryo of SENARYOLAR) {
     for (const ekran of EKRANLAR) {
-      const context = await browser.newContext({ viewport: { ...ekran.viewport }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+      const context = await browser.newContext({ locale: 'tr-TR', viewport: { ...ekran.viewport }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
       if (senaryo.sahteVV) await context.addInitScript(sahteCubukBetigi, CUBUK);
 
       const page = await context.newPage(), hatalar = [];
@@ -152,7 +152,7 @@ try {
   // iOS'ta çift parmak — iOS `user-scalable=no` ayarını yok sayar). Taklit yok: sayfa ölçeği gerçekten CDP
   // (Emulation.setPageScaleFactor) ile değiştirilir, `visualViewport.scale` buna göre gerçekten 2 olur.
   {
-    const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    const context = await browser.newContext({ locale: 'tr-TR', viewport: { width: 1280, height: 800 } });
     const page = await context.newPage();
     await page.goto(url + '/?test=1');
     await page.waitForFunction(() => !!window.__sonPlaka);

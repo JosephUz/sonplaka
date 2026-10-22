@@ -1,5 +1,6 @@
 import * as T from 'three';
 import { DISC, TEAMS } from '../config.js';
+import { t } from '../dil.js';
 import { box, mat } from './builders.js';
 
 /**
@@ -84,7 +85,7 @@ export function syncActors(actors, w, time, playing, project, hide = -1) {
     v.disc.scale.set(k, 1, k);
     v.disc.material.emissiveIntensity = 0.6 + (p.charge / DISC.heavyCharge) * 2.4;
     v.disc.material.emissive.set(p.charge >= DISC.heavyCharge - 0.01 ? '#ff9a50' : p.power === 'freeze' ? '#8ff3ff' : p.power === 'triple' ? '#ffd35c' : TEAMS.colors[p.team]);
-    const text = p.freeze > 0 ? 'DONDU' : !mine && (w.online ? p.human : false) ? p.name : mine ? '' : '';
+    const text = p.freeze > 0 ? t('etiket.dondu') : !mine && (w.online ? p.human : false) ? p.name : mine ? '' : '';
     v.label.textContent = text;
     const s = project(p.x, p.y + 2.6, p.z);
     v.label.hidden = !playing || !text || s.behind;

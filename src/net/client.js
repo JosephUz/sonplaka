@@ -42,7 +42,7 @@ export function createNetClient(hooks) {
     switch (msg.t) {
       case S2C.WELCOME: store('sp.token', msg.token); client.id = msg.id; client.nick = msg.nick; hooks.onWelcome?.(msg); break;
       case S2C.LOBBY: client.lobby = msg; store('sp.room', msg.code); hooks.onLobby?.(msg); break;
-      case S2C.ERROR: hooks.onError?.(msg.msg); break;
+      case S2C.ERROR: hooks.onError?.(msg); break;
       case S2C.START: {
         const first = !world;
         if (first) { world = createWorld(undefined, { teamSize: msg.teamSize, difficulty: msg.difficulty }); world.online = true; buffer = []; clockReady = false; }

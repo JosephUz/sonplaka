@@ -20,7 +20,7 @@ const sahteKilit = () => {
   Element.prototype.requestFullscreen = function () { return Promise.resolve(); };
 };
 async function newContext(opts = {}) {
-  const ctx = await browser.newContext({ viewport: { width: 1536, height: 960 }, ...opts });
+  const ctx = await browser.newContext({ locale: 'tr-TR', viewport: { width: 1536, height: 960 }, ...opts });
   await ctx.addInitScript(sahteKilit);
   if (process.env.SAHTE_KILIT) await ctx.addInitScript({ path: process.env.SAHTE_KILIT });
   return ctx;
@@ -145,6 +145,7 @@ try {
   }
   const [host, guest, seer] = pages;
   await host.goto(url + '/?test=1');
+  await host.waitForFunction(() => !!window.__sonPlaka); // yazılar dil modülüyle (src/dil.js) gelir
   const order = await host.evaluate(() => ['#sp-nick', '.mode-row', '#sp-start', '.online-head', '#sp-quick', '#sp-create', '#sp-join', '#sp-rooms']
     .map(s => document.querySelector(s)).every((el, i, a) => !i || (a[i - 1].compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)));
   assert.ok(order, 'ana ekran sırası standarda uymuyor');

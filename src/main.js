@@ -1,5 +1,7 @@
 import { createAudio } from './audio.js';
-import { CAMERA, DIFFICULTIES, DIFFICULTY_LABEL, DISC, MATCH, MODES, PICKUP, TEAMS, modeLabel, playersFor } from './config.js';
+import { CAMERA, DIFFICULTIES, DISC, MATCH, MODES, PICKUP, playersFor } from './config.js';
+import { DILLER, dilDugmesi, dilUygula, t } from './dil.js';
+import { kipAdi, takimAdi, zorlukAdi } from './etiket.js';
 import { createGosteri, gosteriAcik } from './gosteri.js';
 import { createIboGosteri, iboGosteriAcik } from './gosteri-ibo.js';
 import { createOtopilot, otopilotAcik } from './otopilot.js';
@@ -32,9 +34,12 @@ import { alive, createWorld, step } from './world.js';
  * maç. Menü ve lobi atlanır, arayüz gizlenir, girdi ve sunucu yoktur; kamera kavgayı izler, maç bitince yenisi başlar.
  */
 const STEP = 1 / 60, MAX_STEPS = 5;
-const POWER_NAMES = { triple: 'ÜÇLÜ DİSK', freeze: 'DONDURUCU DİSK' };
+const POWER_NAMES = { triple: 'guc.triple', freeze: 'guc.freeze' }; // sözlük anahtarları (src/diller/)
 
 export async function start(root) {
+  // Dil (josephuz/docs/dil-standardi.md): HTML'deki data-i18n işaretleri, sayfa başlığı; dil düğmesi çubuğun sonunda.
+  dilUygula();
+  dilDugmesi(root.querySelector('#dil'));
   const testMode = new URLSearchParams(location.search).has('test');
   const touch = touchDevice();
   root.classList.toggle('touch', touch);
@@ -45,7 +50,7 @@ export async function start(root) {
   const camButton = root.querySelector('#sp-cam');
   const setCamera = mode => {
     view.setCamera(mode);
-    camButton.innerHTML = (mode === 'fps' ? '🎥 Omuz' : '🎥 Birinci şahıs') + ' <kbd>V</kbd>';
+    camButton.innerHTML = t(mode === 'fps' ? 'kamera.omuz' : 'kamera.fps') + ' <kbd>V</kbd>';
     try { localStorage.setItem('sp.cam', mode); } catch { /* yok */ }
   };
   let savedCam = null, input = null;
@@ -62,7 +67,7 @@ export async function start(root) {
   const settingsChoice = () => ({ teamSize: modeChoice(), difficulty: diffChoice() });
   const homeMeta = () => {
     const n = modeChoice(), bots = String(playersFor(n) - 1).padStart(2, '0');
-    root.querySelector('#sp-home-meta-1').textContent = `${n === 1 ? 'HERKES HERKESE' : modeLabel(n)} · SEN + ${bots} BOT · BOT ${DIFFICULTY_LABEL[diffChoice()]}`;
+    root.querySelector('#sp-home-meta-1').textContent = t('ana.meta', { kip: n === 1 ? t('kip.herkesHerkese') : kipAdi(n), bot: bots, zorluk: zorlukAdi(diffChoice()) });
   };
   const setMode = n => { for (const i of modeInputs) i.checked = Number(i.value) === n; homeMeta(); try { localStorage.setItem('sp.mode', String(n)); } catch { /* yok */ } };
   const setDiff = d => { for (const i of diffInputs) i.checked = i.value === d; homeMeta(); try { localStorage.setItem('sp.diff', d); } catch { /* yok */ } };
@@ -113,9 +118,9 @@ export async function start(root) {
     input.clear();
     // Çevrim içinde mola yalnız bir perdedir: yeniden başlatma yok, çıkış odadan çıkar (standart menüdeki ad da değişir).
     root.querySelector('#sp-restart').hidden = online;
-    root.querySelector('#sp-menu').textContent = online ? 'Odadan çık' : 'Ana menü';
+    root.querySelector('#sp-menu').textContent = t(online ? 'oda.cik' : 'mola.anaMenu');
     root.querySelector('#sp-pause-note').hidden = !online;
-    root.querySelector('#sp-again').textContent = online ? 'LOBİYE DÖN' : 'BİR MAÇ DAHA';
+    root.querySelector('#sp-again').textContent = t(online ? 'sonuc.lobiyeDon' : 'sonuc.birDaha');
     refresh();
   }
   function begin() {
@@ -175,7 +180,7 @@ export async function start(root) {
       if (pending) { const go = pending; pending = null; go(); return; }
       const remembered = !net.world && net.rememberedRoom();
       const code = inviteCode || remembered;
-      if (code && !net.lobby) { lobby.status(code === remembered ? 'Odaya geri bağlanıyor…' : 'Odaya bağlanıyor…'); net.join(code); }
+      if (code && !net.lobby) { lobby.status(t(code === remembered ? 'oda.geriBaglaniyor' : 'oda.baglaniyor')); net.join(code); }
       inviteCode = null;
     },
     onLobby(msg) {
@@ -185,8 +190,10 @@ export async function start(root) {
       else if (!started && screen !== 'results') showLobby(msg);
     },
     onError(msg) {
-      lobby.status(msg);
-      if (msg === 'Böyle bir oda yok' && screen !== 'lobby') { net.leave(); lobby.setUrlCode(null); }
+      // Sunucu hatası dil bağımsız `kod` ile gelir (bkz. server/rooms.mjs): sözlükte varsa çevirisi, yoksa sunucunun yazısı.
+      const k = 'sunucu.' + msg.kod;
+      lobby.status(msg.kod && k in DILLER.tr ? t(k, msg.d || {}) : msg.msg);
+      if (msg.kod === 'oda.yok' && screen !== 'lobby') { net.leave(); lobby.setUrlCode(null); }
     },
     onStart(msg, first) {
       if (!first) return;
@@ -206,7 +213,7 @@ export async function start(root) {
     onRooms: list => lobby.setRooms(list),
     onDisconnect(was) {
       lobby.setServer(false);
-      if (was && online && started) ui.message('BAĞLANTI KOPTU · YENİDEN BAĞLANIYOR', 3);
+      if (was && online && started) ui.message(t('mesaj.koptu'), 3);
     },
   }) : null;
   let pending = null, inviteCode = null;
@@ -241,14 +248,14 @@ export async function start(root) {
     net.connect(lobby.nick());
   }
 
-  const who = p => (p.id === w.me ? 'SEN' : p.name.toUpperCase());
+  const who = p => (p.id === w.me ? t('mesaj.sen') : p.name.toUpperCase());
   /** Dolum halkası: sol tık basılıyken ağır disk şarjı. */
   function chargeState() {
     if (!active()) return null;
     const p = w.players[w.me];
     if (p.out || p.charge <= 0) return null;
     const full = p.charge >= DISC.heavyCharge - 0.01;
-    return { p: p.charge / DISC.heavyCharge, full, text: full ? 'BIRAK: AĞIR DİSK' : 'BIRAK: DİSK · TUT: AĞIR' };
+    return { p: p.charge / DISC.heavyCharge, full, text: t(full ? 'sarj.agir' : 'sarj.disk') };
   }
 
   function consume() {
@@ -258,17 +265,17 @@ export async function start(root) {
       audio.play(e.type);
       if (touch) buzz(e, me);
       switch (e.type) {
-        case 'go': ui.message('BAŞLA!', 1); break;
+        case 'go': ui.message(t('mesaj.basla'), 1); break;
         case 'spawn': if (e.id === me) faceCenter(); break;
-        case 'tremble': ui.warn(e.ring === 2 ? 'DIŞ HALKA ÇÖKÜYOR · İÇERİ KAÇ' : 'İÇ HALKA ÇÖKÜYOR · MERKEZE KAÇ', 5); break;
-        case 'collapse': ui.message(e.ring === 2 ? 'DIŞ HALKA DÜŞTÜ' : 'SON PLAKA · DOĞUŞ KAPANDI · SÜRE BİTİNCE BURADA KALAN KAZANIR', 3); view.shake(0.35); break;
-        case 'shrinkWarn': ui.warn('MERKEZ DARALIYOR · KENARDAN UZAK DUR', 5); break;
+        case 'tremble': ui.warn(t(e.ring === 2 ? 'mesaj.disCokuyor' : 'mesaj.icCokuyor'), 5); break;
+        case 'collapse': ui.message(t(e.ring === 2 ? 'mesaj.disDustu' : 'mesaj.sonPlaka'), 3); view.shake(0.35); break;
+        case 'shrinkWarn': ui.warn(t('mesaj.daraliyor'), 5); break;
         case 'hit':
-          if (e.id === me) { view.shake(CAMERA.knockShake); if (e.kind === 'freeze') ui.message('DONDUN · 2 SN', 1.5); }
+          if (e.id === me) { view.shake(CAMERA.knockShake); if (e.kind === 'freeze') ui.message(t('mesaj.dondun'), 1.5); }
           break;
         case 'fall':
           if (e.id === me) {
-            ui.message((e.by !== null ? who(w.players[e.by]) + ' SENİ DÜŞÜRDÜ' : 'DÜŞTÜN') + (e.lives === 0 ? ' · HAK BİTTİ' : e.respawn ? ` · ${e.lives} HAK` : ''), 2.5);
+            ui.message((e.by !== null ? t('mesaj.seniDusurdu', { ad: who(w.players[e.by]) }) : t('mesaj.dustun')) + (e.lives === 0 ? t('mesaj.hakBitti') : e.respawn ? t('mesaj.hak', { n: e.lives }) : ''), 2.5);
             // Düşüş sineması: kamera düştüğün yerde alçalırken yukarıdaki arenaya bakar.
             // Bakış arenanın merkezine, yukarı: plakalar tepede uzaklaşırken görünsün.
             {
@@ -276,10 +283,10 @@ export async function start(root) {
               fallCam = { x: e.x, y: e.y, z: e.z, t: 0, yaw, pitch, id: -1 }; view.face(yaw, pitch);
             }
           }
-          else if (e.by === me) ui.message(who(w.players[e.id]) + ' DÜŞTÜ · SENİN SAYENDE', 2);
+          else if (e.by === me) ui.message(t('mesaj.sayende', { ad: who(w.players[e.id]) }), 2);
           break;
-        case 'pickup': if (e.id === me) ui.message(POWER_NAMES[e.kind] + ' ×' + PICKUP.shots, 1.8); break;
-        case 'end': ui.message(e.team == null ? 'BERABERE' : (e.why === 'last' ? 'SON PLAKADA KALAN: ' : 'SÜRE BİTTİ · SON PLAKADA KALAN: ') + TEAMS.names[e.team] + ' KAZANDI', 3); break;
+        case 'pickup': if (e.id === me) ui.message(t('mesaj.guc', { guc: t(POWER_NAMES[e.kind]), n: PICKUP.shots }), 1.8); break;
+        case 'end': ui.message(e.team == null ? t('mesaj.berabere') : t(e.why === 'last' ? 'mesaj.bitisSon' : 'mesaj.bitisSure', { takim: takimAdi(e.team) }), 3); break;
         default: break;
       }
     }

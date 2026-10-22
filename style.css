@@ -267,6 +267,8 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 /* Müzik düğmesi: telefonda da nota simgesi, kapalıyken üstü çizili (bkz. src/muzik.js). */
 #son-plaka.touch #sp-muzik::before{content:"♫"}
 #son-plaka.touch #sp-muzik.muted::before{text-decoration:line-through;opacity:.65}
+/* Dil düğmesi (josephuz/docs/dil-standardi.md): telefonda da simge değil yazı ("EN" / "TR"), öbür simgelerle aynı kutu. */
+#son-plaka.touch .header-actions #dil{font-size:12px;font-weight:900;letter-spacing:.5px}
 /* Dar ekran (telefon dikey, küçük yatay): standart araç çubuğu tek satırda kalsın — simgeler ve josephuz bağlantısı
    küçülür, sıra ve düğmeler aynı kalır, çubuk ekranın dışına taşmaz. Bu kurallar yukarıdaki `.touch` simge
    ölçülerinden **sonra** gelmeli: aynı ağırlıktaki seçicilerde sonraki kazanır. */

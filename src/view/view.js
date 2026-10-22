@@ -1,5 +1,6 @@
 import * as T from 'three';
 import { CAMERA, DISC, TEAMS, TOUCH } from '../config.js';
+import { t } from '../dil.js';
 import { buildArenaView } from './arena.js';
 import { createActor, disposeActor, syncActors } from './actors.js';
 import { createCamera } from './camera.js';
@@ -17,7 +18,7 @@ export function createView(container, { mobile = false } = {}) {
   renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? TOUCH.pixelRatio : 1.5));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = mobile ? T.PCFShadowMap : T.PCFSoftShadowMap;
   renderer.outputColorSpace = T.SRGBColorSpace;
-  renderer.domElement.setAttribute('aria-label', 'Son Plaka arenası');
+  renderer.domElement.setAttribute('aria-label', t('gorunum.aria'));
   container.insertBefore(renderer.domElement, container.firstChild);
 
   const scene = new T.Scene();

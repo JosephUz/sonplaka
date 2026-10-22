@@ -10,6 +10,7 @@ import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { ALTYAZI, ISARET } from '../src/gosteri-ibo.js';
+import tr from '../src/diller/tr.js';
 
 const pw = process.env.PLAYWRIGHT_MODULE || 'playwright';
 const pwYol = /^[a-zA-Z]:[\\/]|^\//.test(pw) ? pathToFileURL(/\.[cm]?js$/.test(pw) ? pw : pw.replace(/[\\/]$/, '') + '/index.mjs').href : pw;
@@ -29,7 +30,7 @@ const SAAT = `(() => {
 
 const browser = await chromium.launch({ headless: true, args: process.env.SWIFTSHADER ? ['--mute-audio', '--use-gl=angle', '--use-angle=swiftshader'] : ['--mute-audio', '--use-gl=angle', '--use-angle=d3d11', '--ignore-gpu-blocklist'] });
 try {
-  const ctx = await browser.newContext({ viewport: { width: 540, height: 960 } });
+  const ctx = await browser.newContext({ locale: 'tr-TR', viewport: { width: 540, height: 960 } });
   await ctx.addInitScript(() => {
     try { localStorage.setItem('sp.cam', 'shoulder'); } catch { /* yok */ }
     window.__sockets = 0; window.__istek = 0;
@@ -71,7 +72,8 @@ try {
   for (const [bas, , metin] of ALTYAZI) {
     await kadar(bas + 0.2);
     assert.ok(await yazi.isVisible(), `${bas} sn: altyazı kutusu açık`);
-    assert.equal((await yazi.textContent()).trim(), metin, `${bas} sn: doğru cümle`);
+    assert.equal((await yazi.textContent()).trim(), tr[metin], // ALTYAZI sözlük anahtarı tutar; sayfa Türkçe (locale tr-TR)
+      `${bas} sn: doğru cümle`);
     const tekrarda = bas + 0.2 >= ISARET.tekrar1 && bas + 0.2 < ISARET.canli - 0.2;
     assert.equal(await tekrar.isVisible(), tekrarda, `${bas} sn: TEKRAR rozeti ${tekrarda ? 'görünür' : 'gizli'}`);
     if (tekrarda && !tekrarKaresi) { tekrarKaresi = true; await page.screenshot({ path: 'artifacts/gosteri-ibo-tekrar.png' }); }

@@ -19,7 +19,7 @@ export const C2S = {
 export const S2C = {
   WELCOME: 'welcome', // { id, token, nick }
   LOBBY: 'lobby',     // { code, hostId, state, private, settings: { teamSize, difficulty, private }, seats: [{ id, nick, online } | null] × oyuncu sayısı }
-  ERROR: 'error',     // { msg }
+  ERROR: 'error',     // { msg, kod?, d? } — kod dil bağımsız anahtar (istemcide t('sunucu.' + kod, d))
   START: 'start',     // { you, teamSize, difficulty, names, humans } — maç başladı (ya da ortasına katıldın)
   SNAP: 's',          // durum paketi + o ana kadar biriken olaylar (bkz. snapshot.js)
   END: 'end',         // { score, winner (-1 berabere), stats, names }
@@ -49,7 +49,7 @@ export const NET = {
 };
 /** Oda kodu girişi: büyük harf, harf/rakam dışı atılır, tiresiz yazılan (KPRT4) KPRT-4 olur. */
 export const normalizeCode = raw => {
-  const s = String(raw || '').toLocaleUpperCase('tr').replace(/İ/g, 'I').replace(/[^A-Z0-9]/g, '');
+  const s = String(raw || '').toLocaleUpperCase('tr').replace(/\u0130/g, 'I').replace(/[^A-Z0-9]/g, '');
   return s.length > 4 ? `${s.slice(0, 4)}-${s.slice(4)}` : s;
 };
 export const roomCode = () => {

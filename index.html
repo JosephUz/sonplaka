@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#0b0f1a">
-<title>Son Plaka · Boşluk Arenası</title>
+<title data-i18n="sayfa.baslik">Son Plaka · Boşluk Arenası</title>
+<meta name="description" content="" data-i18n-content="sayfa.aciklama">
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="/style.css">
 <script type="importmap">{ "imports": { "three": "/vendor/three.module.js" } }</script>
@@ -16,88 +17,90 @@
     <div class="grain"></div>
 
     <header>
-      <a class="logo" href="/">SON<span>PLAKA</span><small>BOŞLUK ARENASI / İLK DENEME</small></a>
+      <a class="logo" href="/">SON<span>PLAKA</span><small data-i18n="logo.alt">BOŞLUK ARENASI / İLK DENEME</small></a>
       <!-- STANDART üst araç çubuğu (bütün JosephUz oyunlarında aynı sıra ve aynı yazılar):
            ← josephuz.com · Ses: açık/kapalı · Müzik: açık/kapalı · Kontroller F1.
            Oyuna özgü düğmeler (duraklat, kamera) standart dörtlünün ardına gelir. -->
       <div class="header-actions">
         <a id="sp-site" class="btn" href="https://www.josephuz.com/">← josephuz.com</a>
-        <button id="sp-sound" aria-label="Ses efektlerini aç veya kapat">Ses: açık</button>
-        <button id="sp-muzik" aria-label="Oyun müziğini aç veya kapat" title="Oyun müziği (ses düzeyi Esc menüsünde)">Müzik: açık</button>
-        <button id="sp-help-open">Kontroller <kbd>F1</kbd></button>
-        <button id="sp-pause-open" hidden>Duraklat <kbd>Esc</kbd></button>
-        <button id="sp-cam" aria-label="Kamera: birinci şahıs / omuz">🎥 Omuz</button>
+        <button id="sp-sound" aria-label="Ses efektlerini aç veya kapat" data-i18n-aria-label="ses.aria" data-i18n="ses.acik">Ses: açık</button>
+        <button id="sp-muzik" aria-label="Oyun müziğini aç veya kapat" data-i18n-aria-label="muzik.aria" title="Oyun müziği (ses düzeyi Esc menüsünde)" data-i18n-title="muzik.title" data-i18n="muzik.acik">Müzik: açık</button>
+        <button id="sp-help-open" data-i18n-html="ust.kontroller">Kontroller <kbd>F1</kbd></button>
+        <button id="sp-pause-open" hidden data-i18n-html="ust.duraklat">Duraklat <kbd>Esc</kbd></button>
+        <button id="sp-cam" aria-label="Kamera: birinci şahıs / omuz" data-i18n-aria-label="kamera.aria" data-i18n="kamera.omuz">🎥 Omuz</button>
+        <!-- Dil düğmesi (josephuz/docs/dil-standardi.md): çubuğun sonunda, öbür dili gösterir; maçta gizli (src/ui.js hud). -->
+        <button id="dil"></button>
       </div>
     </header>
 
     <div id="sp-scoreboard" hidden>
       <div class="teams" id="sp-board-l"></div>
-      <div class="clock"><span id="sp-timer">5:00</span><small id="sp-phase">BAŞLIYOR</small></div>
+      <div class="clock"><span id="sp-timer">5:00</span><small id="sp-phase" data-i18n="evre.basliyor">BAŞLIYOR</small></div>
       <div class="teams" id="sp-board-r"></div>
     </div>
 
     <section id="sp-home" class="home">
       <div class="home-content">
-        <div class="eyebrow"><i></i> HERKES TEK – 5v5 DİSK ARENASI · DARALAN BOŞLUK</div>
-        <h1>Plakalar düşer.<br><span>Sen kalırsın.</span></h1>
-        <p>Diskle rakibi kenardan aşağı at, plakalar teker teker boşluğa düşerken<br>rampalarla içeri kaç. Son plakada doğuş kapanır: süre bitince orada ayakta kalan kazanır.</p>
+        <div class="eyebrow" data-i18n-html="ana.ust"></div>
+        <h1 data-i18n-html="ana.slogan"></h1>
+        <p data-i18n-html="ana.tanitim"></p>
         <!-- Oda standardı (josephuz/docs/oda-standardi.md): ADIN → tek başına → ÇEVRİM İÇİ → AÇIK ODALAR. -->
-        <label class="nick home-nick"><span>ADIN</span><input id="sp-nick" maxlength="16" autocomplete="off" spellcheck="false" aria-label="Oyuncu adı"></label>
-        <div class="mode-row" role="radiogroup" aria-label="Kaça kaç">
-          <label><input type="radio" name="sp-mode" value="1">HERKES TEK</label>
+        <label class="nick home-nick"><span data-i18n="ana.adin">ADIN</span><input id="sp-nick" maxlength="16" autocomplete="off" spellcheck="false" aria-label="Oyuncu adı" data-i18n-aria-label="ana.adin.aria"></label>
+        <div class="mode-row" role="radiogroup" aria-label="Kaça kaç" data-i18n-aria-label="ana.kip.aria">
+          <label><input type="radio" name="sp-mode" value="1"><span data-i18n="kip.herkesTek">HERKES TEK</span></label>
           <label><input type="radio" name="sp-mode" value="2">2v2</label>
           <label><input type="radio" name="sp-mode" value="3">3v3</label>
           <label><input type="radio" name="sp-mode" value="4">4v4</label>
           <label><input type="radio" name="sp-mode" value="5" checked>5v5</label>
         </div>
-        <div class="mode-row diff-row" role="radiogroup" aria-label="Bot zorluğu">
+        <div class="mode-row diff-row" role="radiogroup" aria-label="Bot zorluğu" data-i18n-aria-label="ana.zorluk.aria">
           <span>BOT</span>
-          <label><input type="radio" name="sp-diff" value="easy">KOLAY</label>
-          <label><input type="radio" name="sp-diff" value="normal" checked>NORMAL</label>
-          <label><input type="radio" name="sp-diff" value="hard">ZOR</label>
+          <label><input type="radio" name="sp-diff" value="easy"><span data-i18n="zorluk.easy">KOLAY</span></label>
+          <label><input type="radio" name="sp-diff" value="normal" checked><span data-i18n="zorluk.normal">NORMAL</span></label>
+          <label><input type="radio" name="sp-diff" value="hard"><span data-i18n="zorluk.hard">ZOR</span></label>
         </div>
-        <button id="sp-start" class="primary">TEK BAŞINA <span>↗</span></button>
-        <div class="home-meta"><span id="sp-home-meta-1">5v5 · SEN + 09 BOT</span><span>SÜRE BİTİNCE SON PLAKADA KALAN KAZANIR</span></div>
+        <button id="sp-start" class="primary" data-i18n-html="ana.tekBasina"></button>
+        <div class="home-meta"><span id="sp-home-meta-1"></span><span data-i18n="ana.kural">SÜRE BİTİNCE SON PLAKADA KALAN KAZANIR</span></div>
         <div class="home-online">
-          <div class="online-head"><b>ÇEVRİM İÇİ</b><span id="sp-online"></span></div>
-          <button id="sp-quick" class="quick">HIZLI KATIL <span>→</span></button>
+          <div class="online-head"><b data-i18n="ana.cevrimIci">ÇEVRİM İÇİ</b><span id="sp-online"></span></div>
+          <button id="sp-quick" class="quick" data-i18n-html="ana.hizliKatil"></button>
           <div class="online-row">
-            <button id="sp-create">ODA KUR</button>
-            <button id="sp-join">ODAYA KATIL</button>
+            <button id="sp-create" data-i18n="ana.odaKur">ODA KUR</button>
+            <button id="sp-join" data-i18n="ana.odayaKatil">ODAYA KATIL</button>
           </div>
-          <div id="sp-joinrow" class="join-row" hidden><input id="sp-code" placeholder="ODA KODU" maxlength="6" autocomplete="off" spellcheck="false" aria-label="Oda kodu"><button id="sp-join-go">KATIL</button></div>
+          <div id="sp-joinrow" class="join-row" hidden><input id="sp-code" placeholder="ODA KODU" data-i18n-placeholder="ana.odaKodu" maxlength="6" autocomplete="off" spellcheck="false" aria-label="Oda kodu" data-i18n-aria-label="ana.odaKodu.aria"><button id="sp-join-go" data-i18n="ana.katil">KATIL</button></div>
           <div class="home-status"><span id="sp-home-status" role="status"></span></div>
-          <div id="sp-rooms" class="rooms" hidden><b class="rooms-head">AÇIK ODALAR <small id="sp-rooms-count"></small></b><div id="sp-rooms-list" class="rooms-list"></div></div>
+          <div id="sp-rooms" class="rooms" hidden><b class="rooms-head"><span data-i18n="ana.acikOdalar">AÇIK ODALAR</span> <small id="sp-rooms-count"></small></b><div id="sp-rooms-list" class="rooms-list"></div></div>
         </div>
         <div class="rule-cards">
-          <div><b>01 / DİSK</b><span>Vurulan savrulur; can yok, düşen 4 saniyede geri gelir.</span></div>
-          <div><b>02 / PLAKA</b><span>Dış halka 40. saniyede düşer; iç halka 80. saniyede: doğuş kapanır.</span></div>
-          <div><b>03 / SON PLAKA</b><span>Merkez daralır ama düşmez. Süre bitince orada kalan kazanır.</span></div>
+          <div><b data-i18n="ana.kart1.b">01 / DİSK</b><span data-i18n="ana.kart1">Vurulan savrulur; can yok, düşen 4 saniyede geri gelir.</span></div>
+          <div><b data-i18n="ana.kart2.b">02 / PLAKA</b><span data-i18n="ana.kart2">Dış halka 40. saniyede düşer; iç halka 80. saniyede: doğuş kapanır.</span></div>
+          <div><b data-i18n="ana.kart3.b">03 / SON PLAKA</b><span data-i18n="ana.kart3">Merkez daralır ama düşmez. Süre bitince orada kalan kazanır.</span></div>
         </div>
       </div>
-      <div class="pitch-note"><i></i> BOŞLUK ARENASI <span>13 plaka, 40 zıplama plakası, sınır diskleri sektirir.</span></div>
+      <div class="pitch-note" data-i18n-html="ana.not"></div>
     </section>
 
     <div id="sp-gosteri" hidden>SON PLAKA</div>
     <!-- "İbo" gösteri sahnesinin (?gosteri=ibo; bkz. src/gosteri-ibo.js) altyazısı ve tekrar rozeti. Yalnız o
          sahnede açılır; öbür kiplerde ve normal oyunda `hidden` kalır. -->
     <div id="sp-gosteri-yazi" hidden aria-hidden="true"></div>
-    <div id="sp-gosteri-tekrar" hidden aria-hidden="true">TEKRAR</div>
+    <div id="sp-gosteri-tekrar" hidden aria-hidden="true" data-i18n="tekrar">TEKRAR</div>
     <div id="sp-crosshair" hidden>+</div>
     <div id="sp-charge" hidden><div class="charge-ring"></div><span id="sp-charge-text"></span></div>
     <div id="sp-warn" role="status" hidden></div>
     <div id="sp-rule" role="status" hidden></div>
     <div id="sp-message" role="status" hidden></div>
-    <div id="sp-down" hidden><strong id="sp-down-title">DÜŞTÜN!</strong><span id="sp-down-count"></span><small id="sp-down-note"></small></div>
+    <div id="sp-down" hidden><strong id="sp-down-title" data-i18n="dusme.dustun">DÜŞTÜN!</strong><span id="sp-down-count"></span><small id="sp-down-note"></small></div>
     <div id="sp-freeze" hidden></div>
 
     <aside id="sp-player" hidden>
-      <span class="eyebrow" id="sp-side">SEN / MAVİ TAKIM</span>
-      <strong id="sp-status">DİSKLER HAZIR</strong>
-      <div class="meter-label"><span>DİSK</span><span id="sp-disc-text">5 / 5</span></div>
+      <span class="eyebrow" id="sp-side"></span>
+      <strong id="sp-status" data-i18n="durum.hazir">DİSKLER HAZIR</strong>
+      <div class="meter-label"><span data-i18n="oyuncu.disk">DİSK</span><span id="sp-disc-text">5 / 5</span></div>
       <div class="discs" id="sp-discs"></div>
-      <div class="meter-label power-row"><span>GÜÇ</span><span id="sp-power">—</span></div>
-      <div class="meter-label"><span>DÜŞME HAKKI</span><span id="sp-lives">♥♥♥♥♥</span></div>
+      <div class="meter-label power-row"><span data-i18n="oyuncu.guc">GÜÇ</span><span id="sp-power">—</span></div>
+      <div class="meter-label"><span data-i18n="oyuncu.hak">DÜŞME HAKKI</span><span id="sp-lives">♥♥♥♥♥</span></div>
     </aside>
 
     <div id="sp-touch" hidden>
@@ -105,100 +108,100 @@
       <div class="touch-zone right" data-t="look"></div>
       <div id="sp-stick" hidden><i></i></div>
       <div class="touch-buttons">
-        <div id="sp-t-shoot" class="tbtn shoot" data-t="shoot" role="button" aria-label="Disk at"><b>AT</b><small id="sp-t-shoot-sub">TUT: AĞIR</small></div>
-        <div id="sp-t-bar" class="tbtn bar" data-t="bar" role="button" aria-label="Levye"><b>LEVYE</b></div>
-        <div id="sp-t-jump" class="tbtn jump" data-t="jump" role="button" aria-label="Zıpla"><b>ZIPLA</b><small>2 KEZ</small></div>
+        <div id="sp-t-shoot" class="tbtn shoot" data-t="shoot" role="button" aria-label="Disk at" data-i18n-aria-label="dokun.at.aria"><b data-i18n="dokun.at">AT</b><small id="sp-t-shoot-sub" data-i18n="dokun.tut">TUT: AĞIR</small></div>
+        <div id="sp-t-bar" class="tbtn bar" data-t="bar" role="button" aria-label="Levye" data-i18n-aria-label="dokun.levye.aria"><b data-i18n="dokun.levye">LEVYE</b></div>
+        <div id="sp-t-jump" class="tbtn jump" data-t="jump" role="button" aria-label="Zıpla" data-i18n-aria-label="dokun.zipla.aria"><b data-i18n="dokun.zipla">ZIPLA</b><small data-i18n="dokun.ikiKez">2 KEZ</small></div>
       </div>
     </div>
-    <div id="sp-rotate"><strong>Telefonu yan çevir</strong><span>Son Plaka yatay ekranda oynanır.</span></div>
+    <div id="sp-rotate"><strong data-i18n="dondur.baslik">Telefonu yan çevir</strong><span data-i18n="dondur.metin">Son Plaka yatay ekranda oynanır.</span></div>
 
     <div id="sp-controls" hidden>
-      <span><kbd>W A S D</kbd> Hareket</span>
-      <span><kbd>FARE</kbd> Bak / nişan</span>
-      <span><kbd>SOL TIK</kbd> Disk · 1,5 sn tut: Ağır</span>
-      <span><kbd>SAĞ TIK / F</kbd> Levye</span>
-      <span><kbd>SHIFT</kbd> Koş</span>
-      <span><kbd>BOŞLUK</kbd> Zıpla · havada tekrar</span>
-      <span><kbd>V</kbd> Kamera</span>
+      <span data-i18n-html="tus.hareket"></span>
+      <span data-i18n-html="tus.fare"></span>
+      <span data-i18n-html="tus.solTik"></span>
+      <span data-i18n-html="tus.sagTik"></span>
+      <span data-i18n-html="tus.shift"></span>
+      <span data-i18n-html="tus.bosluk"></span>
+      <span data-i18n-html="tus.v"></span>
     </div>
 
     <section id="sp-help" class="overlay" hidden>
       <div class="card">
-        <span class="eyebrow">ARENA KURALLARI</span>
-        <h2>Can yok. Mermi yok.<br>Sadece kenar var.</h2>
+        <span class="eyebrow" data-i18n="yardim.ust">ARENA KURALLARI</span>
+        <h2 data-i18n-html="yardim.baslik"></h2>
         <dl class="touch-only">
-          <dt>Sol yarı</dt><dd>Parmağını koy, joystick belirir: sürükleyerek yürü; sonuna kadar itersen koşarsın.</dd>
-          <dt>Sağ yarı</dt><dd>Parmağını kaydırarak bak ve nişan al (ortadaki artı nişangahtır).</dd>
-          <dt>AT</dt><dd>Dokun: disk. 1,5 saniye basılı tut: ağır disk (çok daha sert savurur). Elinde 5 disk var, 1,5 saniyede bir yenilenir.</dd>
-          <dt>LEVYE</dt><dd>Yakındaki rakibi kenara doğru iter. Kenar düellosunun silahı.</dd>
-          <dt>ZIPLA</dt><dd>Havadayken bir kez daha zıplarsın. Havada vurulursan düşersin.</dd>
-          <dt>Kamera 🎥</dt><dd>Telefonda omuz üstü başlar; birinci şahsa geçebilirsin.</dd>
+          <dt data-i18n="yardim.d1.b">Sol yarı</dt><dd data-i18n-html="yardim.d1"></dd>
+          <dt data-i18n="yardim.d2.b">Sağ yarı</dt><dd data-i18n-html="yardim.d2"></dd>
+          <dt data-i18n="yardim.d3.b">AT</dt><dd data-i18n-html="yardim.d3"></dd>
+          <dt data-i18n="yardim.d4.b">LEVYE</dt><dd data-i18n-html="yardim.d4"></dd>
+          <dt data-i18n="yardim.d5.b">ZIPLA</dt><dd data-i18n-html="yardim.d5"></dd>
+          <dt data-i18n="yardim.d6.b">Kamera 🎥</dt><dd data-i18n-html="yardim.d6"></dd>
         </dl>
         <dl class="desktop-only">
-          <dt>WASD / Oklar</dt><dd>Baktığın yöne göre yürü. Plakanın kenarından düşersin; kenarda dikkat.</dd>
-          <dt>Fare + sol tık</dt><dd>Nişangaha disk at. Disk hasar vermez: vurulan disk yönünde savrulur ve havalanır. Kenara yakın olan boşluğa gider.</dd>
-          <dt>Sol tık basılı</dt><dd>1,5 saniye tut (halka dolar): <b>ağır disk</b>. Yavaş ve parlak, herkes görür; ama değdiğini çok daha sert savurur. Hiçbir disk elemez: eleme yalnız boşluğa düşmekle olur.</dd>
-          <dt>Sağ tık / F</dt><dd><b>Levye</b>: yakındaki rakibi kendinden uzağa savurur. Kenardaki rakibi levyeyle uğurla.</dd>
-          <dt>Shift</dt><dd>Hızlı koş: rampaya yetişmek ve diskten kaçmak için.</dd>
-          <dt>Boşluk</dt><dd>Zıpla; havadayken bir kez daha zıpla. Havada vurulursan yönün değişir, düşebilirsin.</dd>
-          <dt>Rampalar</dt><dd>Plakalar arasındaki tek geçiş: plaka kenarındaki rampaya koş, okun gösterdiği plakaya uçarsın (uçuşta yön veremezsin, disk atabilirsin). Rampalar hiç kapanmaz: basan her zaman uçar.</dd>
-          <dt>Daralma</dt><dd>40. saniyede dış halka (8 plaka) düşer, 80. saniyede iç halka. Sonra merkez plaka 130. saniyeye kadar yarıçap 5,5'e küçülür ve orada durur; merkez hiç düşmez, 145. saniyede süre biter. Düşmeden 5 saniye önce plaka titrer: içeri kaç.</dd>
-          <dt>Güç diskleri</dt><dd>Merkezde ve iç halkada doğar: <b>üçlü</b> (3 atış yelpaze) ve <b>dondurucu</b> (3 atış, vurulan 2 saniye donar; donmuşu levyeyle it).</dd>
-          <dt>Düşme hakkı</dt><dd>Herkesin <b>5 düşme hakkı</b> var: beşinci düşüşte doğuş açık olsa da elenirsin. Yeni doğan 2 saniye korunur (disk ve levye işlemez, botlar hedef almaz); ilk atışın korumayı bitirir. Botlar da doğduktan hemen sonra atmaz.</dd>
-          <dt>Bot zorluğu</dt><dd>Giriş ekranında <b>Kolay / Normal / Zor</b>; odada kuran seçer. Zor botlar hızlı tepki verir ve isabetli atar; Normal ve Kolay daha seyrek ve sapmalı atar, diskten daha az kaçar.</dd>
-          <dt>Son plaka</dt><dd>Dış ve iç halka ayaktayken düşme hakkı sınırsız: 4 saniye sonra ayakta bir plakada doğarsın. İç halka düşünce yalnız merkez kalır ve <b>doğuş kapanır</b>: rakip takımın kimsesi kalmayınca ayakta kalan takım hemen kazanır. <b>145. saniyede süre bitince son plakada kalan kazanır</b>: ayakta oyuncusu en çok olan takım, eşitse en çok düşüren; herkes tek kipinde merkezde kalan tek kişi.</dd>
-          <dt>Kipler</dt><dd><b>Herkes tek</b> (5 kişi, herkes herkese), <b>2v2</b>, <b>3v3</b>, <b>4v4</b>, <b>5v5</b>; boş yerleri botlar doldurur. Odada da aynı kipler: kuran seçer. İnsanlar aynı takımdaysa co-op (rakipler bot), karşı takımdaki boş koltuğa geçince PvP.</dd>
-          <dt>V</dt><dd>Kamera: birinci şahıs ↔ omuz üstü.</dd>
-          <dt>Esc</dt><dd>Fareyi bırakır ve oyunu durdurur.</dd>
+          <dt data-i18n="yardim.m1.b">WASD / Oklar</dt><dd data-i18n-html="yardim.m1"></dd>
+          <dt data-i18n="yardim.m2.b">Fare + sol tık</dt><dd data-i18n-html="yardim.m2"></dd>
+          <dt data-i18n="yardim.m3.b">Sol tık basılı</dt><dd data-i18n-html="yardim.m3"></dd>
+          <dt data-i18n="yardim.m4.b">Sağ tık / F</dt><dd data-i18n-html="yardim.m4"></dd>
+          <dt data-i18n="yardim.m5.b">Shift</dt><dd data-i18n-html="yardim.m5"></dd>
+          <dt data-i18n="yardim.m6.b">Boşluk</dt><dd data-i18n-html="yardim.m6"></dd>
+          <dt data-i18n="yardim.m7.b">Rampalar</dt><dd data-i18n-html="yardim.m7"></dd>
+          <dt data-i18n="yardim.m8.b">Daralma</dt><dd data-i18n-html="yardim.m8"></dd>
+          <dt data-i18n="yardim.m9.b">Güç diskleri</dt><dd data-i18n-html="yardim.m9"></dd>
+          <dt data-i18n="yardim.m10.b">Düşme hakkı</dt><dd data-i18n-html="yardim.m10"></dd>
+          <dt data-i18n="yardim.m11.b">Bot zorluğu</dt><dd data-i18n-html="yardim.m11"></dd>
+          <dt data-i18n="yardim.m12.b">Son plaka</dt><dd data-i18n-html="yardim.m12"></dd>
+          <dt data-i18n="yardim.m13.b">Kipler</dt><dd data-i18n-html="yardim.m13"></dd>
+          <dt>V</dt><dd data-i18n-html="yardim.m14"></dd>
+          <dt>Esc</dt><dd data-i18n-html="yardim.m15"></dd>
         </dl>
-        <p>Diskler görünmez sınırdan seker (3 kez): arkadan vur. Plakalarda siper yok: sürekli hareket et. Çok oyunculu: giriş ekranında kipi seç, AÇIK ODALAR listesinden birine katıl, HIZLI KATIL ya da ODA KUR ile kurup kodu / linki paylaş (odayı bekleme odasında özel yaparsan listede görünmez); herkes boş koltuğa oturur, boş kalanları botlar oynar.</p>
-        <button id="sp-help-close" class="primary">ANLADIM</button>
+        <p data-i18n="yardim.son">Diskler görünmez sınırdan seker (3 kez): arkadan vur. Plakalarda siper yok: sürekli hareket et. Çok oyunculu: giriş ekranında kipi seç, AÇIK ODALAR listesinden birine katıl, HIZLI KATIL ya da ODA KUR ile kurup kodu / linki paylaş (odayı bekleme odasında özel yaparsan listede görünmez); herkes boş koltuğa oturur, boş kalanları botlar oynar.</p>
+        <button id="sp-help-close" class="primary" data-i18n="yardim.anladim">ANLADIM</button>
       </div>
     </section>
 
     <section id="sp-lobby" class="overlay" hidden>
       <div class="card lobby-card">
-        <span class="eyebrow" id="sp-lobby-title">ODA</span>
-        <div class="lobby-head"><h2 id="sp-lobby-code">----</h2><button id="sp-lobby-copy">Linki kopyala</button></div>
-        <p id="sp-lobby-vis" class="lobby-vis">AÇIK ODA · listede görünür</p>
-        <div class="lobby-settings"><label class="lobby-mode">KAÇA KAÇ <select id="sp-lobby-mode" aria-label="Kip"></select></label><label class="lobby-mode">BOT <select id="sp-lobby-diff" aria-label="Bot zorluğu"></select></label><label class="lobby-mode">ODA <select id="sp-lobby-private" aria-label="Oda görünürlüğü"><option value="0">Herkese açık</option><option value="1">Özel</option></select></label></div>
+        <span class="eyebrow" id="sp-lobby-title" data-i18n="oda.baslik">ODA</span>
+        <div class="lobby-head"><h2 id="sp-lobby-code">----</h2><button id="sp-lobby-copy" data-i18n="oda.linkiKopyala">Linki kopyala</button></div>
+        <p id="sp-lobby-vis" class="lobby-vis" data-i18n="oda.acik">AÇIK ODA · listede görünür</p>
+        <div class="lobby-settings"><label class="lobby-mode"><span data-i18n="oda.kacaKac">KAÇA KAÇ</span> <select id="sp-lobby-mode" aria-label="Kip" data-i18n-aria-label="oda.kip.aria"></select></label><label class="lobby-mode"><span data-i18n="oda.bot">BOT</span> <select id="sp-lobby-diff" aria-label="Bot zorluğu" data-i18n-aria-label="ana.zorluk.aria"></select></label><label class="lobby-mode"><span data-i18n="oda.oda">ODA</span> <select id="sp-lobby-private" aria-label="Oda görünürlüğü" data-i18n-aria-label="oda.gorunurluk.aria"><option value="0" data-i18n="oda.herkeseAcik">Herkese açık</option><option value="1" data-i18n="oda.ozelSecenek">Özel</option></select></label></div>
         <p id="sp-lobby-hint"></p>
         <div class="lobby-teams" id="sp-lobby-teams"></div>
         <p id="sp-lobby-status" class="lobby-status" role="status"></p>
-        <button id="sp-lobby-start" class="primary">MAÇI BAŞLAT <span>↗</span></button>
-        <button id="sp-lobby-leave" class="lobby-leave">Odadan çık</button>
+        <button id="sp-lobby-start" class="primary" data-i18n-html="oda.baslat"></button>
+        <button id="sp-lobby-leave" class="lobby-leave" data-i18n="oda.cik">Odadan çık</button>
       </div>
     </section>
 
     <section id="sp-pause" class="overlay" hidden>
       <div class="card small">
-        <span class="eyebrow">MOLA</span>
-        <h2>Bir nefes al.</h2>
+        <span class="eyebrow" data-i18n="mola.ust">MOLA</span>
+        <h2 data-i18n="mola.baslik">Bir nefes al.</h2>
         <!-- STANDART duraklatma menüsü: DEVAM ET → · Kontroller F1 · Ses · Müzik · Ana menü / Odadan çık · josephuz.com'a dön.
              "Yeniden başlat" oyuna özgü ek (çevrim içinde gizli). Müzik ses düzeyi sabit, sürgü yok. -->
-        <button id="sp-resume" class="primary">DEVAM ET →</button>
-        <button id="sp-pause-help">Kontroller <kbd>F1</kbd></button>
-        <button id="sp-pause-sound" aria-label="Ses efektlerini aç veya kapat">Ses: açık</button>
-        <button id="sp-pause-muzik" aria-label="Oyun müziğini aç veya kapat">Müzik: açık</button>
-        <button id="sp-restart">Yeniden başlat</button>
-        <button id="sp-menu">Ana menü</button>
-        <p id="sp-pause-note" class="pause-note" hidden>Çevrim içi maç durmaz: sen moladayken oyuncun yerinde durur.</p>
-        <a class="btn" href="https://www.josephuz.com/">josephuz.com'a dön</a>
+        <button id="sp-resume" class="primary" data-i18n="mola.devam">DEVAM ET →</button>
+        <button id="sp-pause-help" data-i18n-html="ust.kontroller">Kontroller <kbd>F1</kbd></button>
+        <button id="sp-pause-sound" aria-label="Ses efektlerini aç veya kapat" data-i18n-aria-label="ses.aria" data-i18n="ses.acik">Ses: açık</button>
+        <button id="sp-pause-muzik" aria-label="Oyun müziğini aç veya kapat" data-i18n-aria-label="muzik.aria" data-i18n="muzik.acik">Müzik: açık</button>
+        <button id="sp-restart" data-i18n="mola.yenidenBaslat">Yeniden başlat</button>
+        <button id="sp-menu" data-i18n="mola.anaMenu">Ana menü</button>
+        <p id="sp-pause-note" class="pause-note" hidden data-i18n="mola.not">Çevrim içi maç durmaz: sen moladayken oyuncun yerinde durur.</p>
+        <a class="btn" href="https://www.josephuz.com/" data-i18n="mola.siteyeDon">josephuz.com'a dön</a>
       </div>
     </section>
 
     <section id="sp-results" class="overlay" hidden>
       <div class="card result-card">
-        <span class="eyebrow">MAÇ SONU</span>
+        <span class="eyebrow" data-i18n="sonuc.ust">MAÇ SONU</span>
         <h2 id="sp-result-title"></h2>
         <div id="sp-final-score"></div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Oyuncu</th><th>Düşürme</th><th>Düşme</th><th>İsabet</th><th>Atış</th><th>Güç diski</th><th>Zıplama plakası</th></tr></thead>
+            <thead><tr><th data-i18n="sonuc.oyuncu">Oyuncu</th><th data-i18n="sonuc.dusurme">Düşürme</th><th data-i18n="sonuc.dusme">Düşme</th><th data-i18n="sonuc.isabet">İsabet</th><th data-i18n="sonuc.atis">Atış</th><th data-i18n="sonuc.guc">Güç diski</th><th data-i18n="sonuc.rampa">Zıplama plakası</th></tr></thead>
             <tbody id="sp-stats"></tbody>
           </table>
         </div>
-        <button id="sp-again" class="primary">BİR MAÇ DAHA</button>
+        <button id="sp-again" class="primary" data-i18n="sonuc.birDaha">BİR MAÇ DAHA</button>
       </div>
     </section>
   </div>

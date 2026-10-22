@@ -1,4 +1,6 @@
-import { DIFFICULTIES, DIFFICULTY_LABEL, MODES, TEAMS, modeLabel, teamsFor } from './config.js';
+import { DIFFICULTIES, MODES, TEAMS, teamsFor } from './config.js';
+import { t } from './dil.js';
+import { kipAdi, takimAdi, zorlukAdi, zorlukKucuk } from './etiket.js';
 import { normalizeCode } from './net/protocol.js';
 
 /**
@@ -26,7 +28,7 @@ export function createLobby(root, app) {
     teams: $('lobby-teams'), hint: $('lobby-hint'), lobbyStatus: $('lobby-status'), start: $('lobby-start'), copy: $('lobby-copy'),
   };
   const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } return v; };
-  const defaultNick = () => `Oyuncu-${Math.floor(1000 + Math.random() * 9000)}`;
+  const defaultNick = () => t('oda.varsayilanAd', { n: Math.floor(1000 + Math.random() * 9000) });
   el.nick.value = store('sp.nick') || defaultNick();
   const nick = () => { const v = el.nick.value.trim().slice(0, 16) || defaultNick(); el.nick.value = v; store('sp.nick', v); return v; };
   let lobby = null, picked = null, serverUp = false, copied = 0;
@@ -35,23 +37,23 @@ export function createLobby(root, app) {
     serverUp = up;
     el.rooms.hidden = !up;
     for (const b of [el.quick, el.create, el.join, el.joinGo]) {
-      b.disabled = !up; b.classList.toggle('soon', !up); b.title = up ? '' : 'Çok oyunculu yakında';
+      b.disabled = !up; b.classList.toggle('soon', !up); b.title = up ? '' : t('oda.yakindaTitle');
       if (b === el.joinGo) continue;
       const tag = b.querySelector('.soon-tag');
-      if (!up && !tag) b.insertAdjacentHTML('beforeend', '<em class="soon-tag">YAKINDA</em>'); else if (up) tag?.remove();
+      if (!up && !tag) b.insertAdjacentHTML('beforeend', `<em class="soon-tag">${t('oda.yakinda')}</em>`); else if (up) tag?.remove();
     }
     if (!up) { el.joinRow.hidden = true; el.online.textContent = ''; }
   }
   setServer(false);
 
-  el.quick.onclick = () => { el.status.textContent = 'Oda aranıyor…'; app.quick(nick(), app.settingsChoice()); };
-  el.create.onclick = () => { el.status.textContent = 'Oda kuruluyor…'; app.create(nick(), app.settingsChoice()); };
+  el.quick.onclick = () => { el.status.textContent = t('oda.araniyor'); app.quick(nick(), app.settingsChoice()); };
+  el.create.onclick = () => { el.status.textContent = t('oda.kuruluyor'); app.create(nick(), app.settingsChoice()); };
   el.join.onclick = () => { el.joinRow.hidden = !el.joinRow.hidden; if (!el.joinRow.hidden) el.code.focus(); };
   const joinGo = () => {
     const code = normalizeCode(el.code.value);
     el.code.value = code;
-    if (code.replace('-', '').length < 4) { el.status.textContent = 'Oda kodunu yaz'; return; }
-    el.status.textContent = 'Odaya bağlanıyor…'; app.join(nick(), code);
+    if (code.replace('-', '').length < 4) { el.status.textContent = t('oda.kodYaz'); return; }
+    el.status.textContent = t('oda.baglaniyor'); app.join(nick(), code);
   };
   el.joinGo.onclick = joinGo;
   el.code.addEventListener('keydown', e => { if (e.key === 'Enter') joinGo(); });
@@ -60,33 +62,32 @@ export function createLobby(root, app) {
 
   el.copy.onclick = () => {
     const url = `${location.origin}${location.pathname}?oda=${encodeURIComponent(lobby?.code || '')}`;
-    const done = () => { el.copy.textContent = 'Link kopyalandı'; clearTimeout(copied); copied = setTimeout(() => { el.copy.textContent = 'Linki kopyala'; }, 1500); };
+    const done = () => { el.copy.textContent = t('oda.linkKopyalandi'); clearTimeout(copied); copied = setTimeout(() => { el.copy.textContent = t('oda.linkiKopyala'); }, 1500); };
     try { navigator.clipboard.writeText(url).then(done, () => { el.lobbyStatus.textContent = url; }); } catch { el.lobbyStatus.textContent = url; }
   };
   el.start.onclick = () => app.start();
   $('lobby-leave').onclick = () => app.leave();
-  el.mode.innerHTML = MODES.map(n => `<option value="${n}">${modeLabel(n)}</option>`).join('');
+  el.mode.innerHTML = MODES.map(n => `<option value="${n}">${kipAdi(n)}</option>`).join('');
   el.mode.onchange = () => app.settings({ teamSize: Number(el.mode.value) });
-  el.diff.innerHTML = DIFFICULTIES.map(d => `<option value="${d}">${DIFFICULTY_LABEL[d]}</option>`).join('');
+  el.diff.innerHTML = DIFFICULTIES.map(d => `<option value="${d}">${zorlukAdi(d)}</option>`).join('');
   el.diff.onchange = () => app.settings({ difficulty: el.diff.value });
   el.priv.onchange = () => app.settings({ private: el.priv.value === '1' });
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   /** Ayar özeti: `5v5 · Bot Normal` (herkes tekte `Herkes tek · Bot Zor`). */
-  const diffName = d => { const l = DIFFICULTY_LABEL[d] || DIFFICULTY_LABEL.normal; return l[0] + l.slice(1).toLocaleLowerCase('tr'); };
-  const summary = (n, d) => `${n === 1 ? 'Herkes tek' : modeLabel(n)} · Bot ${diffName(d)}`;
+  const summary = (n, d) => t('oda.ozet', { kip: n === 1 ? t('oda.herkesTek') : kipAdi(n), zorluk: zorlukKucuk(d) });
 
   /** Açık odalar: kuranın adı, ayar özeti ve n/max oyuncu, LOBİDE / MAÇTA, KATIL → ya da DOLU; kod gösterilmez. */
   function setRooms(list) {
     el.roomsCount.textContent = String(list.length);
-    if (!list.length) { el.roomsList.innerHTML = '<div class="rooms-empty">Şu an açık oda yok. Hızlı katıl yeni bir oda kurar.</div>'; return; }
+    if (!list.length) { el.roomsList.innerHTML = `<div class="rooms-empty">${t('oda.listeBos')}</div>`; return; }
     el.roomsList.innerHTML = list.map(r => {
       const playing = r.state === 'playing', full = r.full ?? r.humans >= r.seats;
       return `<button class="room${playing ? ' playing' : ''}" data-code="${esc(r.code)}"${full ? ' disabled' : ''}>`
-        + `<span><b>${esc(r.host)}</b><small>${summary(r.teamSize, r.difficulty)} · ${r.humans}/${r.seats} oyuncu</small></span>`
-        + `<span class="room-go"><i>${playing ? 'MAÇTA' : 'LOBİDE'}</i><em>${full ? 'DOLU' : 'KATIL →'}</em></span></button>`;
+        + `<span><b>${esc(r.host)}</b><small>${summary(r.teamSize, r.difficulty)} · ${t('oda.oyuncu', { n: r.humans, max: r.seats })}</small></span>`
+        + `<span class="room-go"><i>${t(playing ? 'oda.macta' : 'oda.lobide')}</i><em>${t(full ? 'oda.dolu' : 'oda.katil')}</em></span></button>`;
     }).join('');
-    for (const b of el.roomsList.querySelectorAll('.room')) b.onclick = () => { if (!serverUp || b.disabled) return; el.status.textContent = 'Odaya bağlanıyor…'; app.join(nick(), b.dataset.code); };
+    for (const b of el.roomsList.querySelectorAll('.room')) b.onclick = () => { if (!serverUp || b.disabled) return; el.status.textContent = t('oda.baglaniyor'); app.join(nick(), b.dataset.code); };
   }
   setRooms([]);
 
@@ -96,8 +97,8 @@ export function createLobby(root, app) {
     const n = lobby.settings?.teamSize || 5, teams = teamsFor(n), diff = lobby.settings?.difficulty || 'normal';
     const priv = Boolean(lobby.settings?.private ?? lobby.private);
     el.lobbyCode.textContent = lobby.code;
-    el.title.textContent = `ODA · ${summary(n, diff)}`;
-    el.vis.textContent = priv ? 'ÖZEL ODA · yalnız kodla' : 'AÇIK ODA · listede görünür';
+    el.title.textContent = t('oda.baslikOzet', { ozet: summary(n, diff) });
+    el.vis.textContent = t(priv ? 'oda.ozel' : 'oda.acik');
     for (const s of [el.mode, el.diff, el.priv]) s.disabled = !host || playing;
     el.mode.value = String(n); el.diff.value = diff; el.priv.value = priv ? '1' : '0';
     if (picked != null && !lobby.seats.some(s => s && s.id === picked)) picked = null;
@@ -107,21 +108,21 @@ export function createLobby(root, app) {
         const slot = team * n + k, s = lobby.seats[slot];
         const cls = ['seat', s ? 'taken' : 'free', s && s.id === me ? 'me' : '', s && !s.online ? 'off' : '', s && s.id === picked ? 'picked' : ''].filter(Boolean).join(' ');
         const who = s
-          ? `${esc(s.nick)}${s.id === lobby.hostId ? ' <small>kuran</small>' : ''}${s.id === me ? ' <small class="tag-me">sen</small>' : ''}${s.online ? '' : ' <small>koptu</small>'}`
-          : 'Bot · boş koltuk <small class="sit">Buraya otur</small>';
-        return `<li class="${cls}" data-slot="${slot}"${s ? ` data-id="${s.id}"` : ''}${host && s ? ' draggable="true"' : ''}>${n > 1 ? `<em>Koltuk ${k + 1}</em>` : ''}<span>${who}</span></li>`;
+          ? `${esc(s.nick)}${s.id === lobby.hostId ? ` <small>${t('oda.kuran')}</small>` : ''}${s.id === me ? ` <small class="tag-me">${t('oda.sen')}</small>` : ''}${s.online ? '' : ` <small>${t('oda.koptu')}</small>`}`
+          : `${t('oda.bosKoltuk')} <small class="sit">${t('oda.otur')}</small>`;
+        return `<li class="${cls}" data-slot="${slot}"${s ? ` data-id="${s.id}"` : ''}${host && s ? ' draggable="true"' : ''}>${n > 1 ? `<em>${t('oda.koltuk', { n: k + 1 })}</em>` : ''}<span>${who}</span></li>`;
       }).join('');
-      return `<div class="lobby-team" style="--tc:${TEAMS.colors[team]}"><b>${TEAMS.names[team]}</b><ol>${seats}</ol></div>`;
+      return `<div class="lobby-team" style="--tc:${TEAMS.colors[team]}"><b>${takimAdi(team)}</b><ol>${seats}</ol></div>`;
     }).join('');
     for (const li of root.querySelectorAll('#sp-lobby .seat')) wire(li, host);
     const humans = lobby.seats.filter(Boolean).length, bots = lobby.seats.length - humans;
-    const humanTeams = new Set(lobby.seats.map((s, i) => (s ? Math.floor(i / n) : -1)).filter(t => t >= 0));
-    const kind = n === 1 ? 'Herkes tek' : humanTeams.size > 1 ? 'PvP' : 'Co-op: rakipler bot';
-    el.hint.textContent = `${humans} insan · ${bots} bot · ${kind}${playing ? ' · Maç sürüyor: boş koltuğa oturunca oyuna girersin' : ''}`;
+    const humanTeams = new Set(lobby.seats.map((s, i) => (s ? Math.floor(i / n) : -1)).filter(k => k >= 0));
+    const kind = t(n === 1 ? 'oda.herkesTek' : humanTeams.size > 1 ? 'oda.pvp' : 'oda.coop');
+    el.hint.textContent = t('oda.ipucu', { insan: humans, bot: bots, tur: kind }) + (playing ? t('oda.macSuruyor') : '');
     el.start.hidden = playing;
     el.start.disabled = !host;
-    el.start.innerHTML = host ? 'MAÇI BAŞLAT <span>↗</span>' : 'Kuranın başlatması bekleniyor';
-    el.lobbyStatus.textContent = host && picked != null ? 'Taşınacak koltuğa tıkla' : '';
+    el.start.innerHTML = t(host ? 'oda.baslat' : 'oda.bekleniyor');
+    el.lobbyStatus.textContent = host && picked != null ? t('oda.tasi') : '';
   }
 
   function wire(li, host) {
@@ -141,7 +142,7 @@ export function createLobby(root, app) {
 
   return {
     nick, setServer, render, setRooms,
-    setOnline(n) { el.online.textContent = n > 0 ? `● ${n} çevrim içi` : ''; el.online.title = 'Oyunu şu an açık tutan sekme sayısı'; },
+    setOnline(n) { el.online.textContent = n > 0 ? t('oda.cevrimIci', { n }) : ''; el.online.title = t('oda.cevrimIciTitle'); },
     status(text) { el.status.textContent = text; el.lobbyStatus.textContent = text; },
     /** Davet linki: `?oda=KPRT-4` (tiresiz de olur). */
     urlCode() {

@@ -28,7 +28,8 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
   const byToken = new Map();
 
   const send = (conn, obj) => { if (conn.ws && conn.ws.readyState === 1) conn.ws.send(JSON.stringify(obj)); };
-  const error = (conn, msg) => send(conn, { t: S2C.ERROR, msg });
+  // `kod`: dil bağımsız anahtar (josephuz/docs/dil-standardi.md); istemci t('sunucu.' + kod, d) gösterir, yoksa `msg`.
+  const error = (conn, msg, kod, d) => send(conn, { t: S2C.ERROR, msg, ...(kod ? { kod } : {}), ...(d ? { d } : {}) });
 
   const online = () => conns.size + presence();
   let onlineSent = -1;
@@ -273,17 +274,17 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
         const { teamSize, difficulty } = sanitize(msg, room.settings);
         room.settings.difficulty = difficulty;
         if (typeof msg.private === 'boolean') room.settings.private = msg.private;
-        if (teamSize !== room.settings.teamSize && !relayout(room, teamSize)) return error(conn, `Bu kip için oda kalabalık: ${members(room).length} kişi, ${playersFor(teamSize)} koltuk`);
+        if (teamSize !== room.settings.teamSize && !relayout(room, teamSize)) return error(conn, `Bu kip için oda kalabalık: ${members(room).length} kişi, ${playersFor(teamSize)} koltuk`, 'oda.kalabalik', { kisi: members(room).length, koltuk: playersFor(teamSize) });
         broadcastLobby(room);
         return;
       }
       case C2S.JOIN: {
         const code = normalizeCode(msg.code);
         const r = rooms.get(code);
-        if (!r) return error(conn, 'Böyle bir oda yok');
+        if (!r) return error(conn, 'Böyle bir oda yok', 'oda.yok');
         if (r.seats.includes(conn)) { broadcastLobby(r); if (r.world) send(conn, startMsg(r, conn)); return; }
         const slot = freeSeat(r);
-        if (slot < 0) return error(conn, 'Oda dolu');
+        if (slot < 0) return error(conn, 'Oda dolu', 'oda.dolu');
         if (room) leaveRoom(conn);
         conn.input = blankInput();
         seat(r, conn, slot); conn.room = r;
@@ -295,7 +296,7 @@ export function createRooms({ log = console.log, presence = () => 0 } = {}) {
       case C2S.SEAT: {
         const slot = Math.round(+msg.slot);
         if (!room || !(slot >= 0 && slot < room.seats.length)) return;
-        if (room.seats[slot]) return error(conn, 'Koltuk dolu: kuran yerini değiştirebilir');
+        if (room.seats[slot]) return error(conn, 'Koltuk dolu: kuran yerini değiştirebilir', 'koltuk.dolu');
         seat(room, conn, slot);
         broadcastLobby(room);
         if (room.world) roster(room);

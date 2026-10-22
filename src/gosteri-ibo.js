@@ -1,4 +1,5 @@
 import { CAMERA, GOSTERI_IBO as G } from './config.js';
+import { t as ceviri } from './dil.js';
 import { knock } from './actions.js';
 import { clamp, wrap } from './math.js';
 import { isApp } from './platform.js';
@@ -66,22 +67,26 @@ export const ISARET = {
   bitis: 34.75,       // oyun görüntüsünün sonu (kalanı kurgudaki josephuz.com kapanışı)
 };
 
-/** Altyazılar: her cümle konuşulduğu saniyede çıkar, sustuğunda kalkar (meme usulü, ekranın ortasına yakın). */
+/**
+ * Altyazılar: her cümle konuşulduğu saniyede çıkar, sustuğunda kalkar (meme usulü, ekranın ortasına yakın). Üçüncü
+ * öğe sözlük anahtarıdır (src/diller/: 'ibo.N'); ekrana etkin dildeki metin yazılır. Türkçe ses + Türkçe altyazı için
+ * sahne `?gosteri=ibo&dil=tr` ile açılır.
+ */
 export const ALTYAZI = [
-  [2.60, 4.30, 'Gel la hadi, çekiyom.'],
-  [4.44, 6.30, 'Buzu gözüküyor.'],
-  [6.32, 8.10, 'Sen gel la. Nereyen gelecek belam?'],
-  [8.46, 12.20, 'Bak alt tarafım var ya, yol gibi var ya, yol gibi.'],
-  [13.38, 14.40, 'Oraya in.'],
-  [16.08, 18.10, 'Bak düşme sakın, vallahi çok kötü düşersin la.'],
-  [20.36, 21.85, 'La ya bak o oğlum, yürüyor lan.'],
-  [22.44, 23.30, 'La İbo!'],
-  [24.38, 25.95, 'Bir şey oldu mu?'],
-  [26.14, 27.45, 'Bir şey oldu mu?'],
-  [28.08, 29.90, 'Baya çok kötü çarptı bak.'],
-  [31.90, 33.00, 'Oğlum yükselmiş ha.'],
+  [2.60, 4.30, 'ibo.1'],
+  [4.44, 6.30, 'ibo.2'],
+  [6.32, 8.10, 'ibo.3'],
+  [8.46, 12.20, 'ibo.4'],
+  [13.38, 14.40, 'ibo.5'],
+  [16.08, 18.10, 'ibo.6'],
+  [20.36, 21.85, 'ibo.7'],
+  [22.44, 23.30, 'ibo.8'],
+  [24.38, 25.95, 'ibo.9'],
+  [26.14, 27.45, 'ibo.9'],
+  [28.08, 29.90, 'ibo.10'],
+  [31.90, 33.00, 'ibo.11'],
   // Kahkaha: yazıya dökülmez, yalnız gülen yüz durur (Yusuf 13 Ekim).
-  [33.05, 34.40, '😂'],
+  [33.05, 34.40, 'ibo.12'],
 ];
 
 /**
@@ -477,8 +482,9 @@ export function createIboGosteri({ view, root = null }) {
     for (let n = 0; n < ALTYAZI.length; n++) if (t >= ALTYAZI[n][0] && t < ALTYAZI[n][1]) i = n;
     if (i !== yaziIndex) {
       yaziIndex = i;
-      if (i >= 0) olcum.altyazi.push({ i, t, metin: ALTYAZI[i][2] });
-      if (yaziEl) { yaziEl.textContent = i >= 0 ? ALTYAZI[i][2] : ''; yaziEl.hidden = i < 0; }
+      const metin = i >= 0 ? ceviri(ALTYAZI[i][2]) : '';
+      if (i >= 0) olcum.altyazi.push({ i, t, metin });
+      if (yaziEl) { yaziEl.textContent = metin; yaziEl.hidden = i < 0; }
     }
     // Rozet son karelerde kalkar: çekimin son karesi donarak kapanışa uzanıyor, rozet orada asılı kalmasın.
     if (tekrarEl) tekrarEl.hidden = !(t >= ISARET.tekrar1 && t < ISARET.canli - 0.2);

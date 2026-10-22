@@ -1,4 +1,5 @@
 import { DISC, TOUCH } from './config.js';
+import { t } from './dil.js';
 
 /**
  * Dokunmatik kontroller (yalnızca tarayıcı; telefon, tablet). Çoklu dokunuş pointer olaylarıyla izlenir, her parmak
@@ -91,7 +92,7 @@ export function createTouch(root, sink) {
       if (!visible) return;
       const p = w.players[w.me];
       el.shoot.classList.toggle('idle', p.discs <= 0 || p.out);
-      el.shootSub.textContent = p.discs > 0 ? `${p.discs} DİSK` : 'YENİLENİYOR';
+      el.shootSub.textContent = p.discs > 0 ? t('dokun.disk', { n: p.discs }) : t('dokun.yenileniyor');
       el.shoot.style.setProperty('--cd', p.discs <= 0 ? Math.min(1, p.regen / DISC.regen).toFixed(3) : 0);
       el.bar.style.setProperty('--cd', p.barCd > 0 ? Math.min(1, p.barCd / 0.8).toFixed(3) : 0);
     },

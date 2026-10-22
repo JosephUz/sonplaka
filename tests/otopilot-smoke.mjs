@@ -15,7 +15,7 @@ const url = process.env.GAME_URL || 'http://localhost:5187';
 await mkdir('artifacts', { recursive: true });
 const browser = await chromium.launch({ headless: true, args: process.env.SWIFTSHADER ? ['--use-gl=angle', '--use-angle=swiftshader'] : ['--use-gl=angle', '--use-angle=d3d11', '--ignore-gpu-blocklist'] });
 try {
-  const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+  const ctx = await browser.newContext({ locale: 'tr-TR', viewport: { width: 1280, height: 720 } });
   // Kamera tercihi önceden 'fps' yazılır: otopilot omuz kamerasına geçer ama tercihi DEĞİŞTİRMEMELİ.
   await ctx.addInitScript(() => {
     try { localStorage.setItem('sp.cam', 'fps'); } catch { /* yok */ }

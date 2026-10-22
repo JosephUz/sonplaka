@@ -14,7 +14,8 @@
     "test:muzik": "node tests/muzik-smoke.mjs",
     "build:web": "node scripts/build-web.mjs",
     "deploy:web": "node scripts/build-web.mjs && npx wrangler@4 deploy",
-    "test:cubuk": "node tests/standart-cubuk.mjs"
+    "test:cubuk": "node tests/standart-cubuk.mjs",
+    "dil": "node scripts/dil-denetim.mjs"
   },
   "dependencies": {
     "three": "0.180.0",

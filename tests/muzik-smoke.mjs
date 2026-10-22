@@ -21,7 +21,7 @@ const browser = await chromium.launch({
 });
 const olcum = {};
 try {
-  const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+  const ctx = await browser.newContext({ locale: 'tr-TR', viewport: { width: 1280, height: 720 } });
   const page = await ctx.newPage(), errors = [];
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', e => { if (e.type() === 'error') errors.push(e.text()); });

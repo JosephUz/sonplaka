@@ -136,7 +136,7 @@ const olcum = [];
 try {
   // 1) Giriş ekranı, üç ekran ölçüsü: standart dörtlü başta, tek satır, ekranın içinde, logoya binmiyor.
   for (const [ad, ekran] of [['dar', DAR], ['genis', GENIS], ['dikey', DIKEY]]) {
-    const context = await browser.newContext({ viewport: ekran, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+    const context = await browser.newContext({ locale: 'tr-TR', viewport: ekran, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
     const page = await context.newPage(), hatalar = [];
     page.on('pageerror', e => hatalar.push(e.message));
     page.on('console', e => { if (e.type() === 'error') hatalar.push(e.text()); });
@@ -165,7 +165,7 @@ try {
   }
 
   // 2) Dar yatay telefonda maç ve duraklatma menüsü.
-  const context = await browser.newContext({ viewport: DAR, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  const context = await browser.newContext({ locale: 'tr-TR', viewport: DAR, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
   const page = await context.newPage(), hatalar = [];
   page.on('pageerror', e => hatalar.push(e.message));
   page.on('console', e => { if (e.type() === 'error') hatalar.push(e.text()); });

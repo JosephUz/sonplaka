@@ -5,6 +5,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { ALTYAZI, ISARET, createIboGosteri } from '../src/gosteri-ibo.js';
+import { t } from '../src/dil.js';
+import tr from '../src/diller/tr.js';
 import { GOSTERI_IBO } from '../src/config.js';
 
 /**
@@ -36,7 +38,7 @@ const kare = t => o.iz.reduce((en, k) => (Math.abs(k.t - t) < Math.abs(en.t - t)
 test('1 · her altyazı kendi cümlesinin saniyesinde çıkar', () => {
   assert.equal(o.olcum.altyazi.length, ALTYAZI.length, 'bütün altyazılar gösterilir');
   for (const [i, kayit] of o.olcum.altyazi.entries()) {
-    assert.equal(kayit.metin, ALTYAZI[i][2]);
+    assert.equal(kayit.metin, t(ALTYAZI[i][2])); // ALTYAZI sözlük anahtarı tutar, ekrana etkin dildeki metin yazılır
     const sapma = kayit.t - ALTYAZI[i][0];
     assert.ok(sapma >= 0 && sapma <= KARE + 1e-6, `"${kayit.metin}" ${ALTYAZI[i][0]} sn'de çıkar (sapma ${sapma.toFixed(3)} sn)`);
   }
@@ -86,8 +88,8 @@ test('5 · kahkahanın tepesinde İbo sekmenin en yüksek noktasında', () => {
     `sekmenin en yüksek noktası kahkahanın tepesinde (${once.y.toFixed(2)} → ${tepe.y.toFixed(2)} → ${sonra.y.toFixed(2)})`);
   assert.ok(tepe.y - GOSTERI_IBO.derinlik > 1, `plakadan en az 1 birim yukarıda (${(tepe.y - GOSTERI_IBO.derinlik).toFixed(2)})`);
   // Kahkaha altyazısı yazıya dökülmez.
-  assert.equal(ALTYAZI.at(-1)[2], '😂', 'son altyazı kahkaha simgesi');
-  assert.equal(ALTYAZI.at(-2)[2], 'Oğlum yükselmiş ha.', 'ondan önceki "Oğlum yükselmiş ha."');
+  assert.equal(tr[ALTYAZI.at(-1)[2]], '😂', 'son altyazı kahkaha simgesi');
+  assert.equal(tr[ALTYAZI.at(-2)[2]], 'Oğlum yükselmiş ha.', 'ondan önceki "Oğlum yükselmiş ha."');
   assert.ok(ALTYAZI.at(-1)[1] < ISARET.bitis - 0.2, 'son altyazı kapanıştan önce kalkar');
 });
 
