@@ -1,5 +1,11 @@
 # Son Plaka
 
+> **EN:** A first-person disc arena over a shrinking void, in the browser (Three.js): knock rivals off the falling plates and be the last one standing; free-for-all or team modes, with bots or online.
+>
+> **TR:** Tarayıcıda (Three.js) birinci şahıs disk arenası, daralan boşluk: rakibi düşen plakalardan at, son plakada ayakta kal; herkes tek ya da takımlı, botlarla ya da çevrim içi.
+
+**Play / Oyna:** https://sonplaka.josephuz.com · **Source / Kaynak:** https://github.com/JosephUz/sonplaka
+
 Three.js ile tarayıcıda çalışan, birinci şahıs **disk arenası + daralan boşluk**. Boşlukta asılı 13 plaka maç boyunca
 dıştan içe düşer; diskle rakibi kenardan aşağı atarsın, rampalarla içeri kaçarsın. Can yok, mermi yok. Dış halkalar
 ayaktayken düşme hakkı sınırsız; iç halka düşünce **son plaka**: doğuş kapanır ve süre bitince orada ayakta kalan kazanır.
@@ -176,3 +182,18 @@ odaları `server/`, oyun kodu `src/` altındadır. three.js npm paketinden `/ven
 | `src/muzik.js`, `muzik/` | Oyun içi müzik: sahne seçimi, çapraz geçiş (şu an parça yok; eskiler `muzik/archive/`) ve lisans notu |
 | `tests/` | Kural testleri, oda testleri, tarayıcı dumanı |
 | `tests/muzik.test.mjs`, `tests/muzik-smoke.mjs` | Müzik ve standart araç çubuğu testleri (tarayıcısız kural testi; tarayıcıda ölçüm) |
+
+## Lisans / License
+
+- **Kod:** [MIT](LICENSE), Copyright (c) 2026 JosephUz. Kodu kullanabilir, değiştirebilir, dağıtabilirsin.
+- **MIT dışında, tüm hakları saklıdır:** "Son Plaka" ve "JosephUz" adları; `muzik/` altındaki müzikler. Ayrıntı: [TRADEMARKS.md](TRADEMARKS.md). Müzik için `muzik/LISANS.txt`.
+- **Fork'lar** başka bir ad ve logo kullanmalı, resmî sürüm olduğunu ima etmemeli.
+- **Üçüncü taraf:** [three.js](https://github.com/mrdoob/three.js) ve [ws](https://github.com/websockets/ws) npm bağımlılığıdır (ikisi de MIT), depoda değil, kendi lisanslarıyla gelir. Müziklerdeki enstrüman örnekleri VSCO 2 Community Edition (CC0).
+
+> **In English:** The code is licensed under [MIT](LICENSE). The name "Son Plaka", the name "JosephUz", the music in `muzik/` are **not** covered by MIT and are all rights reserved; see [TRADEMARKS.md](TRADEMARKS.md). Forks must use a different name and logo.
+
+## Katkı / Contributing
+
+Hata bildirimi, öneri ve pull request'e açığız. Büyük bir değişiklikten önce bir [issue](https://github.com/JosephUz/sonplaka/issues) açıp konuşalım; oyunun dengesi ve yönü JosephUz'da. Kod ve oyun Türkçe: değişken, işlev ve mesaj adları Türkçe, çevresindeki kodun düzenine uy; `npm test` geçmeli. Gönderdiğin katkı bu deponun MIT lisansıyla yayımlanır. Müzik, ses ya da görsel eklemeden önce issue'da sor. Güvenlik açıklarını issue yerine [SECURITY.md](SECURITY.md)'deki yoldan bildir.
+
+> **In English:** Issues and pull requests are welcome; please open an issue before large changes. Contributions are accepted under the MIT license of this repository. Report security issues privately as described in [SECURITY.md](SECURITY.md).

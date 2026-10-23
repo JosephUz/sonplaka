@@ -9,3 +9,10 @@ apk/
 android/*.jks
 android/keystore.properties
 scratch/
+# Açık depoya girmeyecek yerel dosyalar (sürücü günlükleri, deneme betikleri, sırlar, veritabanları).
+NVIDIA Corporation/
+.env.*
+!.env.example
+*.keystore
+*.db
+*.sqlite
