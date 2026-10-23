@@ -174,8 +174,8 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
 }
 
 /* Dokunmatik kip: sol yarı joystick, sağ yarı bakış, sağ altta başparmak düğmeleri. */
-#son-plaka .touch-only{display:none}
-#son-plaka.touch .touch-only{display:grid}
+#son-plaka .touch-only,#son-plaka .card dl.touch-only{display:none} /* dl.touch-only: ".card dl{display:grid}" kuralından özgül olmalı */
+#son-plaka.touch .touch-only,#son-plaka.touch .card dl.touch-only{display:grid}
 #son-plaka.touch .desktop-only,#son-plaka.touch #sp-controls,#son-plaka.touch #sp-player,#son-plaka.touch kbd{display:none!important}
 #son-plaka.touch canvas{cursor:default}
 #son-plaka #sp-touch{position:absolute;inset:0;touch-action:none;-webkit-user-select:none;-webkit-touch-callout:none}
