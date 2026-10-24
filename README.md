@@ -95,20 +95,22 @@ sürgüsü) · `Yeniden başlat` (çevrimdışı) · `Ana menü` / çevrim için
 
 ## Kurallar
 
-- **Disk** (sol tık): elde 3, 1,5 sn'de bir yenilenir. Görünmez sınırdan 3 kez seker. İsabet hasar vermez:
+- **Disk** (sol tık): tek saldırı (levye yok). Elde 5, her saniye bir disk yenilenir. Görünmez sınırdan 3 kez seker. İsabet hasar vermez:
   vurulan disk yönünde savrulur ve havalanır; kenara yakın olan boşluğa düşer.
 - **Ağır disk**: sol tık 1,5 sn basılı (nişangahta halka dolar, turuncuya döner), bırakınca çıkar. Yavaş, parlak;
   değdiğini çok daha sert savurur. Hiçbir disk elemez: eleme yalnız boşluğa düşmekle olur.
-- **Levye** (sağ tık / F): yakın ve önündeki rakibi uzağa iter.
 - **Zıplama** (Boşluk): havada bir kez daha. Uçuşta ve savrulurken yön verilmez.
 - **Rampalar**: plakalar arası tek geçiş; plaka kenarındaki rampaya koş, okun gösterdiği plakaya uçarsın. Rampa hiç kapanmaz.
 - **Hızlı koşu** (Shift; telefonda joystick sonuna kadar): 1,45 kat hız.
 - **Daralma**: 40. sn dış halka düşer; 80. sn iç halka (**doğuş kapanır**); 100-130. sn merkez yarıçap 10'dan 5,5'e
   küçülür ve orada durur — itiş sürsün diye daha fazla daralmaz. **Merkez plaka hiç düşmez**; 145. sn süre biter.
-  Düşmeden 5 sn önce plaka titrer ve ekranda uyarı çıkar.
-- **Düşme hakkı ve koruma**: herkesin **5 düşme hakkı** var (`LIFE.lives`); beşinci düşüşte doğuş açık olsa da elenir,
+  Düşmeden 5 sn önce plaka titrer, kenarı kırmızı yanıp söner ve ekranda uyarı çıkar. Diskle vurulunca ekran kenarı
+  kırmızı parlar ve vuranın adı çıkar.
+- **Isınma**: dış halka düşene kadar (40. sn) düşmek hak götürmez, yalnız doğuş beklenir; kendi kendine düşmek
+  rakibe puan yazmaz (yalnız son 4 sn içinde vuran rakip düşürmüş sayılır, `CREDIT`).
+- **Düşme hakkı ve koruma**: ısınmadan sonra herkesin **5 düşme hakkı** var (`LIFE.lives`); beşinci düşüşte doğuş açık olsa da elenir,
   hakkı biten sayılmaz (bir takımın herkesinin hakkı biterse maç biter). Yeni doğan 2 sn korunur (`LIFE.shield`):
-  disk ve levye işlemez, botlar hedef almaz; ilk atış ya da levye korumayı bitirir. Botlar doğduktan sonra bir süre atmaz.
+  disk işlemez, botlar hedef almaz; ilk atış korumayı bitirir. Botlar doğduktan sonra bir süre atmaz.
 - **Bot zorluğu** (giriş ekranında Kolay / Normal / Zor, odada kuran seçer; `BOT_LEVELS`): Zor = hızlı tepki, isabetli
   nişan; Normal ve Kolay daha seyrek plan yapar, daha seyrek ve sapmalı atar, diskten daha az kaçar, doğunca daha uzun bekler.
 - **Doğuş ve kazanan**: dış ve iç halka ayaktayken düşen 4 sn sonra ayakta bir plakada doğar (kendi dış plakası;
@@ -130,7 +132,6 @@ Maç sonunda karne: düşürme, düşme, isabet, atış, güç diski, zıplama p
 | WASD / oklar | Bakışa göre hareket |
 | Fare | Bak / nişan (birinci şahıs) |
 | Sol tık | Disk; 1,5 sn tut: ağır disk |
-| Sağ tık / F | Levye |
 | Shift | Hızlı koş |
 | Boşluk | Zıpla, havada tekrar |
 | V | Kamera: birinci şahıs ↔ omuz |
@@ -139,7 +140,7 @@ Maç sonunda karne: düşürme, düşme, isabet, atış, güç diski, zıplama p
 ## Telefon
 
 Dokunmatik ekran algılanınca (masaüstünde `?touch`) omuz kamerasıyla başlar; sol yarıda joystick, sağ yarıda parmak
-kaydırarak bakış, sağ altta **AT** (basılı tut: ağır), **LEVYE**, **ZIPLA**. Ekran yataydır.
+kaydırarak bakış, sağ altta **AT** (basılı tut: ağır) ve **ZIPLA**. Ekran yataydır.
 
 ## Çok oyunculu
 
@@ -171,10 +172,10 @@ odaları `server/`, oyun kodu `src/` altındadır. three.js npm paketinden `/ven
 
 | Dosya | İçerik |
 |---|---|
-| `src/config.js` | Bütün ayar sayıları (arena, maç takvimi ve kipler, disk, levye, bot, kamera) |
+| `src/config.js` | Bütün ayar sayıları (arena, maç takvimi ve kipler, disk, bot, kamera) |
 | `src/arena.js` | Plakalar, kolonlar, zıplama plakaları, güç diski noktaları (paylaşımlı geometri) |
 | `src/world.js` | Simülasyon: kipler, maç akışı, plaka çöküşü, fizik, diskler, düşme ve doğuş, son plaka ve kazanan |
-| `src/actions.js` | Zıplama, disk, levye, savurma, güç diski |
+| `src/actions.js` | Zıplama, disk, savurma, güç diski |
 | `src/ai.js` | Bot kararları ve plakalar arası yol |
 | `src/net/` | Protokol, durum paketi, istemci |
 | `src/view/` | Sahne, arena görünümü, oyuncular, diskler, efektler, kamera |
