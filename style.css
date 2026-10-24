@@ -402,3 +402,14 @@ html.vv #son-plaka{--sp-h:var(--vv-h);inset:auto;top:var(--vv-top);left:var(--vv
   background:#070c16cc;border:2px solid #ff5a4a8c;
   font:900 clamp(13px,2.1vw,26px)/1 Segoe UI,Arial,sans-serif;letter-spacing:.22em;color:#ffdede}
 #son-plaka #sp-gosteri-tekrar::before{content:"";width:.62em;height:.62em;border-radius:50%;background:#ff4b38;box-shadow:0 0 14px #ff4b38}
+
+/* Kısa masaüstü pencereleri (yükseklik 561–820 px: dizüstü, itch.io'nun 1280x720 çerçevesi): ana ekran kaydırmadan sığsın,
+   alttaki ÇEVRİM İÇİ bölümü (hızlı katıl, odalar) ilk bakışta görünsün. */
+@media(min-width:651px) and (min-height:561px) and (max-height:820px){
+#son-plaka .home-content{padding-top:calc(92px + var(--sp-top));padding-bottom:12px}
+#son-plaka .home h1{font-size:clamp(34px,6.4vh,54px);letter-spacing:-2px;margin:8px 0}
+#son-plaka .home p{font-size:14px;line-height:1.5;margin:8px 0 12px}
+#son-plaka .home-meta{margin-top:10px}
+#son-plaka .home-online{margin-top:12px}
+#son-plaka .home .rule-cards{display:none}
+}

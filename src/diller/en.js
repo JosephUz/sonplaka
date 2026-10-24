@@ -21,7 +21,7 @@ export default {
 
   'ana.ust': '<i></i> FREE-FOR-ALL TO 5v5 DISC ARENA · SHRINKING VOID',
   'ana.slogan': 'Platforms fall.<br><span>You stay.</span>',
-  'ana.tanitim': 'Knock rivals off the edge with your discs. As the platforms drop into the void one by one,<br>use the ramps to get inside. On the last platform respawns are off: whoever is still standing when time runs out wins.',
+  'ana.tanitim': 'Knock rivals off the edge with your discs. As the platforms drop into the void one by one, use the ramps to get inside. On the last platform respawns are off: whoever is still standing when time runs out wins.',
   'ana.adin': 'NAME',
   'ana.adin.aria': 'Player name',
   'ana.kip.aria': 'Mode',
