@@ -1,7 +1,7 @@
-import { CROWBAR, DISC, JUMP, PICKUP } from './config.js';
+import { DISC, JUMP, PICKUP } from './config.js';
 
 /**
- * Oyuncu eylemleri: zıplama (çift), disk atma (normal / ağır / dondurucu / üçlü), levye. İnsan girdisi de bot
+ * Oyuncu eylemleri: zıplama (çift), disk atma (normal / ağır / dondurucu / üçlü). İnsan girdisi de bot
  * kararları da buradan geçer; eylem yapılamıyorsa (raund oynanmıyor, elenmiş, savrulmuş, donmuş) false döner.
  */
 export function emit(w, type, data = {}) { w.events.push({ type, ...data }); }
@@ -50,24 +50,6 @@ export function throwDisc(w, id, kind = 'normal') {
   if (p.power && --p.powerLeft <= 0) p.power = null;
   p.stats.throws++;
   emit(w, 'throw', { id, kind, count, x: p.x, y: p.y + 1.3, z: p.z });
-  return true;
-}
-
-/** Levye: bakış konisindeki yakın rakipleri kendinden uzağa savurur. */
-export function swing(w, id) {
-  const p = w.players[id];
-  if (idle(w, p) || p.barCd > 0) return false;
-  p.barCd = CROWBAR.cooldown; p.charge = 0; p.shield = 0; // saldıran korumasını kaybeder
-  const fx = Math.sin(p.yaw), fz = Math.cos(p.yaw);
-  emit(w, 'swing', { id, x: p.x, y: p.y + 1.2, z: p.z });
-  for (const t of w.players) {
-    if (t.team === p.team || t.out || t.shield > 0) continue; // korumalı (yeni doğmuş) oyuncu itilmez
-    const dx = t.x - p.x, dz = t.z - p.z, d = Math.hypot(dx, dz);
-    if (d > CROWBAR.range || Math.abs(t.y - p.y) > 2.2) continue;
-    if (d > 0.05 && (dx * fx + dz * fz) / d < CROWBAR.cone) continue;
-    const ux = d > 0.05 ? dx / d : fx, uz = d > 0.05 ? dz / d : fz;
-    knock(w, t, ux, uz, CROWBAR.knock, CROWBAR.lift, p.id, 'bar');
-  }
   return true;
 }
 

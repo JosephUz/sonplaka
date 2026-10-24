@@ -27,8 +27,8 @@ export const S2C = {
   ROOMS: 'rooms',     // { rooms: [{ code, host, teamSize, difficulty, humans, seats, state, full }] } — herkese açık odalar (dolu olanlar da; istemci DOLU yazar)
   ONLINE: 'on',       // { n } — çevrim içi (açık sekme) sayısı, değişince
 };
-/** Tek harfle gönderilen basışlar (girdi paketindeki e alanı): sol tık bas / bırak, levye, zıplama. */
-export const EDGES = { t: 'tap', r: 'release', s: 'secondary', j: 'jump' };
+/** Tek harfle gönderilen basışlar (girdi paketindeki e alanı): sol tık bas / bırak, zıplama. */
+export const EDGES = { t: 'tap', r: 'release', j: 'jump' };
 export const NET = {
   /** Simülasyon adımı (sn) ve kaç adımda bir durum paketi (2 → saniyede 30). */
   step: 1 / 60, snapshotEvery: 2,

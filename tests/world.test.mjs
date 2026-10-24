@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ARENA, CROWBAR, DISC, FREEZE, LIFE, MATCH, MOVE, PAD, PICKUP, ROUND, botParams } from '../src/config.js';
-import { aliveCount, createWorld, groundAt, jump, step, swing, throwDisc } from '../src/world.js';
+import { ARENA, DISC, FREEZE, LIFE, MATCH, MOVE, PAD, PICKUP, ROUND, botParams } from '../src/config.js';
+import { aliveCount, createWorld, groundAt, jump, step, throwDisc } from '../src/world.js';
 
 /** Raund oynanır durumda, herkes yerinde; botlar düşünmesin diye uzun think. */
 const setup = () => {
@@ -110,16 +110,6 @@ test('kısa sol tık normal disk atar; diskler 1,5 saniyede bir yenilenir; elde 
   assert.equal(p.discs, DISC.max);
   run(w, 200);
   assert.equal(p.discs, DISC.max);
-});
-
-test('levye: bakış konisindeki yakın rakibi uzağa iter, arkadakini itmez', () => {
-  const w = setup();
-  const p = center(w, 0, 0, 0), front = center(w, 5, 0, 1.8), back = center(w, 6, 0, -1.8);
-  p.yaw = 0;
-  assert.ok(swing(w, 0));
-  assert.ok(front.knock > 0 && front.vz > CROWBAR.knock * 0.9, 'öndeki itilmedi');
-  assert.equal(back.knock, 0, 'arkadaki itildi');
-  assert.equal(swing(w, 0), false, 'bekleme yok');
 });
 
 test('zıplama: yerde kalkar, havada bir kez daha zıplar, üçüncü olmaz', () => {
@@ -299,7 +289,7 @@ test('süre bitince son plakada eşit sayıdaysa en çok düşüren kazanır; he
   assert.equal(ffa.winner, 2, 'herkes tek: merkezde kalanlar arasında en çok düşüren kazanır');
 });
 
-test('son evrede botlar merkeze gidip orada kalır ve rakibi iter (disk bitse de levye sallar)', () => {
+test('son evrede botlar merkeze gidip orada kalır ve rakibi diskle iter', () => {
   const w = createWorld(1, { teamSize: 2 });
   w.state = 'play'; w.t = ROUND.shrinkAt + 28; w.respawnOpen = false;
   // Yalnız merkez ayakta; botlar bir iç halka plakasında.
@@ -309,19 +299,18 @@ test('son evrede botlar merkeze gidip orada kalır ve rakibi iter (disk bitse de
   run(w, 60 * 6);
   assert.ok(w.players.some(p => !p.out && p.plate === 0), 'botlar son evrede merkeze gitmedi');
 
-  // Disksiz son evre: itiş yalnız levyeyle sürer.
+  // Son evre düellosu: levye yok, itiş yalnız diskle.
   const duel = createWorld(1, { teamSize: 2 });
   duel.state = 'play'; duel.t = ROUND.shrinkAt + 28; duel.respawnOpen = false;
   for (let i = 1; i < duel.plates.length; i++) duel.plates[i].phase = 2;
   duel.players.forEach((p, i) => { const a = i / duel.players.length * Math.PI * 2; Object.assign(p, { x: Math.sin(a) * 3, y: 0, z: Math.cos(a) * 3, vx: 0, vy: 0, vz: 0, ground: true, plate: 0, out: false, respawn: 0 }); });
-  let swings = 0;
+  let hits = 0;
   for (let i = 0; i < 60 * 15 && duel.winner === null; i++) {
-    for (const p of duel.players) { p.discs = 0; p.regen = 99; }
     step(duel, 1 / 60);
-    for (const e of duel.events) if (e.type === 'swing') swings++;
+    for (const e of duel.events) if (e.type === 'hit') hits++;
     duel.events.length = 0;
   }
-  assert.ok(swings > 0, 'son evrede diski biten bot levye sallamadı');
+  assert.ok(hits > 0, 'son evrede botlar diskle vurmadı');
   assert.ok(duel.winner !== null, 'itiş kimseyi düşürmedi');
 });
 
@@ -379,8 +368,19 @@ test('botlar doğar doğmaz atmaz (spawnWait), sonra atar', () => {
   assert.ok(later > 0, 'bot bekleme bitince atmadı');
 });
 
-test('düşme hakkı 5: her düşüş bir hak götürür, beşincide doğuş açıkken de elenir; hakkı biten sayılmaz', () => {
+test('ısınma: dış halka düşene kadar düşmek hak götürmez, kendi düşüşü rakibe puan yazmaz', () => {
   const w = setup(), p = center(w, 0, ARENA.center.r - 0.5, 0);
+  run(w, 180, { x: 1, z: 0 });
+  assert.ok(p.out && p.respawn > 0, 'düşmedi');
+  assert.equal(p.lives, LIFE.lives, 'ısınmada hak gitti');
+  assert.equal(w.score.reduce((a, b) => a + b, 0), 0, 'kendi düşüşü puan yazdı');
+  const fall = w.events.filter(e => e.type === 'fall' && e.id === 0).at(-1);
+  assert.ok(!fall || fall.free, 'düşüş olayı ısınmayı bildirmeli');
+});
+
+test('düşme hakkı 5: her düşüş bir hak götürür, beşincide doğuş açıkken de elenir; hakkı biten sayılmaz', () => {
+  const w = setup(); w.t = ROUND.ring2At + 1;
+  const p = center(w, 0, ARENA.center.r - 0.5, 0);
   assert.equal(p.lives, LIFE.lives);
   p.lives = 2;
   run(w, 180, { x: 1, z: 0 });

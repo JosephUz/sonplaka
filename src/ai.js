@@ -1,16 +1,16 @@
-import { CROWBAR, DISC } from './config.js';
+import { DISC } from './config.js';
 import { alive } from './actions.js';
 import { distance } from './math.js';
 
 /**
- * Bot kararı: bu adımın girdisi { x, z, yaw, pitch, tap, release, hold, secondary, jump }. Parametreler zorluğa göre
+ * Bot kararı: bu adımın girdisi { x, z, yaw, pitch, tap, release, hold, jump }. Parametreler zorluğa göre
  * w.bot'tan (config.js → botParams). B.think aralıkla plan yapar (hedef, gidilecek nokta, düello mu), her adım plana
  * göre yürür ve nişan alır. Doğduktan sonra B.spawnWait saniye atmaz; korumalı (yeni doğmuş) rakibi hedef almaz.
  * - Plakası titriyor / düşüyorsa ya da merkez küçülürken kenardaysa: içeri götüren zıplama plakasına (ya da merkeze) kaçar.
  * - Plakasında güç diski varsa (elinde güç yokken) onu alır.
  * - **Son plaka evresinde** (doğuş kapalı, süre bitince orada kalan kazanır): merkezde değilse oraya gider, merkezdeyse
- *   geri açılmadan rakibin üstüne gidip levyeyle kenara doğru iter.
- * - Rakiple aynı plakadaysa düello: mesafeyi korur, yanlara kayar, kenardan uzak durur, disk atar, yakınsa levye.
+ *   rakibe yakın durup diskle kenara doğru savurur.
+ * - Rakiple aynı plakadaysa düello: mesafeyi korur, yanlara kayar, kenardan uzak durur, disk atar.
  * - Rakip başka plakadaysa: bazen uzaktan atar; zıplama plakalarıyla ona (ya da merkeze) gider.
  * - Üstüne gelen diski görünce zıplayarak kaçınır.
  */
@@ -52,8 +52,6 @@ export function botInput(w, p) {
       if (b.charge) { cmd.hold = true; if (p.charge >= DISC.heavyCharge - 0.01) { cmd.release = true; b.charge = false; b.fireT = w.time + B.fireEvery + w.random() * B.fireJitter; } }
       else { cmd.tap = true; cmd.release = true; b.fireT = w.time + B.fireEvery + w.random() * B.fireJitter; b.aimErr = (w.random() - 0.5) * 2 * B.aimError; }
     }
-    // Levye diski beklemez: menzile giren rakibe her zaman sallanır (son plakada kenara itmenin silahı).
-    if (d < CROWBAR.range * 0.9 && p.barCd <= 0 && Math.abs(target.y - p.y) < 2) cmd.secondary = true;
   }
   if (p.ground && w.time >= b.jumpT && incoming(w, p)) { b.jumpT = w.time + 1.2; if (w.random() < B.dodgeChance) cmd.jump = true; }
   return cmd;
@@ -88,8 +86,8 @@ function plan(w, p, b) {
       if (s.active && spot.plate === p.plate) { b.dest = { x: spot.x, z: spot.z }; b.duel = !!best && best.plate === p.plate; return; }
     }
   }
-  // Son plaka evresi (doğuş kapalı): merkezde kalmak kazandırır. Merkezde değilse oraya gider, oradaysa rakibin
-  // üstüne gidip levyeyle kenara doğru iter (geri açılmaz).
+  // Son plaka evresi (doğuş kapalı): merkezde kalmak kazandırır. Merkezde değilse oraya gider, oradaysa rakibe
+  // yaklaşır (B.close'tan içeri girmez) ve diskle kenara doğru savurur.
   const last = !w.respawnOpen && w.plates[0].phase < 2;
   if (last && plate.ring !== 0) {
     const pad = routePad(w, p.plate, 0);
@@ -100,7 +98,7 @@ function plan(w, p, b) {
   if (!best) { b.dest = wander(w, p, plate, ps); return; }
   if (best.plate === p.plate) {
     b.duel = true;
-    const d = distance(p, best), toward = last ? 1 : d > B.range ? 1 : d < B.close ? -1 : 0;
+    const d = distance(p, best), toward = last ? (d > B.close ? 1 : 0) : d > B.range ? 1 : d < B.close ? -1 : 0;
     const ux = (best.x - p.x) / (d || 1), uz = (best.z - p.z) / (d || 1);
     b.dest = inside(w, plate, ps, { x: p.x + ux * toward * 3, z: p.z + uz * toward * 3 });
     return;

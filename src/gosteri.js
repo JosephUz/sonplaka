@@ -62,7 +62,7 @@ export function createGosteri({ view }) {
       Object.assign(p, {
         x: pl.x + Math.sin(a) * r, y: 0, z: pl.z + Math.cos(a) * r, vx: 0, vy: 0, vz: 0,
         ground: true, plate: pl.id, jumps: 0, knock: 0, flight: 0, freeze: 0, respawn: 0, out: false,
-        padLock: 0, shield: 0, charge: 0, chargeSpent: false, throwCd: 0, barCd: 0, power: null, powerLeft: 0,
+        padLock: 0, shield: 0, charge: 0, chargeSpent: false, throwCd: 0, power: null, powerLeft: 0,
         lastHit: null, think: 0.05 + i * 0.02, bot: null, lives: GOSTERI.can,
       });
       p.yaw = Math.atan2(pl.x - p.x, pl.z - p.z); p.pitch = 0;

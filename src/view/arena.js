@@ -6,7 +6,7 @@ import { mat } from './builders.js';
  * Arena görünümü: boşlukta asılı yuvarlak plakalar (kalın silindir, üstünde parlayan çerçeve), kolonlar, zıplama
  * plakaları (yeşil: açık, kırmızı: kapalı, gri: hedefi düşmüş; hedefi gösteren ok), güç diskleri (dönen, yükselip
  * alçalan), altta yıldızlar ve derin bir boşluk, disk sınırı için ince halka. Simülasyon durumunu her kare okur:
- * titreyen plaka sarsılır, düşen plaka iner, yok olan gizlenir, merkez küçülür.
+ * titreyen plaka sarsılır ve kenarı kırmızı yanıp söner, düşen plaka iner, yok olan gizlenir, merkez küçülür.
  */
 const PLATE_TOP = ['#5b6f86', '#4d6a66', '#5f5a68'];
 const PLATE_SIDE = ['#242c3a', '#22302e', '#2c2833'];
@@ -38,7 +38,7 @@ export function buildArenaView(scene, arena) {
       const cap = new T.Mesh(new T.CylinderGeometry(ARENA.pillarR * 1.2, ARENA.pillarR * 1.2, 0.2, 14), new T.MeshStandardMaterial({ color: '#f5c26b', emissive: '#c48a2a', emissiveIntensity: 0.8 }));
       cap.position.set(c.x - pl.x, ARENA.pillarH + 0.1, c.z - pl.z); group.add(cap);
     }
-    return { group, body, r0: pl.r };
+    return { group, body, r0: pl.r, rimMat };
   });
 
   // Rampa: plaka kenarında hedefe doğru yükselen kama; üstünde hedefi gösteren ok. Kama şekli (uzunluk, yükseklik)
@@ -93,6 +93,9 @@ export function buildArenaView(scene, arena) {
         const jitter = s.phase === 1 ? Math.sin(time * 41 + i) * 0.07 : 0;
         v.group.position.y = s.y + jitter;
         v.group.position.x = w.arena.plates[i].x + (s.phase === 1 ? Math.sin(time * 37 + i * 2) * 0.05 : 0);
+        // Düşecek plaka: kenar halkası kırmızı yanıp söner (titreme tek başına gözden kaçıyordu).
+        const warn = s.phase === 1 && Math.sin(time * 14) > 0;
+        if (v.warn !== warn) { v.warn = warn; v.rimMat.color.set(warn ? '#ff5a4a' : '#7fe0e8'); v.rimMat.emissive.set(warn ? '#ff2a1a' : '#4fc7d3'); v.rimMat.emissiveIntensity = warn ? 2.2 : 1.2; }
         const k = s.r / v.r0;
         v.body.scale.set(k, 1, k);
       });

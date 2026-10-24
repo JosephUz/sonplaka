@@ -32,8 +32,9 @@ export const ROUND = { start: 3, tremble: 5, ring2At: 40, ring1At: 80, shrinkAt:
 
 /**
  * Düşme hakkı ve doğuş koruması: her oyuncunun `lives` düşme hakkı vardır; beşinci düşüşte doğuş açık olsa da elenir.
- * Yeni doğan `shield` saniye korunur: disk ve levye onu savuramaz, botlar onu hedef almaz; ilk atış ya da levye
- * korumayı bitirir.
+ * Yeni doğan `shield` saniye korunur: disk onu savuramaz, botlar onu hedef almaz; ilk atış korumayı bitirir.
+ * **Isınma:** dış halka düşene kadar (`ROUND.ring2At`) düşmek hak götürmez, yalnız doğuş beklenir (yeni oyuncu
+ * diski ve rampaları öğrenirken elenmesin). Rakip düşürdüyse yine de rakibin düşürmesi sayılır.
  */
 export const LIFE = { lives: 5, shield: 2 };
 
@@ -65,10 +66,7 @@ export const PAD = { speed: 20, min: 0.9, max: 1.5 };
  * `knockTime` saniye kontrolsüzdür. Sol tık `heavyCharge` saniye basılıyken bırakılırsa **ağır disk**: yavaş
  * (`heavySpeed`), parlak, `heavyKnock` / `heavyLift` kat sert savurur; o da elemez, eleme yalnız düşmeyle. `cooldown` iki atış arası. Üçlü disk `spread` radyan yelpazeyle çıkar.
  */
-export const DISC = { max: 5, regen: 1.5, speed: 26, heavySpeed: 17, radius: 0.55, life: 4, bounces: 3, knock: 15, lift: 5, knockTime: 0.45, heavyCharge: 1.5, heavyKnock: 1.8, heavyLift: 1.5, cooldown: 0.25, spread: 0.22 };
-
-/** Levye (sağ tık): `range` içinde ve bakış konisinde (`cone`: kosinüs) rakibi kendinden uzağa `knock` ile iter. */
-export const CROWBAR = { range: 2.6, cone: 0.5, knock: 22, lift: 6, cooldown: 0.8 };
+export const DISC = { max: 5, regen: 1, speed: 26, heavySpeed: 17, radius: 0.55, life: 4, bounces: 3, knock: 15, lift: 5, knockTime: 0.45, heavyCharge: 1.5, heavyKnock: 1.8, heavyLift: 1.5, cooldown: 0.25, spread: 0.22 };
 
 /** Dondurucu disk: vurulan `time` saniye donar (kıpırdayamaz, atamaz; itilirse kayar). */
 export const FREEZE = { time: 2 };

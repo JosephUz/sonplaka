@@ -66,11 +66,6 @@ try {
   assert.equal((await hero()).discs, discsBefore - 1, 'disk atılmadı');
   assert.ok(await game(() => window.__sonPlaka.world().discs.length >= 0));
 
-  // Sağ tık: levye (bekleme başlar).
-  await page.mouse.click(768, 480, { button: 'right' });
-  await page.waitForTimeout(60);
-  assert.ok((await hero()).barCd > 0, 'levye sallanmadı');
-
   // V: omuz kamerası, tekrar V: birinci şahıs.
   await page.keyboard.press('KeyV'); await page.waitForTimeout(100);
   assert.equal(await game(() => window.__sonPlaka.view().cameraMode), 'shoulder');

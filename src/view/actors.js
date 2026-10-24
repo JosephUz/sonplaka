@@ -5,7 +5,7 @@ import { box, mat } from './builders.js';
 
 /**
  * Oyuncu görselleri: blok gövde, kafa, saç, kollar ve bacaklar (koşarken sallanır, havada açılır), sağ elde disk
- * (şarj olurken büyüyüp parlar), sol elde levye; üstte isim etiketi (DOM). Savrulan geriye takla atar, donan buz
+ * (şarj olurken büyüyüp parlar); üstte isim etiketi (DOM). Savrulan geriye takla atar, donan buz
  * küpünün içinde titrer, elenen gizlenir. Birinci şahısta senin gövden çizilmez. Senin karakterin sarı saçlı.
  */
 const iceGeo = new T.BoxGeometry(1.3, 2.4, 1.3);
@@ -29,7 +29,7 @@ export function createActor(scene, labels, id, team) {
     box(leg, 0.27, 0.18, 0.45, '#f3e6bf', 0, -0.5, 0.09);
     body.add(leg); limbs.push(leg);
   }
-  let disc = null, bar = null;
+  let disc = null;
   for (const x of [-0.52, 0.52]) {
     const arm = new T.Group(); arm.position.set(x, 1.42, 0);
     box(arm, 0.22, 0.53, 0.25, color, 0, -0.2, 0);
@@ -37,8 +37,6 @@ export function createActor(scene, labels, id, team) {
     if (x > 0) {
       disc = new T.Mesh(discGeo, new T.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.6, roughness: 0.4 }));
       disc.position.set(0.15, -0.55, 0.35); disc.rotation.x = Math.PI / 2 - 0.4; arm.add(disc);
-    } else {
-      bar = box(arm, 0.08, 0.08, 1.1, '#b8402f', 0, -0.55, 0.45); bar.rotation.x = 0.5;
     }
     body.add(arm); limbs.push(arm);
   }
@@ -46,7 +44,7 @@ export function createActor(scene, labels, id, team) {
   const label = document.createElement('div');
   label.className = 'actor-label'; label.style.color = color;
   labels.append(label);
-  return { root, body, limbs, disc, bar, ice, label, hair, hairColor, mine: null, team };
+  return { root, body, limbs, disc, ice, label, hair, hairColor, mine: null, team };
 }
 
 /** Oyuncu görselini sahneden ve etiketini DOM'dan kaldırır (kip değişince yeniden kurulur). */
@@ -76,7 +74,6 @@ export function syncActors(actors, w, time, playing, project, hide = -1) {
     // Sağ kol nişanda: bakış eğimine göre kalkar; şarjda disk büyür ve parlar.
     const arm = v.limbs[3];
     if (p.charge > 0 || (p.ground && speed < 0.5)) arm.rotation.x = -1.2 - p.pitch * 0.6;
-    if (p.barCd > 0.5) v.limbs[2].rotation.x = -2.2 + (0.8 - p.barCd) * 4; // levye savruluşu
     v.body.rotation.x = p.knock > 0 ? -(1 - p.knock / DISC.knockTime) * 1.4 : 0;
     v.body.rotation.z = p.freeze > 0 ? Math.sin(time * 30) * 0.03 : 0;
     v.ice.visible = p.freeze > 0;

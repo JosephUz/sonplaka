@@ -2,8 +2,8 @@ import { createTouch } from './touch.js';
 
 /**
  * Klavye ve fare (yalnızca tarayıcı). WASD / oklar hareket, fare kilitliyken bakış; sol tık disk (basılı tutunca
- * ağır disk şarjı, bırakınca atış), sağ tık ya da F levye, Boşluk zıplama; V kamera, F1 yardım, Esc mola. Basışlar
- * (tap, release, secondary, jump) bir sonraki okumada bir kez tüketilir. Kilit yokken sahaya tıklamak önce fareyi
+ * ağır disk şarjı, bırakınca atış), Boşluk zıplama; V kamera, F1 yardım, Esc mola. Basışlar
+ * (tap, release, jump) bir sonraki okumada bir kez tüketilir. Kilit yokken sahaya tıklamak önce fareyi
  * kilitler; test kipinde (başsız tarayıcı kilit vermez) tıklama doğrudan işler.
  * Dokunmatik kipte (`touch` kök öğesi verilince, bkz. touch.js) fare kilidi yoktur: joystick hareket, sağ yarı bakış,
  * düğmeler fare ve klavyeyle aynı basışları üretir.
@@ -15,7 +15,6 @@ export function createInput(canvas, { playing, onHelp, onPause, onLook, onUnlock
     down(name) {
       if (!playing()) return;
       if (name === 'shoot') { held = true; edges.tap = true; }
-      else if (name === 'bar') edges.secondary = true;
       else edges[name] = true;
     },
     up(name) { if (name === 'shoot' && held) { held = false; edges.release = true; } },
@@ -36,7 +35,6 @@ export function createInput(canvas, { playing, onHelp, onPause, onLook, onUnlock
     if (!playing()) return;
     keys.add(e.code);
     if (e.code === 'Space') edges.jump = true;
-    if (e.code === 'KeyF') edges.secondary = true;
   });
   addEventListener('keyup', e => keys.delete(e.code));
   addEventListener('blur', onBlur);
@@ -49,7 +47,6 @@ export function createInput(canvas, { playing, onHelp, onPause, onLook, onUnlock
     if (!playing()) return;
     if (!locked() && !testMode && !pad) { lock(); return; }
     if (e.button === 0) { held = true; edges.tap = true; }
-    if (e.button === 2) edges.secondary = true;
   });
   addEventListener('mouseup', e => { if (e.button === 0 && held) { held = false; edges.release = true; } });
 

@@ -6,7 +6,7 @@ import { t } from './dil.js';
  * ayrı iş görür:
  * - Sol yarı: parmağın değdiği yerde beliren **joystick** (hareket, analog).
  * - Sağ yarı: parmak kaydırmak **bakış / nişan** (farenin karşılığı).
- * - Sağ alttaki düğmeler: AT (sol tık: dokun disk, basılı tut ağır), LEVYE (sağ tık), ZIPLA (Boşluk). Düğmeye
+ * - Sağ alttaki düğmeler: AT (sol tık: dokun disk, basılı tut ağır), ZIPLA (Boşluk). Düğmeye
  *   basılıyken parmağı kaydırmak da nişan alır.
  * Girdi input.js'e `sink` üzerinden akar (down / up / look); joystick `axis` ile okunur.
  */
@@ -14,7 +14,7 @@ export const touchDevice = () => new URLSearchParams(location.search).has('touch
 
 export function createTouch(root, sink) {
   const $ = id => root.querySelector('#sp-' + id);
-  const el = { pad: $('touch'), stick: $('stick'), knob: $('stick').firstElementChild, shoot: $('t-shoot'), shootSub: $('t-shoot-sub'), bar: $('t-bar') };
+  const el = { pad: $('touch'), stick: $('stick'), knob: $('stick').firstElementChild, shoot: $('t-shoot'), shootSub: $('t-shoot-sub') };
   const fingers = new Map();
   let axis = { x: 0, z: 0 };
 
@@ -86,7 +86,7 @@ export function createTouch(root, sink) {
       for (const f of fingers.values()) release(f);
       fingers.clear();
     },
-    /** Düğme yazıları: AT düğmesinde disk sayısı, disk yokken sönük ve yenilenme dolumu; levye beklemesi. */
+    /** Düğme yazıları: AT düğmesinde disk sayısı, disk yokken sönük ve yenilenme dolumu. */
     sync(w, visible) {
       el.pad.hidden = !visible;
       if (!visible) return;
@@ -94,7 +94,6 @@ export function createTouch(root, sink) {
       el.shoot.classList.toggle('idle', p.discs <= 0 || p.out);
       el.shootSub.textContent = p.discs > 0 ? t('dokun.disk', { n: p.discs }) : t('dokun.yenileniyor');
       el.shoot.style.setProperty('--cd', p.discs <= 0 ? Math.min(1, p.regen / DISC.regen).toFixed(3) : 0);
-      el.bar.style.setProperty('--cd', p.barCd > 0 ? Math.min(1, p.barCd / 0.8).toFixed(3) : 0);
     },
   };
 }

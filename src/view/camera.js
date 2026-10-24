@@ -5,7 +5,7 @@ import { clamp, wrap } from '../math.js';
 /**
  * Kamera (tek kamera, iki kip): **birinci şahıs** (masaüstünde varsayılan; göz oyuncunun başında, gövde çizilmez) ve
  * **omuz üstü** (telefonda varsayılan; oyuncunun arkasında ve biraz sağında). Yatay bakış (yaw) ve dikey eğim (pitch,
- * yukarı pozitif) fareyle döner; disk ve levye bakış yönüne gider, hareket bakış yönüne göredir. Elenip takım arkadaşını
+ * yukarı pozitif) fareyle döner; disk bakış yönüne gider, hareket bakış yönüne göredir. Elenip takım arkadaşını
  * izlerken (spectate) bakış onun bakışına yumuşakça bağlanır. Savrulunca sarsılır.
  */
 export function createCamera() {

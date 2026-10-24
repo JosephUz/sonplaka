@@ -3,15 +3,13 @@ import { TEAMS } from '../config.js';
 import { box } from './builders.js';
 
 /**
- * Parçacıklar: isabette kıvılcım (ağır diskte turuncu), düşüşte kenarda büyük saçılma, levyede
- * beyaz çakım, zıplama plakasında yeşil (kapanınca kırmızı) püskürtü, sekmede küçük kıvılcım, güç diskinde altın
+ * Parçacıklar: isabette kıvılcım (ağır diskte turuncu), düşüşte kenarda büyük saçılma, zıplama plakasında yeşil (kapanınca kırmızı) püskürtü, sekmede küçük kıvılcım, güç diskinde altın
  * yağmuru. Plaka çökünce çökme noktasında geniş bir şok halkası yayılır, dalga biterken altın, maç biterken kazanan
  * renginde konfeti.
  * Küçük kutular fırlayıp yerçekimiyle boşluğa düşer ve ömürleri bitince sahneden kalkar.
  */
 const BURSTS = {
   hit: { count: 12, color: e => (e.kind === 'heavy' ? '#ff9a50' : '#fff1b8') },
-  swing: { count: 6, color: () => '#ffffff', spread: 4 },
   fall: { count: 34, size: 0.2, spread: 12, up: [4, 12], life: 1.4, color: (e, i) => ['#ff7a2e', '#ffffff', '#ffd35c'][i % 3] },
   pad: { count: 10, color: () => '#7dff9a', spread: 4, up: [4, 9] },
   bounce: { count: 4, color: () => '#bff6ff', spread: 3, size: 0.09 },

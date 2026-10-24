@@ -271,11 +271,14 @@ export async function start(root) {
         case 'collapse': ui.message(t(e.ring === 2 ? 'mesaj.disDustu' : 'mesaj.sonPlaka'), 3); view.shake(0.35); break;
         case 'shrinkWarn': ui.warn(t('mesaj.daraliyor'), 5); break;
         case 'hit':
-          if (e.id === me) { view.shake(CAMERA.knockShake); if (e.kind === 'freeze') ui.message(t('mesaj.dondun'), 1.5); }
+          if (e.id === me) {
+            view.shake(CAMERA.knockShake); ui.hit();
+            ui.message(e.kind === 'freeze' ? t('mesaj.dondun') : t('mesaj.vuruldun', { ad: who(w.players[e.by]) }), 1.5);
+          }
           break;
         case 'fall':
           if (e.id === me) {
-            ui.message((e.by !== null ? t('mesaj.seniDusurdu', { ad: who(w.players[e.by]) }) : t('mesaj.dustun')) + (e.lives === 0 ? t('mesaj.hakBitti') : e.respawn ? t('mesaj.hak', { n: e.lives }) : ''), 2.5);
+            ui.message((e.by !== null ? t('mesaj.seniDusurdu', { ad: who(w.players[e.by]) }) : t('mesaj.dustun')) + (e.free ? t('mesaj.isinma') : e.lives === 0 ? t('mesaj.hakBitti') : e.respawn ? t('mesaj.hak', { n: e.lives }) : ''), 2.5);
             // Düşüş sineması: kamera düştüğün yerde alçalırken yukarıdaki arenaya bakar.
             // Bakış arenanın merkezine, yukarı: plakalar tepede uzaklaşırken görünsün.
             {

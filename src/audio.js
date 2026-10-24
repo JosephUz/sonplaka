@@ -1,12 +1,11 @@
 /**
- * Kısa sentez sesler (dosya yok): disk, isabet, levye, zıplama, zıplama plakası, düşüş, titreme, çökme, güç diski.
+ * Kısa sentez sesler (dosya yok): disk, isabet, zıplama, zıplama plakası, düşüş, titreme, çökme, güç diski.
  * Tarayıcı ilk kullanıcı hareketinden önce ses açtırmaz; bağlam ilk seste kurulur, hata olursa sessiz kalır.
  * Aç / kapa ayarı tarayıcıda kalır (localStorage "sp.sound").
  */
 const TONES = {
   throw: [520, 240],
   hit: [300, 90],
-  swing: [200, 640],
   jump: [300, 520],
   pad: [380, 980],
   fall: [520, 50],

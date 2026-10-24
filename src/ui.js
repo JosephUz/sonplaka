@@ -20,7 +20,7 @@ export function createUI(root) {
     playing: ['scoreboard', 'controls', 'player', 'pause-open'].map($),
     boards: [$('board-l'), $('board-r')], timer: $('timer'), phase: $('phase'),
     side: $('side'), status: $('status'), discText: $('disc-text'), discs: $('discs'), power: $('power'), lives: $('lives'),
-    down: $('down'), downTitle: $('down-title'), downCount: $('down-count'), downNote: $('down-note'), freeze: $('freeze'),
+    down: $('down'), downTitle: $('down-title'), downCount: $('down-count'), downNote: $('down-note'), freeze: $('freeze'), hit: $('hit'),
     crosshair: $('crosshair'), message: $('message'), warn: $('warn'), rule: $('rule'),
     charge: $('charge'), chargeText: $('charge-text'),
     site: $('site'), resultTitle: $('result-title'), finalScore: $('final-score'), stats: $('stats'), sound: $('sound'), pauseSound: $('pause-sound'),
@@ -60,6 +60,8 @@ export function createUI(root) {
     /** Müzik ayarı var mı (gösteri kiplerinde yok): düğmeler büsbütün gizlenir. */
     setMuzikVar(gorunur) { muzikVar = gorunur; el.pauseMuzik.hidden = !gorunur; },
     message(text, time = 2) { el.message.textContent = text; el.message.hidden = false; messageTime = time; },
+    /** İsabet: ekran kenarı bir an kırmızı parlar (diskle vurulduğunu kaçırma). */
+    hit() { el.hit.classList.remove('on'); void el.hit.offsetWidth; el.hit.classList.add('on'); },
     /** Kırmızı uyarı şeridi (plaka çöküyor); süre boyunca kalır. */
     warn(text, time = 5) { el.warn.textContent = text; el.warn.hidden = false; warnTime = time; },
 
