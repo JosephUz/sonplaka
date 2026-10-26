@@ -6,6 +6,9 @@
 
 **Play / Oyna:** https://sonplaka.josephuz.com · **Source / Kaynak:** https://github.com/JosephUz/sonplaka
 
+<p align="center"><img src="docs/ekran/1.jpg" alt="Son Plaka" width="100%"></p>
+<p align="center"><img src="docs/ekran/2.jpg" alt="Son Plaka" width="49%"> <img src="docs/ekran/3.jpg" alt="Son Plaka" width="49%"></p>
+
 Three.js ile tarayıcıda çalışan, birinci şahıs **disk arenası + daralan boşluk**. Boşlukta asılı 13 plaka maç boyunca
 dıştan içe düşer; diskle rakibi kenardan aşağı atarsın, rampalarla içeri kaçarsın. Can yok, mermi yok. Dış halkalar
 ayaktayken düşme hakkı sınırsız; iç halka düşünce **son plaka**: doğuş kapanır ve süre bitince orada ayakta kalan kazanır.
