@@ -62,7 +62,8 @@ export function dilSec(d) {
   if (!gecerli(d)) return;
   try { const h = location.hostname, alan = h === 'josephuz.com' || h.endsWith('.josephuz.com') ? '; domain=.josephuz.com' : ''; document.cookie = `${ANAHTAR}=${d}; path=/; max-age=31536000; SameSite=Lax${alan}`; } catch {}
   try { localStorage.setItem(ANAHTAR, d); } catch {}
-  try { const u = new URL(location.href); u.searchParams.delete('dil'); u.searchParams.delete('lang'); location.replace(u.href); } catch { location.reload(); }
+  // Yalnız #parça farklıysa (sekme adresi, href="#") replace sayfayı yüklemez, atlar: aynı adreste açıkça yenilenir.
+  try { const u = new URL(location.href); u.searchParams.delete('dil'); u.searchParams.delete('lang'); if (u.href === location.href) location.reload(); else location.replace(u.href); } catch { location.reload(); }
 }
 
 /**
